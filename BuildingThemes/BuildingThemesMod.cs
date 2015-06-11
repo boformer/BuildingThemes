@@ -24,6 +24,28 @@ namespace BuildingThemes
 
         private UIButton tab;
 
+        public override void OnCreated(ILoading loading)
+        {
+            base.OnCreated(loading);
+            ReplaceBuildingManager();
+
+            var methodInfo1 = typeof(PrivateBuildingAI).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
+            DetoursHolder.privateBuidingAiSimulationStepState = RedirectionHelper.RedirectCalls(
+                methodInfo1,
+                typeof(DetoursHolder).GetMethod("PrivateBuildingAiSimulationStep", BindingFlags.Public | BindingFlags.Instance)
+                );
+            var methodInfo2 = typeof(PrivateBuildingAI).GetMethod("GetUpgradeInfo", BindingFlags.Public | BindingFlags.Instance);
+            DetoursHolder.privateBuidingAiGetUpgradeInfoState = RedirectionHelper.RedirectCalls(
+                methodInfo2,
+                typeof(DetoursHolder).GetMethod("PrivateBuildingAiGetUpgradeInfo", BindingFlags.Public | BindingFlags.Instance)
+                );
+            var methodInfo3 = typeof(ZoneBlock).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
+            DetoursHolder.zoneBlockSimulationStepState = RedirectionHelper.RedirectCalls(
+                methodInfo3,
+                typeof(DetoursHolder).GetMethod("ZoneBlockSimulationStep", BindingFlags.Public | BindingFlags.Instance)
+                );
+        }
+
         public override void OnLevelLoaded(LoadMode mode) 
         {
             // Is it an actual game ?
@@ -33,9 +55,6 @@ namespace BuildingThemes
 
             // Hook into policies GUI
             ToolsModifierControl.policiesPanel.component.eventVisibilityChanged += OnPoliciesPanelVisibilityChanged;
-
-            // Replace BuildingManager. Credits to Traffic++ developers ;)
-            ReplaceBuildingManager();
         }
 
         public override void OnLevelUnloading()
