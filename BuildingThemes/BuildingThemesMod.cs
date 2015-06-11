@@ -42,6 +42,8 @@ namespace BuildingThemes
         {
             // Remove the custom policy tab
             RemoveThemesTab();
+
+            //TODO(earalov): revert detoured methods
         }
 
         private string GetCurrentEnvironment()
@@ -51,47 +53,13 @@ namespace BuildingThemes
 
         private void ReplaceBuildingManager()
         {
-            if (Singleton<BuildingManager>.instance as CustomBuildingManager != null) return;
-
-            FieldInfo sInstance = typeof(ColossalFramework.Singleton<BuildingManager>).GetField("sInstance", BindingFlags.NonPublic | BindingFlags.Static);
-            BuildingManager originalBuildingManager = ColossalFramework.Singleton<BuildingManager>.instance;
-            CustomBuildingManager customBuildingManager = originalBuildingManager.gameObject.AddComponent<CustomBuildingManager>();
-            customBuildingManager.SetOriginalValues(originalBuildingManager);
-
-            // change the new instance in the singleton
-            sInstance.SetValue(null, customBuildingManager);
-
-            // change the manager in the SimulationManager
-            FastList<ISimulationManager> managers = (FastList<ISimulationManager>)typeof(SimulationManager).GetField("m_managers", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
-
-            managers.Remove(originalBuildingManager);
-            managers.Add(customBuildingManager);
-
-            // add to renderable managers
-            IRenderableManager[] renderables;
-            int count;
-            RenderManager.GetManagers(out renderables, out count);
-            if (renderables != null && count != 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    BuildingManager temp = renderables[i] as BuildingManager;
-                    if (temp != null && temp == originalBuildingManager)
-                    {
-                        renderables[i] = customBuildingManager;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                RenderManager.RegisterRenderableManager(customBuildingManager);
-            }
-
-            // Destroy in 10 seconds to give time to all references to update to the new manager without crashing
-            GameObject.Destroy(originalBuildingManager, 10f);
-
+            //TODO(earalov): save redirected state
+            RedirectionHelper.RedirectCalls(
+                typeof (BuildingManager).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public),
+                typeof (DetoursHolder).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public)
+                );
             Debug.Log("Building Themes: Building Manager successfully replaced.");
+
         }
 
 
