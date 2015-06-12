@@ -14,6 +14,17 @@ namespace BuildingThemes
     class DetoursHolder
     {
 
+        private static Dictionary<ulong, ushort> seedTable = new Dictionary<ulong, ushort>(); 
+
+        public static void InitTable()
+        {
+
+            for (ushort _seed = 0; _seed <= 65534; ++_seed) { 
+                var seed = (ulong) (6364136223846793005L*(long) _seed + 1442695040888963407L);
+                seedTable.Add(seed, _seed);
+            }
+        }
+
         private static readonly object Lock = new object();
 
         //we'll use this variable to pass position to GetRandomBuildingInfo method. Or we can just pass District
@@ -68,35 +79,61 @@ namespace BuildingThemes
                 return (BuildingInfo)null;
             if (fastList.m_size == 0)
                 return (BuildingInfo)null;
-            do
+            if (r.seed == Singleton<SimulationManager>.instance.m_randomizer.seed)
             {
-            } while (!Monitor.TryEnter(Lock, SimulationManager.SYNCHRONIZE_TIMEOUT));
-            try
-            {
-
-                if (position != null)
+                UnityEngine.Debug.Log("Building Themes: Getting position from static variable...");
+                do
                 {
-                    ushort districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position.getValue());
-                    //districtIdx==0 probably means 'outside of any district'
-                    UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo. districtIdx: {0};current thread: {1}",
-                        districtIdx, Thread.CurrentThread.ManagedThreadId);
-                    //District district = Singleton<DistrictManager>.instance.m_districts.m_buffer[districtIdx];
-                    //TODO(earalov): here fastList variable should be filtered. All buildings that  don't belong to the district should be removed from this list.
-                    position = null;
+                } while (!Monitor.TryEnter(Lock, SimulationManager.SYNCHRONIZE_TIMEOUT));
+                try
+                {
+
+                    if (position != null)
+                    {
+                        FilterList(position, ref fastList);
+                        position = null;
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogFormat(
+                            "Building Themes: Detoured GetRandomBuildingInfo. No position was specified!;current thread: {0}",
+                            Thread.CurrentThread.ManagedThreadId);
+
+                    }
                 }
-                else
+                finally
                 {
-                    UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo. No position was specified!;current thread: {0}", Thread.CurrentThread.ManagedThreadId);
-
+                    Monitor.Exit(Lock);
                 }
             }
-            finally
+            else
             {
-                Monitor.Exit(Lock);
+                UnityEngine.Debug.LogFormat(
+                    "Building Themes: Getting position from seed {0}...", r.seed);
+                var buildingId = seedTable[r.seed];
+                var building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
+                var buildingPosition = Position.Build(building.m_position);
+                UnityEngine.Debug.LogFormat(
+                        "Building Themes: Getting position from seed {0}. building: {1}, buildingId: {2}, position: {3}, threadId: {4}",
+                        r.seed, building.Info.name, buildingId, buildingPosition, 
+                        Thread.CurrentThread.ManagedThreadId);
+                FilterList(buildingPosition, ref fastList);
             }
+
             int index = r.Int32((uint)fastList.m_size);
             return PrefabCollection<BuildingInfo>.GetPrefab((uint)fastList.m_buffer[index]);
         }
+
+        private static void FilterList(Position position, ref FastList<ushort> list)
+        {
+            ushort districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position.getValue());
+            //districtIdx==0 probably means 'outside of any district'
+            UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo. districtIdx: {0};current thread: {1}",
+                districtIdx, Thread.CurrentThread.ManagedThreadId);
+            //District district = Singleton<DistrictManager>.instance.m_districts.m_buffer[districtIdx];
+            //TODO(earalov): here fastList variable should be filtered. All buildings that  don't belong to the district should be removed from this list.
+        }
+
 
         public void ZoneBlockSimulationStep(ushort blockID)
         {

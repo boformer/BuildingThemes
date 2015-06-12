@@ -8,6 +8,7 @@ using System.Text;
 using UnityEngine;
 using System.Reflection;
 using System.Threading;
+using ColossalFramework.Math;
 
 namespace BuildingThemes
 {
@@ -64,7 +65,10 @@ namespace BuildingThemes
     {
         public string Name
         {
-            get { return "Building Themes"; }
+            get
+            {
+                return "Building Themes";
+            }
         }
 
         public string Description
@@ -77,6 +81,7 @@ namespace BuildingThemes
         public override void OnCreated(ILoading loading)
         {
             base.OnCreated(loading);
+            DetoursHolder.InitTable();
             ReplaceBuildingManager();
 
             var methodInfo = typeof(ZoneBlock).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
