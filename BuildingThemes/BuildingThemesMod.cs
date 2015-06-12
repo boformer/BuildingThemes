@@ -187,8 +187,4 @@ namespace BuildingThemes
 
     }
 
-    public class Configuration 
-    { 
-        // TODO the xml configuration for the themes
-    }
 }
