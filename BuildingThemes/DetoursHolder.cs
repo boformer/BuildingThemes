@@ -76,12 +76,22 @@ namespace BuildingThemes
 
             FastList<ushort> fastList = areaBuildings[(int)getAreaIndex.Invoke(null, new object[] { service, subService, level, width, length, zoningMode })];
             if (fastList == null)
+            {
+                UnityEngine.Debug.LogFormat("Building Themes: Fast list is null. Return null, current thread: {0}",
+                     Thread.CurrentThread.ManagedThreadId);
                 return (BuildingInfo)null;
+            }
+
             if (fastList.m_size == 0)
+            {
+                UnityEngine.Debug.LogFormat("Building Themes: Fast list is empty. Return null, current thread: {0}", Thread.CurrentThread.ManagedThreadId);
                 return (BuildingInfo)null;
+            }
+
             if (r.seed == Singleton<SimulationManager>.instance.m_randomizer.seed)
             {
-                UnityEngine.Debug.Log("Building Themes: Getting position from static variable...");
+                UnityEngine.Debug.LogFormat("Building Themes: Getting position from static variable, current thread: {0}",
+                    Thread.CurrentThread.ManagedThreadId);
                 do
                 {
                 } while (!Monitor.TryEnter(Lock, SimulationManager.SYNCHRONIZE_TIMEOUT));
@@ -109,13 +119,13 @@ namespace BuildingThemes
             else
             {
                 UnityEngine.Debug.LogFormat(
-                    "Building Themes: Getting position from seed {0}...", r.seed);
+                    "Building Themes: Getting position from seed {0}. current thread: {0}, threadId: {1}", r.seed, Thread.CurrentThread.ManagedThreadId);
                 var buildingId = seedTable[r.seed];
                 var building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
                 var buildingPosition = Position.Build(building.m_position);
                 UnityEngine.Debug.LogFormat(
                         "Building Themes: Getting position from seed {0}. building: {1}, buildingId: {2}, position: {3}, threadId: {4}",
-                        r.seed, building.Info.name, buildingId, buildingPosition, 
+                        r.seed, building.Info.name, buildingId, buildingPosition.getValue(), 
                         Thread.CurrentThread.ManagedThreadId);
                 FilterList(buildingPosition, ref fastList);
             }
