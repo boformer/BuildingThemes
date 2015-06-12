@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Reflection;
+using System.Threading;
 using ColossalFramework;
 using ColossalFramework.Math;
 using UnityEngine;
@@ -13,20 +14,46 @@ namespace BuildingThemes
     class DetoursHolder
     {
 
+        private static readonly object Lock = new object();
+
         //we'll use this variable to pass position to GetRandomBuildingInfo method. Or we can just pass District
-        private static Vector3 position;
+        public class Position
+        {
+            private Vector3 m_position;
+
+            private Position(Vector3 position)
+            {
+                this.m_position = position;
+            }
+
+            public Vector3 getValue()
+            {
+                return m_position;
+            }
+
+            public static Position Build(Vector3 position)
+            {
+                return new Position(position);
+            }
+        }
+
+        public static Position position = null;
 
         public static RedirectCallsState zoneBlockSimulationStepState;
-        public static RedirectCallsState privateBuidingAiSimulationStepState;
-        public static RedirectCallsState privateBuidingAiGetUpgradeInfoState;
 
 
         //this is detoured version of BuildingManger#GetRandomBuildingInfo method. Note, that it's an instance method. It's better because this way all registers will be expected to have the same values
         //as in original methods
         public BuildingInfo GetRandomBuildingInfo(ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
         {
-            UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo. position: {0}", position);
+            UnityEngine.Debug.Log("Building Themes: Detoured GetRandomBuildingInfo was called. Stack trace: " + System.Environment.StackTrace);
 
+            var positionStr = position != null ? position.getValue().ToString() : "null";
+
+            UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo. position: {0}. service: {1}, subService: {2}," +
+                "level: {3}, width: {4}, length: {5}, zoningMode: {6}, current thread: {7}", positionStr, service, subService,
+                                        level, width, length, zoningMode,
+                                        Thread.CurrentThread.ManagedThreadId);
             //this part is the same as in original method
             //I love this hack :) This is how I get this reference - and save it to a variable
             var buildingManager = (BuildingManager)Convert.ChangeType(this, typeof(BuildingManager));
@@ -41,19 +68,41 @@ namespace BuildingThemes
                 return (BuildingInfo)null;
             if (fastList.m_size == 0)
                 return (BuildingInfo)null;
-            ushort districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position);
-            UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo. districtIdx: {0}", districtIdx);
-            //District district = Singleton<DistrictManager>.instance.m_districts.m_buffer[districtIdx];
-            //TODO(earalov): here fastList variable should be filtered. All buildings that  don't belong to the district should be removed from this list.
+            do
+            {
+            } while (!Monitor.TryEnter(Lock, SimulationManager.SYNCHRONIZE_TIMEOUT));
+            try
+            {
+
+                if (position != null)
+                {
+                    ushort districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position.getValue());
+                    //districtIdx==0 probably means 'outside of any district'
+                    UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo. districtIdx: {0};current thread: {1}",
+                        districtIdx, Thread.CurrentThread.ManagedThreadId);
+                    //District district = Singleton<DistrictManager>.instance.m_districts.m_buffer[districtIdx];
+                    //TODO(earalov): here fastList variable should be filtered. All buildings that  don't belong to the district should be removed from this list.
+                    position = null;
+                }
+                else
+                {
+                    UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo. No position was specified!;current thread: {0}", Thread.CurrentThread.ManagedThreadId);
+
+                }
+            }
+            finally
+            {
+                Monitor.Exit(Lock);
+            }
             int index = r.Int32((uint)fastList.m_size);
             return PrefabCollection<BuildingInfo>.GetPrefab((uint)fastList.m_buffer[index]);
         }
 
         public void ZoneBlockSimulationStep(ushort blockID)
         {
-            var zoneBlock = (ZoneBlock)Convert.ChangeType(this, typeof(ZoneBlock));
-            UnityEngine.Debug.LogFormat("Building Themes: Detoured ZoneBlock.SimulationStep was called. blockID: {0}, position: {1}", blockID, zoneBlock.m_position);
-            position = zoneBlock.m_position;
+            var zoneBlock = Singleton<ZoneManager>.instance.m_blocks.m_buffer[blockID];
+            UnityEngine.Debug.LogFormat("Building Themes: Detoured ZoneBlock.SimulationStep was called. blockID: {0}, position: {1}. current thread: {2}", blockID, zoneBlock.m_position, Thread.CurrentThread.ManagedThreadId);
+            position = Position.Build(zoneBlock.m_position);
             var methodInfo = typeof(ZoneBlock).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
             RedirectionHelper.RevertRedirect(
                 methodInfo,
@@ -65,42 +114,6 @@ namespace BuildingThemes
                 typeof(DetoursHolder).GetMethod("ZoneBlockSimulationStep", BindingFlags.Public | BindingFlags.Instance)
                 );
 
-        }
-
-        public BuildingInfo PrivateBuildingAiGetUpgradeInfo(ushort buildingID, ref Building data)
-        {
-            UnityEngine.Debug.LogFormat("Building Themes: Detoured PrivateBuildingAI.GetUpgradeInfo was called. buildingID: {0}, position: {1}", buildingID, data.m_position);
-            var privateBuildingAi = (PrivateBuildingAI)Convert.ChangeType(this, typeof(PrivateBuildingAI));
-            position = data.m_position;
-            var methodInfo = typeof(PrivateBuildingAI).GetMethod("GetUpgradeInfo", BindingFlags.Public | BindingFlags.Instance);
-            RedirectionHelper.RevertRedirect(
-                methodInfo,
-                privateBuidingAiGetUpgradeInfoState
-                );
-            var returnValue = (BuildingInfo)methodInfo.Invoke(privateBuildingAi, new object[] { buildingID, data });
-            RedirectionHelper.RedirectCalls(
-                methodInfo,
-                typeof(DetoursHolder).GetMethod("PrivateBuildingAiGetUpgradeInfo", BindingFlags.Public | BindingFlags.Instance)
-                );
-            return returnValue;
-        }
-
-        public void PrivateBuildingAiSimulationStep(ushort buildingID, ref Building buildingData,
-            ref Building.Frame frameData)
-        {
-            UnityEngine.Debug.LogFormat("Building Themes: Detoured PrivateBuildingAI.SimulationStep. buildingID: {0}, position: {1}", buildingID, buildingData.m_position);
-            var privateBuildingAi = (PrivateBuildingAI)Convert.ChangeType(this, typeof(PrivateBuildingAI));
-            position = buildingData.m_position;
-            var methodInfo = typeof(PrivateBuildingAI).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
-            RedirectionHelper.RevertRedirect(
-                methodInfo,
-                privateBuidingAiSimulationStepState
-                );
-            methodInfo.Invoke(privateBuildingAi, new object[] { buildingID, buildingData, frameData });
-            RedirectionHelper.RedirectCalls(
-                methodInfo,
-                typeof(DetoursHolder).GetMethod("PrivateBuildingAiSimulationStep", BindingFlags.Public | BindingFlags.Instance)
-                );
         }
 
         internal static object GetInstanceField(Type type, object instance, string fieldName)
