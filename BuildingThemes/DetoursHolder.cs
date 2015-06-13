@@ -126,9 +126,14 @@ namespace BuildingThemes
                         Thread.CurrentThread.ManagedThreadId);
                 FilterList(buildingPosition, ref fastList);
             }
-
+            if (fastList.m_size == 0)
+            {
+                UnityEngine.Debug.LogFormat("Building Themes: Filtered list is empty. Return null, current thread: {0}", Thread.CurrentThread.ManagedThreadId);
+                return (BuildingInfo)null;
+            }
             int index = r.Int32((uint)fastList.m_size);
-            return PrefabCollection<BuildingInfo>.GetPrefab((uint)fastList.m_buffer[index]);
+            var buildingInfo = PrefabCollection<BuildingInfo>.GetPrefab((uint) fastList.m_buffer[index]);
+            return buildingInfo;
         }
 
         private static void FilterList(Position position, ref FastList<ushort> list)
@@ -139,6 +144,24 @@ namespace BuildingThemes
                 districtIdx, Thread.CurrentThread.ManagedThreadId);
             //District district = Singleton<DistrictManager>.instance.m_districts.m_buffer[districtIdx];
             //TODO(earalov): here fastList variable should be filtered. All buildings that  don't belong to the district should be removed from this list.
+            
+            
+            //this is stub implementation
+            FastList<ushort> newList = new FastList<ushort>();
+            for (int i=0;i<list.m_size;i++)
+            {
+                var name = PrefabCollection<BuildingInfo>.GetPrefab(list.m_buffer[i]).name;
+                if (name.Contains("lock") && districtIdx == 0)
+                {
+                    continue;
+                }
+                if (!name.Contains("lock") && districtIdx != 0)
+                {
+                    continue;
+                }
+                newList.Add(list.m_buffer[i]);
+            }
+            list = newList;
         }
 
 
