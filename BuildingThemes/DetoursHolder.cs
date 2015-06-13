@@ -57,14 +57,10 @@ namespace BuildingThemes
         //as in original methods
         public BuildingInfo GetRandomBuildingInfo(ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
         {
-            UnityEngine.Debug.Log("Building Themes: Detoured GetRandomBuildingInfo was called. Stack trace: " + System.Environment.StackTrace);
-
-            var positionStr = position != null ? position.getValue().ToString() : "null";
-
-            UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo. position: {0}. service: {1}, subService: {2}," +
-                "level: {3}, width: {4}, length: {5}, zoningMode: {6}, current thread: {7}", positionStr, service, subService,
-                                        level, width, length, zoningMode,
-                                        Thread.CurrentThread.ManagedThreadId);
+            UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo was called. seed: {0} (singleton seed: {1}). service: {2}, subService: {3}," +
+                "level: {4}, width: {5}, length: {6}, zoningMode: {7}, current thread: {8}\nStack trace: {9}", r.seed, Singleton<SimulationManager>.instance.m_randomizer.seed,
+                service, subService, level, width, length, zoningMode,
+                                        Thread.CurrentThread.ManagedThreadId, System.Environment.StackTrace);
             //this part is the same as in original method
             //I love this hack :) This is how I get this reference - and save it to a variable
             var buildingManager = (BuildingManager)Convert.ChangeType(this, typeof(BuildingManager));
@@ -90,14 +86,15 @@ namespace BuildingThemes
 
             if (r.seed == Singleton<SimulationManager>.instance.m_randomizer.seed)
             {
-                UnityEngine.Debug.LogFormat("Building Themes: Getting position from static variable, current thread: {0}",
-                    Thread.CurrentThread.ManagedThreadId);
+
                 do
                 {
                 } while (!Monitor.TryEnter(Lock, SimulationManager.SYNCHRONIZE_TIMEOUT));
                 try
                 {
-
+                    var positionStr = position != null ? position.getValue().ToString() : "null";
+                    UnityEngine.Debug.LogFormat("Building Themes: Getting position from static variable. position: {0}, current thread: {1}",
+                        positionStr, Thread.CurrentThread.ManagedThreadId);
                     if (position != null)
                     {
                         FilterList(position, ref fastList);
@@ -119,7 +116,7 @@ namespace BuildingThemes
             else
             {
                 UnityEngine.Debug.LogFormat(
-                    "Building Themes: Getting position from seed {0}. current thread: {0}, threadId: {1}", r.seed, Thread.CurrentThread.ManagedThreadId);
+                    "Building Themes: Getting position from seed {0}... current thread: {1}", r.seed, Thread.CurrentThread.ManagedThreadId);
                 var buildingId = seedTable[r.seed];
                 var building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
                 var buildingPosition = Position.Build(building.m_position);
