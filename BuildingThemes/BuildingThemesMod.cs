@@ -27,25 +27,15 @@ namespace BuildingThemes
         private UIButton tab;
 
         // district id --> list of enabled themes
-        private Dictionary<byte, List<string>> districtThemes;
+        private List<Configuration.Theme>[] districtThemes;
 
         // [district id][area index] --> prefab fastlist
         private FastList<ushort>[,] m_district_areaBuildings;
-
-        // theme name --> prefab fastlists
-        private Dictionary<string, FastList<ushort>[]> themeBuildings;
 
         public override void OnLevelLoaded(LoadMode mode) 
         {
             // Is it an actual game ?
             if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
-
-            // TODO: load and save the district "policy" data. This is just a placeholder
-            districtThemes = new Dictionary<byte, List<string>>();
-            for (byte i = 0; i < 128; i++) 
-            {
-                districtThemes.Add(i, new List<string>(new string[] { "European", "International" }));
-            }
 
             // load the xml configuration
             Configuration config = Configuration.Deserialize(configPath);
@@ -56,15 +46,36 @@ namespace BuildingThemes
                 Configuration.Serialize(configPath, config);
             }
 
-            // generate the list of buildings per theme, ordered by area index
-            Dictionary<string, FastList<ushort>[]> themeBuildings = GenerateThemeBuildingLists(config);
+            // TODO: load and save the district "policy" data. This is just a placeholder
+            districtThemes = new List<Configuration.Theme>[128];
+            for (byte i = 0; i < 128; i++) 
+            {
+                districtThemes[i] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("European"), config.getTheme("International") });
+            }
 
-            // 128 districts, 2720 possible area indexes
-            m_district_areaBuildings = new FastList<ushort>[128, 2720];
-            //TODO compile the fastlists for every district.
+            // compile the fastlists for every district.
+            m_district_areaBuildings = GenerateDistrictBuildingLists(config);
 
-            // Hook into policies GUI
-            ToolsModifierControl.policiesPanel.component.eventVisibilityChanged += OnPoliciesPanelVisibilityChanged;
+            // debug:
+            for (int i = 0; i < 2720; i++) 
+            {
+                FastList<ushort> buildings = m_district_areaBuildings[0, i];
+
+                if (buildings == null || buildings.m_buffer.Length == 0) continue;
+
+                string output = "index " + i + ": ";
+
+                foreach(ushort b in buildings.m_buffer) 
+                {
+                    output += PrefabCollection<BuildingInfo>.GetPrefab((uint)b).name;
+                    output += ", ";
+                }
+
+                Debug.Log(output);
+            }
+
+                // Hook into policies GUI
+                ToolsModifierControl.policiesPanel.component.eventVisibilityChanged += OnPoliciesPanelVisibilityChanged;
 
             ReplaceBuildingManager();
         }
@@ -93,51 +104,53 @@ namespace BuildingThemes
 
         }
 
-        private Dictionary<string, FastList<ushort>[]> GenerateThemeBuildingLists(Configuration config) 
+        private FastList<ushort>[,] GenerateDistrictBuildingLists(Configuration config) 
         {
-            Dictionary<string, FastList<ushort>[]> lists = new Dictionary<string, FastList<ushort>[]>(config.themes.Count);
+            // 128 districts, 2720 possible area indexes
+            FastList<ushort>[,] lists = new FastList<ushort>[128, 2720];
 
-            foreach (Configuration.Theme theme in config.themes)
+            for (int i = 0; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
             {
-                FastList<ushort>[] list = new FastList<ushort>[2720];
-                lists.Add(theme.name, list);
-
-                foreach (Configuration.Building building in theme.buildings)
+                BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab((uint)i);
+                if (prefab != null && prefab.m_class.m_service != ItemClass.Service.None && prefab.m_placementStyle == ItemClass.Placement.Automatic && prefab.m_class.m_service <= ItemClass.Service.Office)
                 {
-                    for (int i = 0; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
+                    if (prefab.m_cellWidth < 1 || prefab.m_cellWidth > 4)
                     {
-                        BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab((uint)i);
-                        if (prefab != null && prefab.name == building.name && prefab.m_class.m_service != ItemClass.Service.None && prefab.m_placementStyle == ItemClass.Placement.Automatic && prefab.m_class.m_service <= ItemClass.Service.Office)
+                        string text = PrefabCollection<BuildingInfo>.PrefabName((uint)i);
+                        CODebugBase<LogChannel>.Error(LogChannel.Core, string.Concat(new object[]
+						    {
+							    "Invalid width (",
+							    text,
+							    "): ",
+							    prefab.m_cellWidth
+						    }));
+                    }
+                    else if (prefab.m_cellLength < 1 || prefab.m_cellLength > 4)
+                    {
+                        string text2 = PrefabCollection<BuildingInfo>.PrefabName((uint)i);
+                        CODebugBase<LogChannel>.Error(LogChannel.Core, string.Concat(new object[]
+						    {
+							    "Invalid length (",
+							    text2,
+							    "): ",
+							    prefab.m_cellLength
+						    }));
+                    }
+                    else
+                    {
+                        int areaIndex = BuildingThemesMod.GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
+                        
+                        for(int d = 0; d < districtThemes.Length; d++) 
                         {
-                            if (prefab.m_cellWidth < 1 || prefab.m_cellWidth > 4)
-                            {
-                                string text = PrefabCollection<BuildingInfo>.PrefabName((uint)i);
-                                CODebugBase<LogChannel>.Error(LogChannel.Core, string.Concat(new object[]
-						        {
-							        "Invalid width (",
-							        text,
-							        "): ",
-							        prefab.m_cellWidth
-						        }));
-                            }
-                            else if (prefab.m_cellLength < 1 || prefab.m_cellLength > 4)
-                            {
-                                string text2 = PrefabCollection<BuildingInfo>.PrefabName((uint)i);
-                                CODebugBase<LogChannel>.Error(LogChannel.Core, string.Concat(new object[]
-						        {
-							        "Invalid length (",
-							        text2,
-							        "): ",
-							        prefab.m_cellLength
-						        }));
-                            }
-                            else
-                            {
-                                int areaIndex = BuildingThemesMod.GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
+                            List<Configuration.Theme> themeList = districtThemes[d];
 
-                                if (list[areaIndex] == null) list[areaIndex] = new FastList<ushort>();
+                            foreach(Configuration.Theme theme in themeList) 
+                            {
+                                if(!theme.containsBuilding(prefab.name)) continue;
 
-                                list[areaIndex].Add((ushort)i);
+                                if (lists[d,areaIndex] == null) lists[d,areaIndex] = new FastList<ushort>();
+
+                                lists[d, areaIndex].Add((ushort)i);
                             }
                         }
                     }
