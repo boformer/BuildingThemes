@@ -24,7 +24,7 @@ namespace BuildingThemes
             BuildingManager buildingManager = Singleton<BuildingManager>.instance;
             Building building = buildingManager.m_buildings.m_buffer[buildingID];
             UnityEngine.Debug.LogFormat("Building Themes: OnCalculateResidentialLevelUp. buildingID: {0}, target level: {1}, position: {2}. current thread: {3}", buildingID, levelUp.targetLevel, building.m_position, Thread.CurrentThread.ManagedThreadId);
-            DetoursHolder.position = DetoursHolder.Position.Build(building.m_position);
+            DetoursHolder.position = building.m_position;
             return levelUp;
         }
 
@@ -34,7 +34,7 @@ namespace BuildingThemes
             BuildingManager buildingManager = Singleton<BuildingManager>.instance;
             Building building = buildingManager.m_buildings.m_buffer[buildingID];
             UnityEngine.Debug.LogFormat("Building Themes: OnCalculateOfficeLevelUp. buildingID: {0}, target level: {1}, position: {2}. current thread: {3}", buildingID, levelUp.targetLevel, building.m_position, Thread.CurrentThread.ManagedThreadId);
-            DetoursHolder.position = DetoursHolder.Position.Build(building.m_position);
+            DetoursHolder.position = building.m_position;
             return levelUp;
         }
 
@@ -44,7 +44,7 @@ namespace BuildingThemes
            BuildingManager buildingManager = Singleton<BuildingManager>.instance;
             Building building = buildingManager.m_buildings.m_buffer[buildingID];
             UnityEngine.Debug.LogFormat("Building Themes: OnCalculateCommercialLevelUp. buildingID: {0}, target level: {1}, position: {2}. current thread: {3}", buildingID, levelUp.targetLevel, building.m_position, Thread.CurrentThread.ManagedThreadId);
-            DetoursHolder.position = DetoursHolder.Position.Build(building.m_position);
+            DetoursHolder.position = building.m_position;
             return levelUp;
         }
 
@@ -54,7 +54,7 @@ namespace BuildingThemes
             BuildingManager buildingManager = Singleton<BuildingManager>.instance;
             Building building = buildingManager.m_buildings.m_buffer[buildingID];
             UnityEngine.Debug.LogFormat("Building Themes: OnCalculateIndustrialLevelUp. buildingID: {0}, target level: {1}, position: {2}. current thread: {3}", buildingID, levelUp.targetLevel, building.m_position, Thread.CurrentThread.ManagedThreadId);
-            DetoursHolder.position = DetoursHolder.Position.Build(building.m_position);
+            DetoursHolder.position = building.m_position;
             return levelUp;
         }
     }

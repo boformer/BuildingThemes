@@ -25,30 +25,8 @@ namespace BuildingThemes
             }
         }
 
-        private static readonly object Lock = new object();
-
         //we'll use this variable to pass position to GetRandomBuildingInfo method. Or we can just pass District
-        public class Position
-        {
-            private Vector3 m_position;
-
-            private Position(Vector3 position)
-            {
-                this.m_position = position;
-            }
-
-            public Vector3 getValue()
-            {
-                return m_position;
-            }
-
-            public static Position Build(Vector3 position)
-            {
-                return new Position(position);
-            }
-        }
-
-        public static Position position = null;
+        public static Vector3 position;
 
         public static RedirectCallsState zoneBlockSimulationStepState;
 
@@ -89,32 +67,9 @@ namespace BuildingThemes
 
             if (isRandomizerSimulatorManagers)
             {
-
-                do
-                {
-                } while (!Monitor.TryEnter(Lock, SimulationManager.SYNCHRONIZE_TIMEOUT));
-                try
-                {
-                    var positionStr = position != null ? position.getValue().ToString() : "null";
-                    UnityEngine.Debug.LogFormat("Building Themes: Getting position from static variable. position: {0}, current thread: {1}",
-                        positionStr, Thread.CurrentThread.ManagedThreadId);
-                    if (position != null)
-                    {
-                        FilterList(position, ref fastList);
-                        position = null;
-                    }
-                    else
-                    {
-                        UnityEngine.Debug.LogFormat(
-                            "Building Themes: Detoured GetRandomBuildingInfo. No position was specified!;current thread: {0}",
-                            Thread.CurrentThread.ManagedThreadId);
-
-                    }
-                }
-                finally
-                {
-                    Monitor.Exit(Lock);
-                }
+                UnityEngine.Debug.LogFormat("Building Themes: Getting position from static variable. position: {0}, current thread: {1}",
+                    position, Thread.CurrentThread.ManagedThreadId);
+                    FilterList(position, ref fastList);
             }
             else
             {
@@ -122,10 +77,10 @@ namespace BuildingThemes
                     "Building Themes: Getting position from seed {0}... current thread: {1}", randimizerSeed, Thread.CurrentThread.ManagedThreadId);
                 var buildingId = seedTable[randimizerSeed];
                 var building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
-                var buildingPosition = Position.Build(building.m_position);
+                var buildingPosition = building.m_position;
                 UnityEngine.Debug.LogFormat(
                         "Building Themes: Getting position from seed {0}. building: {1}, buildingId: {2}, position: {3}, threadId: {4}",
-                        randimizerSeed, building.Info.name, buildingId, buildingPosition.getValue(), 
+                        randimizerSeed, building.Info.name, buildingId, buildingPosition, 
                         Thread.CurrentThread.ManagedThreadId);
                 FilterList(buildingPosition, ref fastList);
             }
@@ -139,9 +94,9 @@ namespace BuildingThemes
             return buildingInfo;
         }
 
-        private static void FilterList(Position position, ref FastList<ushort> list)
+        private static void FilterList(Vector3 position, ref FastList<ushort> list)
         {
-            ushort districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position.getValue());
+            ushort districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position);
             //districtIdx==0 probably means 'outside of any district'
             UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo. districtIdx: {0};current thread: {1}",
                 districtIdx, Thread.CurrentThread.ManagedThreadId);
@@ -172,7 +127,7 @@ namespace BuildingThemes
         {
             var zoneBlock = Singleton<ZoneManager>.instance.m_blocks.m_buffer[blockID];
             UnityEngine.Debug.LogFormat("Building Themes: Detoured ZoneBlock.SimulationStep was called. blockID: {0}, position: {1}. current thread: {2}", blockID, zoneBlock.m_position, Thread.CurrentThread.ManagedThreadId);
-            position = Position.Build(zoneBlock.m_position);
+            position = zoneBlock.m_position;
             var methodInfo = typeof(ZoneBlock).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
             RedirectionHelper.RevertRedirect(
                 methodInfo,
