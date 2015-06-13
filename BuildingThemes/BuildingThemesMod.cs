@@ -22,19 +22,50 @@ namespace BuildingThemes
             get { return "Create building themes and apply them to map themes, cities and districts."; }
         }
 
+        private const string configPath = "BuildingThemes.xml";
+
         private UIButton tab;
+
+        // district id --> list of enabled themes
+        private Dictionary<byte, List<string>> districtThemes;
+
+        // [district id][area index] --> prefab fastlist
+        private FastList<ushort>[,] m_district_areaBuildings;
+
+        // theme name --> prefab fastlists
+        private Dictionary<string, FastList<ushort>[]> themeBuildings;
 
         public override void OnLevelLoaded(LoadMode mode) 
         {
             // Is it an actual game ?
             if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
 
-            // TODO load data (serialized for policies, xml for themes)
+            // TODO: load and save the district "policy" data. This is just a placeholder
+            districtThemes = new Dictionary<byte, List<string>>();
+            for (byte i = 0; i < 128; i++) 
+            {
+                districtThemes.Add(i, new List<string>(new string[] { "European", "International" }));
+            }
+
+            // load the xml configuration
+            Configuration config = Configuration.Deserialize(configPath);
+
+            if (config == null)
+            {
+                config = Configuration.GenerateDefaultConfig();
+                Configuration.Serialize(configPath, config);
+            }
+
+            // generate the list of buildings per theme, ordered by area index
+            Dictionary<string, FastList<ushort>[]> themeBuildings = GenerateThemeBuildingLists(config);
+
+            // 128 districts, 2720 possible area indexes
+            m_district_areaBuildings = new FastList<ushort>[128, 2720];
+            //TODO compile the fastlists for every district.
 
             // Hook into policies GUI
             ToolsModifierControl.policiesPanel.component.eventVisibilityChanged += OnPoliciesPanelVisibilityChanged;
 
-            // Replace BuildingManager. Credits to Traffic++ developers ;)
             ReplaceBuildingManager();
         }
 
@@ -61,6 +92,86 @@ namespace BuildingThemes
             Debug.Log("Building Themes: Building Manager successfully replaced.");
 
         }
+
+        private Dictionary<string, FastList<ushort>[]> GenerateThemeBuildingLists(Configuration config) 
+        {
+            Dictionary<string, FastList<ushort>[]> lists = new Dictionary<string, FastList<ushort>[]>(config.themes.Count);
+
+            foreach (Configuration.Theme theme in config.themes)
+            {
+                FastList<ushort>[] list = new FastList<ushort>[2720];
+                lists.Add(theme.name, list);
+
+                foreach (Configuration.Building building in theme.buildings)
+                {
+                    for (int i = 0; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
+                    {
+                        BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab((uint)i);
+                        if (prefab != null && prefab.name == building.name && prefab.m_class.m_service != ItemClass.Service.None && prefab.m_placementStyle == ItemClass.Placement.Automatic && prefab.m_class.m_service <= ItemClass.Service.Office)
+                        {
+                            if (prefab.m_cellWidth < 1 || prefab.m_cellWidth > 4)
+                            {
+                                string text = PrefabCollection<BuildingInfo>.PrefabName((uint)i);
+                                CODebugBase<LogChannel>.Error(LogChannel.Core, string.Concat(new object[]
+						        {
+							        "Invalid width (",
+							        text,
+							        "): ",
+							        prefab.m_cellWidth
+						        }));
+                            }
+                            else if (prefab.m_cellLength < 1 || prefab.m_cellLength > 4)
+                            {
+                                string text2 = PrefabCollection<BuildingInfo>.PrefabName((uint)i);
+                                CODebugBase<LogChannel>.Error(LogChannel.Core, string.Concat(new object[]
+						        {
+							        "Invalid length (",
+							        text2,
+							        "): ",
+							        prefab.m_cellLength
+						        }));
+                            }
+                            else
+                            {
+                                int areaIndex = BuildingThemesMod.GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
+
+                                if (list[areaIndex] == null) list[areaIndex] = new FastList<ushort>();
+
+                                list[areaIndex].Add((ushort)i);
+                            }
+                        }
+                    }
+                }
+            }
+            return lists;
+        }
+
+    	public static int GetAreaIndex(ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
+	    {
+		    int num;
+		    if (subService != ItemClass.SubService.None)
+		    {
+			    num = 8 + subService - ItemClass.SubService.ResidentialLow;
+		    }
+		    else
+		    {
+			    num = service - ItemClass.Service.Residential;
+		    }
+		    num = (int)(num * 5 + level);
+		    if (zoningMode == BuildingInfo.ZoningMode.CornerRight)
+		    {
+			    num = num * 4 + length - 1;
+			    num = num * 4 + width - 1;
+			    num = num * 2 + 1;
+		    }
+		    else
+		    {
+			    num = num * 4 + width - 1;
+			    num = num * 4 + length - 1;
+			    num = (int)(num * 2 + zoningMode);
+		    }
+		    return num;
+	    }
 
 
         // GUI stuff
