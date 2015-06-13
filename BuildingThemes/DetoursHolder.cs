@@ -57,6 +57,9 @@ namespace BuildingThemes
         //as in original methods
         public BuildingInfo GetRandomBuildingInfo(ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
         {
+
+            var isRandomizerSimulatorManagers = r.seed == Singleton<SimulationManager>.instance.m_randomizer.seed; //I do it here in case if randomizer methodos mell be called later
+            var randimizerSeed = r.seed; //if they are called seed will change
             UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo was called. seed: {0} (singleton seed: {1}). service: {2}, subService: {3}," +
                 "level: {4}, width: {5}, length: {6}, zoningMode: {7}, current thread: {8}\nStack trace: {9}", r.seed, Singleton<SimulationManager>.instance.m_randomizer.seed,
                 service, subService, level, width, length, zoningMode,
@@ -84,7 +87,7 @@ namespace BuildingThemes
                 return (BuildingInfo)null;
             }
 
-            if (r.seed == Singleton<SimulationManager>.instance.m_randomizer.seed)
+            if (isRandomizerSimulatorManagers)
             {
 
                 do
@@ -116,13 +119,13 @@ namespace BuildingThemes
             else
             {
                 UnityEngine.Debug.LogFormat(
-                    "Building Themes: Getting position from seed {0}... current thread: {1}", r.seed, Thread.CurrentThread.ManagedThreadId);
-                var buildingId = seedTable[r.seed];
+                    "Building Themes: Getting position from seed {0}... current thread: {1}", randimizerSeed, Thread.CurrentThread.ManagedThreadId);
+                var buildingId = seedTable[randimizerSeed];
                 var building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
                 var buildingPosition = Position.Build(building.m_position);
                 UnityEngine.Debug.LogFormat(
                         "Building Themes: Getting position from seed {0}. building: {1}, buildingId: {2}, position: {3}, threadId: {4}",
-                        r.seed, building.Info.name, buildingId, buildingPosition.getValue(), 
+                        randimizerSeed, building.Info.name, buildingId, buildingPosition.getValue(), 
                         Thread.CurrentThread.ManagedThreadId);
                 FilterList(buildingPosition, ref fastList);
             }
