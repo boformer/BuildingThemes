@@ -7,6 +7,7 @@ using ColossalFramework.Plugins;
 using System.Text;
 using UnityEngine;
 using System.Reflection;
+using System.Resources;
 using System.Threading;
 using ColossalFramework.Math;
 
@@ -114,6 +115,13 @@ namespace BuildingThemes
             DetoursHolder.zoneBlockSimulationStepState = RedirectionHelper.PatchJumpTo(
                 DetoursHolder.zoneBlockSimulationStepPtr,
                 DetoursHolder.zoneBlockSimulationStepDetourPtr
+                );
+            DetoursHolder.resourceManagerAddResource = typeof(ImmaterialResourceManager).GetMethod("AddResource", new[] { typeof(ImmaterialResourceManager.Resource), typeof(int), typeof(Vector3), typeof(float) });
+            DetoursHolder.resourceManagerAddResourcePtr = DetoursHolder.resourceManagerAddResource.MethodHandle.GetFunctionPointer();
+            DetoursHolder.resourceManagerAddResourceDetourPtr = typeof(DetoursHolder).GetMethod("ImmaterialResourceManagerAddResource").MethodHandle.GetFunctionPointer();
+            DetoursHolder.resourceManagerAddResourceState = RedirectionHelper.PatchJumpTo(
+                DetoursHolder.resourceManagerAddResourcePtr,
+                DetoursHolder.resourceManagerAddResourceDetourPtr
                 );
         }
 

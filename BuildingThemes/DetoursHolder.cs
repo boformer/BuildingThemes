@@ -33,8 +33,14 @@ namespace BuildingThemes
         public static MethodInfo zoneBlockSimulationStep;
         public static IntPtr zoneBlockSimulationStepPtr;
         public static IntPtr zoneBlockSimulationStepDetourPtr;
+        
         private static MethodInfo refreshAreaBuidlings;
         private static MethodInfo getAreaIndex;
+
+        public static RedirectCallsState resourceManagerAddResourceState;
+        public static MethodInfo resourceManagerAddResource;
+        public static IntPtr resourceManagerAddResourcePtr;
+        public static IntPtr resourceManagerAddResourceDetourPtr;
 
         //this is detoured version of BuildingManger#GetRandomBuildingInfo method. Note, that it's an instance method. It's better because this way all registers will be expected to have the same values
         //as in original methods
@@ -176,6 +182,24 @@ namespace BuildingThemes
             zoneBlockSimulationStep.Invoke(zoneBlock, new object[] { blockID });
             RedirectionHelper.PatchJumpTo(zoneBlockSimulationStepPtr, zoneBlockSimulationStepDetourPtr);
 
+        }
+
+        public int ImmaterialResourceManagerAddResource(ImmaterialResourceManager.Resource resource, int rate, Vector3 positionArg, float radius)
+        {
+            if (BuildingThemesMod.isDebug)
+            {
+                UnityEngine.Debug.LogFormat(
+                    "Building Themes: Detoured ImmaterialResource.AddResource was called. position: {0}. current thread: {1}",
+                    positionArg, Thread.CurrentThread.ManagedThreadId);
+            }
+            if (resource == ImmaterialResourceManager.Resource.Abandonment)
+            {
+                position = positionArg;
+            }
+            RedirectionHelper.RevertJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceState);
+            var result = Singleton<ImmaterialResourceManager>.instance.AddResource(resource, rate, positionArg, radius);
+            RedirectionHelper.PatchJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceDetourPtr);
+            return result;
         }
 
         internal static object GetInstanceField(Type type, object instance, string fieldName)
