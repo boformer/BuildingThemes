@@ -54,6 +54,14 @@ namespace BuildingThemes
             return PatchJumpTo(fptr1, fptr2);
         }
 
+        public static RedirectCallsState RedirectCalls(RuntimeMethodHandle from, RuntimeMethodHandle to)
+        {
+            // GetFunctionPointer enforces compilation of the method.
+            var fptr1 = from.GetFunctionPointer();
+            var fptr2 = to.GetFunctionPointer();
+            return PatchJumpTo(fptr1, fptr2);
+        }
+
         public static void RevertRedirect(MethodInfo from, RedirectCallsState state)
         {
             var fptr1 = from.MethodHandle.GetFunctionPointer();
@@ -66,7 +74,7 @@ namespace BuildingThemes
         /// </summary>
         /// <param name="site"></param>
         /// <param name="target"></param>
-        private static RedirectCallsState PatchJumpTo(IntPtr site, IntPtr target)
+        public static RedirectCallsState PatchJumpTo(IntPtr site, IntPtr target)
         {
             RedirectCallsState state = new RedirectCallsState();
 
@@ -92,7 +100,7 @@ namespace BuildingThemes
             return state;
         }
 
-        private static void RevertJumpTo(IntPtr site, RedirectCallsState state)
+        public static void RevertJumpTo(IntPtr site, RedirectCallsState state)
         {
             unsafe
             {

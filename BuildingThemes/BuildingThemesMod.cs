@@ -7,11 +7,82 @@ using ColossalFramework.Plugins;
 using System.Text;
 using UnityEngine;
 using System.Reflection;
+using System.Threading;
 
 namespace BuildingThemes
 {
+
+
+    public class LevelUpExtension : LevelUpExtensionBase
+    {
+
+        public override ResidentialLevelUp OnCalculateResidentialLevelUp(ResidentialLevelUp levelUp,
+            int averageEducation, int landValue, ushort buildingID, Service service, SubService subService,
+            Level currentLevel)
+        {
+            BuildingManager buildingManager = Singleton<BuildingManager>.instance;
+            Building building = buildingManager.m_buildings.m_buffer[buildingID];
+            if (BuildingThemesMod.isDebug)
+            {
+                UnityEngine.Debug.LogFormat("Building Themes: OnCalculateResidentialLevelUp. buildingID: {0}, target level: {1}, position: {2}. current thread: {3}", buildingID, levelUp.targetLevel, building.m_position, Thread.CurrentThread.ManagedThreadId);
+            }
+            DetoursHolder.position = building.m_position;
+            return levelUp;
+        }
+
+        public override OfficeLevelUp OnCalculateOfficeLevelUp(OfficeLevelUp levelUp, int averageEducation,
+            int serviceScore, ushort buildingID, Service service, SubService subService, Level currentLevel)
+        {
+            BuildingManager buildingManager = Singleton<BuildingManager>.instance;
+            Building building = buildingManager.m_buildings.m_buffer[buildingID];
+            if (BuildingThemesMod.isDebug)
+            {
+
+                UnityEngine.Debug.LogFormat(
+                    "Building Themes: OnCalculateOfficeLevelUp. buildingID: {0}, target level: {1}, position: {2}. current thread: {3}",
+                    buildingID, levelUp.targetLevel, building.m_position, Thread.CurrentThread.ManagedThreadId);
+            }
+            DetoursHolder.position = building.m_position;
+            return levelUp;
+        }
+
+        public override CommercialLevelUp OnCalculateCommercialLevelUp(CommercialLevelUp levelUp, int averageWealth,
+            int landValue, ushort buildingID, Service service, SubService subService, Level currentLevel)
+        {
+           BuildingManager buildingManager = Singleton<BuildingManager>.instance;
+            Building building = buildingManager.m_buildings.m_buffer[buildingID];
+            if (BuildingThemesMod.isDebug)
+            {
+
+                UnityEngine.Debug.LogFormat(
+                    "Building Themes: OnCalculateCommercialLevelUp. buildingID: {0}, target level: {1}, position: {2}. current thread: {3}",
+                    buildingID, levelUp.targetLevel, building.m_position, Thread.CurrentThread.ManagedThreadId);
+            }
+            DetoursHolder.position = building.m_position;
+            return levelUp;
+        }
+
+        public override IndustrialLevelUp OnCalculateIndustrialLevelUp(IndustrialLevelUp levelUp, int averageEducation,
+            int serviceScore, ushort buildingID, Service service, SubService subService, Level currentLevel)
+        {
+            BuildingManager buildingManager = Singleton<BuildingManager>.instance;
+            Building building = buildingManager.m_buildings.m_buffer[buildingID];
+            if (BuildingThemesMod.isDebug)
+            {
+
+                UnityEngine.Debug.LogFormat(
+                    "Building Themes: OnCalculateIndustrialLevelUp. buildingID: {0}, target level: {1}, position: {2}. current thread: {3}",
+                    buildingID, levelUp.targetLevel, building.m_position, Thread.CurrentThread.ManagedThreadId);
+            }
+            DetoursHolder.position = building.m_position;
+            return levelUp;
+        }
+    }
+    
     public class BuildingThemesMod : LoadingExtensionBase, IUserMod
     {
+        public static bool isDebug = false;
+        
         public string Name
         {
             get { return "Building Themes"; }
@@ -33,6 +104,28 @@ namespace BuildingThemes
 
         // [district id][area index] --> prefab fastlist
         public static FastList<ushort>[,] m_district_areaBuildings;
+
+        public override void OnCreated(ILoading loading)
+        {
+            base.OnCreated(loading);
+            DetoursHolder.InitTable();
+            ReplaceBuildingManager();
+
+            DetoursHolder.zoneBlockSimulationStep = typeof(ZoneBlock).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
+            DetoursHolder.zoneBlockSimulationStepPtr = DetoursHolder.zoneBlockSimulationStep.MethodHandle.GetFunctionPointer();
+            DetoursHolder.zoneBlockSimulationStepDetourPtr = typeof(DetoursHolder).GetMethod("ZoneBlockSimulationStep", BindingFlags.Public | BindingFlags.Instance).MethodHandle.GetFunctionPointer();
+            DetoursHolder.zoneBlockSimulationStepState = RedirectionHelper.PatchJumpTo(
+                DetoursHolder.zoneBlockSimulationStepPtr,
+                DetoursHolder.zoneBlockSimulationStepDetourPtr
+                );
+            DetoursHolder.resourceManagerAddResource = typeof(ImmaterialResourceManager).GetMethod("AddResource", new[] { typeof(ImmaterialResourceManager.Resource), typeof(int), typeof(Vector3), typeof(float) });
+            DetoursHolder.resourceManagerAddResourcePtr = DetoursHolder.resourceManagerAddResource.MethodHandle.GetFunctionPointer();
+            DetoursHolder.resourceManagerAddResourceDetourPtr = typeof(DetoursHolder).GetMethod("ImmaterialResourceManagerAddResource").MethodHandle.GetFunctionPointer();
+            DetoursHolder.resourceManagerAddResourceState = RedirectionHelper.PatchJumpTo(
+                DetoursHolder.resourceManagerAddResourcePtr,
+                DetoursHolder.resourceManagerAddResourceDetourPtr
+                );
+        }
 
         public override void OnLevelLoaded(LoadMode mode) 
         {
@@ -90,8 +183,6 @@ namespace BuildingThemes
 
             // Hook into policies GUI
             ToolsModifierControl.policiesPanel.component.eventVisibilityChanged += OnPoliciesPanelVisibilityChanged;
-
-            ReplaceBuildingManager();
         }
 
         public override void OnLevelUnloading()
