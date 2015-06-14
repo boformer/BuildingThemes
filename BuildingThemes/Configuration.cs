@@ -16,10 +16,6 @@ namespace BuildingThemes
         [XmlArrayItem(ElementName = "Theme")]
         public List<Theme> themes = new List<Theme>();
 
-        [XmlArray(ElementName = "Themes")]
-        [XmlArrayItem(ElementName = "Theme")]
-        public List<Building> knownBuildings = new List<Building>();
-
         public Theme getTheme(string name) 
         {
             foreach (Theme theme in themes) 
@@ -31,6 +27,7 @@ namespace BuildingThemes
 
         public class Theme
         {
+            [XmlAttribute("name")]
             public string name;
 
             [XmlArray(ElementName = "Buildings")]
@@ -57,6 +54,10 @@ namespace BuildingThemes
             {
                 this.name = name;
             }
+
+            public Theme()
+            {
+            }
         }
 
         public class Building
@@ -67,6 +68,10 @@ namespace BuildingThemes
             public Building(string name)
             {
                 this.name = name;
+            }
+
+            public Building()
+            {
             }
         }
 

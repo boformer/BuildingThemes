@@ -26,11 +26,13 @@ namespace BuildingThemes
 
         private UIButton tab;
 
+        private Configuration config;
+
         // district id --> list of enabled themes
         private List<Configuration.Theme>[] districtThemes;
 
         // [district id][area index] --> prefab fastlist
-        private FastList<ushort>[,] m_district_areaBuildings;
+        public static FastList<ushort>[,] m_district_areaBuildings;
 
         public override void OnLevelLoaded(LoadMode mode) 
         {
@@ -38,7 +40,7 @@ namespace BuildingThemes
             if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
 
             // load the xml configuration
-            Configuration config = Configuration.Deserialize(configPath);
+            config = Configuration.Deserialize(configPath);
 
             if (config == null)
             {
@@ -48,40 +50,56 @@ namespace BuildingThemes
 
             // TODO: load and save the district "policy" data. This is just a placeholder
             districtThemes = new List<Configuration.Theme>[128];
-            for (byte i = 0; i < 128; i++) 
+
+            districtThemes[0] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("European"), config.getTheme("International") });
+            districtThemes[1] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("European")});
+            districtThemes[2] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("International") });
+
+            for (byte i = 3; i < 128; i++) 
             {
                 districtThemes[i] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("European"), config.getTheme("International") });
             }
 
             // compile the fastlists for every district.
-            m_district_areaBuildings = GenerateDistrictBuildingLists(config);
+            m_district_areaBuildings = GenerateDistrictBuildingLists();
 
             // debug:
-            for (int i = 0; i < 2720; i++) 
+            for (int d = 0; d < 3; d++)
             {
-                FastList<ushort> buildings = m_district_areaBuildings[0, i];
-
-                if (buildings == null || buildings.m_buffer.Length == 0) continue;
-
-                string output = "index " + i + ": ";
-
-                foreach(ushort b in buildings.m_buffer) 
+                for (int i = 0; i < 2720; i++)
                 {
-                    output += PrefabCollection<BuildingInfo>.GetPrefab((uint)b).name;
-                    output += ", ";
-                }
+                    FastList<ushort> buildings = m_district_areaBuildings[d, i];
 
-                Debug.Log(output);
+                    if (buildings == null || buildings.m_size == 0) continue;
+
+                    string output = "index " + i + ": ";
+
+                    for (int b = 0; b < buildings.m_size; b++)
+                    {
+                        uint prefabId = (uint)m_district_areaBuildings[d, i].m_buffer[b];
+
+                        output += prefabId;
+                        output += " - ";
+                        output += PrefabCollection<BuildingInfo>.GetPrefab(prefabId).name;
+                        output += ", ";
+                    }
+
+                    Debug.Log(output);
+                }
             }
 
-                // Hook into policies GUI
-                ToolsModifierControl.policiesPanel.component.eventVisibilityChanged += OnPoliciesPanelVisibilityChanged;
+            // Hook into policies GUI
+            ToolsModifierControl.policiesPanel.component.eventVisibilityChanged += OnPoliciesPanelVisibilityChanged;
 
             ReplaceBuildingManager();
         }
 
         public override void OnLevelUnloading()
         {
+            config = null;
+            districtThemes = null;
+            m_district_areaBuildings = null;
+            
             // Remove the custom policy tab
             RemoveThemesTab();
 
@@ -104,7 +122,7 @@ namespace BuildingThemes
 
         }
 
-        private FastList<ushort>[,] GenerateDistrictBuildingLists(Configuration config) 
+        private FastList<ushort>[,] GenerateDistrictBuildingLists() 
         {
             // 128 districts, 2720 possible area indexes
             FastList<ushort>[,] lists = new FastList<ushort>[128, 2720];
@@ -112,6 +130,7 @@ namespace BuildingThemes
             for (int i = 0; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
             {
                 BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab((uint)i);
+
                 if (prefab != null && prefab.m_class.m_service != ItemClass.Service.None && prefab.m_placementStyle == ItemClass.Placement.Automatic && prefab.m_class.m_service <= ItemClass.Service.Office)
                 {
                     if (prefab.m_cellWidth < 1 || prefab.m_cellWidth > 4)
@@ -139,7 +158,7 @@ namespace BuildingThemes
                     else
                     {
                         int areaIndex = BuildingThemesMod.GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
-                        
+
                         for(int d = 0; d < districtThemes.Length; d++) 
                         {
                             List<Configuration.Theme> themeList = districtThemes[d];
@@ -148,9 +167,13 @@ namespace BuildingThemes
                             {
                                 if(!theme.containsBuilding(prefab.name)) continue;
 
-                                if (lists[d,areaIndex] == null) lists[d,areaIndex] = new FastList<ushort>();
+                                if (lists[d, areaIndex] == null)
+                                {
+                                    lists[d, areaIndex] = new FastList<ushort>();
+                                }
 
                                 lists[d, areaIndex].Add((ushort)i);
+                                break;
                             }
                         }
                     }
@@ -234,13 +257,10 @@ namespace BuildingThemes
             container.autoLayoutDirection = LayoutDirection.Vertical;
             container.autoLayoutPadding.top = 5;
 
-            // add some sample buttons
-
-            AddThemePolicyButton(container, "Chicago 1890");
-            AddThemePolicyButton(container, "New York 1940");
-            AddThemePolicyButton(container, "Houston 1990");
-            AddThemePolicyButton(container, "Euro-Contemporary");
-            AddThemePolicyButton(container, "My first custom theme");
+            foreach (Configuration.Theme theme in config.themes) 
+            {
+                AddThemePolicyButton(container, theme);
+            }
         }
 
         private void RemoveThemesTab() 
@@ -258,11 +278,11 @@ namespace BuildingThemes
             GameObject.Destroy(tab.gameObject);
         }
 
-        private void AddThemePolicyButton(UIPanel container, string name) 
+        private void AddThemePolicyButton(UIPanel container, Configuration.Theme theme) 
         {
             
             UIPanel policyPanel = container.AddUIComponent<UIPanel>();
-            policyPanel.name = name;
+            policyPanel.name = theme.name;
             policyPanel.backgroundSprite = "GenericPanel";
             policyPanel.size = new Vector2(364f, 44f);
             policyPanel.objectUserData = ToolsModifierControl.policiesPanel;
@@ -270,7 +290,7 @@ namespace BuildingThemes
 
             UIButton policyButton = policyPanel.AddUIComponent<UIButton>();
             policyButton.name = "PolicyButton";
-            policyButton.text = name;
+            policyButton.text = theme.name;
             policyButton.size = new Vector2(324f, 40f);
             policyButton.focusedBgSprite = "PolicyBarBackActive";
             policyButton.normalBgSprite = "PolicyBarBack";
@@ -287,12 +307,49 @@ namespace BuildingThemes
             policyButton.textHorizontalAlignment = UIHorizontalAlignment.Left;
             policyButton.useDropShadow = false;
             policyButton.textScale = 0.875f;
+            policyButton.gameObject.AddComponent<ThemePolicyContainer>();
 
             UICheckBox policyCheckBox = policyButton.AddUIComponent<UICheckBox>();
             policyCheckBox.name = "Checkbox";
             policyCheckBox.size = new Vector2(363f, 44f);
             policyCheckBox.relativePosition = new Vector3(0f, -2f, 0f);
             policyCheckBox.clipChildren = true;
+
+            uint districtId1 = (uint)ToolsModifierControl.policiesPanel.targetDistrict;
+
+            if (!districtThemes[districtId1].Contains(theme))
+            {
+                policyCheckBox.isChecked = true;
+            }
+            else
+            {
+                policyCheckBox.isChecked = false;
+            }
+
+            policyCheckBox.eventCheckChanged += delegate(UIComponent component, bool enabled)
+            {
+                uint districtId = (uint)ToolsModifierControl.policiesPanel.targetDistrict;
+
+                if (enabled)
+                {
+                    if (!districtThemes[districtId].Contains(theme))
+                    {
+                        districtThemes[districtId].Add(theme);
+                        m_district_areaBuildings = GenerateDistrictBuildingLists();
+                        Debug.Log("enabled theme " + theme.name + " in district " + districtId);
+                    }
+                }
+                else
+                {
+                    if (districtThemes[districtId].Contains(theme))
+                    {
+                        districtThemes[districtId].Remove(theme);
+                        m_district_areaBuildings = GenerateDistrictBuildingLists();
+                        Debug.Log("disabled theme " + theme.name + " in district " + districtId);
+                    }
+                }
+            };
+
 
             UISprite sprite = policyCheckBox.AddUIComponent<UISprite>();
             sprite.name = "Unchecked";
