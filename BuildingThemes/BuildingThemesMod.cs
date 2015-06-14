@@ -90,7 +90,7 @@ namespace BuildingThemes
 
         public string Description
         {
-            get { return "Create building themes and apply them to map themes, cities and districts."; }
+            get { return "Create building themes and apply them to cities and districts."; }
         }
 
         private const string configPath = "BuildingThemes.xml";
@@ -148,37 +148,17 @@ namespace BuildingThemes
             districtThemes[1] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("European")});
             districtThemes[2] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("International") });
 
-            for (byte i = 3; i < 128; i++) 
+            for (uint i = 3; i < 128; i++) 
             {
                 districtThemes[i] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("European"), config.getTheme("International") });
             }
 
             // compile the fastlists for every district.
-            m_district_areaBuildings = GenerateDistrictBuildingLists();
-
-            // debug:
-            for (int d = 0; d < 3; d++)
+            // 128 districts, 2720 possible area indexes
+            m_district_areaBuildings = new FastList<ushort>[128, 2720];
+            for (uint i = 0; i < 128; i++)
             {
-                for (int i = 0; i < 2720; i++)
-                {
-                    FastList<ushort> buildings = m_district_areaBuildings[d, i];
-
-                    if (buildings == null || buildings.m_size == 0) continue;
-
-                    string output = "index " + i + ": ";
-
-                    for (int b = 0; b < buildings.m_size; b++)
-                    {
-                        uint prefabId = (uint)m_district_areaBuildings[d, i].m_buffer[b];
-
-                        output += prefabId;
-                        output += " - ";
-                        output += PrefabCollection<BuildingInfo>.GetPrefab(prefabId).name;
-                        output += ", ";
-                    }
-
-                    Debug.Log(output);
-                }
+                GenerateDistrictBuildingLists(i);
             }
 
             // Hook into policies GUI
@@ -197,11 +177,6 @@ namespace BuildingThemes
             //TODO(earalov): revert detoured methods
         }
 
-        private string GetCurrentEnvironment()
-        {
-            return Singleton<SimulationManager>.instance.m_metaData.m_environment;
-        }
-
         private void ReplaceBuildingManager()
         {
             //TODO(earalov): save redirected state
@@ -213,11 +188,8 @@ namespace BuildingThemes
 
         }
 
-        private FastList<ushort>[,] GenerateDistrictBuildingLists() 
+        private void GenerateDistrictBuildingLists(uint d) 
         {
-            // 128 districts, 2720 possible area indexes
-            FastList<ushort>[,] lists = new FastList<ushort>[128, 2720];
-
             for (int i = 0; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
             {
                 BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab((uint)i);
@@ -250,27 +222,23 @@ namespace BuildingThemes
                     {
                         int areaIndex = BuildingThemesMod.GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
 
-                        for(int d = 0; d < districtThemes.Length; d++) 
+                        List<Configuration.Theme> themeList = districtThemes[d];
+
+                        foreach(Configuration.Theme theme in themeList) 
                         {
-                            List<Configuration.Theme> themeList = districtThemes[d];
+                            if(!theme.containsBuilding(prefab.name)) continue;
 
-                            foreach(Configuration.Theme theme in themeList) 
+                            if (m_district_areaBuildings[d, areaIndex] == null)
                             {
-                                if(!theme.containsBuilding(prefab.name)) continue;
-
-                                if (lists[d, areaIndex] == null)
-                                {
-                                    lists[d, areaIndex] = new FastList<ushort>();
-                                }
-
-                                lists[d, areaIndex].Add((ushort)i);
-                                break;
+                                m_district_areaBuildings[d, areaIndex] = new FastList<ushort>();
                             }
+
+                            m_district_areaBuildings[d, areaIndex].Add((ushort)i);
+                            break;
                         }
                     }
                 }
             }
-            return lists;
         }
 
     	public static int GetAreaIndex(ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
@@ -426,7 +394,7 @@ namespace BuildingThemes
                     if (!districtThemes[districtId].Contains(theme))
                     {
                         districtThemes[districtId].Add(theme);
-                        m_district_areaBuildings = GenerateDistrictBuildingLists();
+                        GenerateDistrictBuildingLists(districtId);
                         Debug.Log("enabled theme " + theme.name + " in district " + districtId);
                     }
                 }
@@ -435,7 +403,7 @@ namespace BuildingThemes
                     if (districtThemes[districtId].Contains(theme))
                     {
                         districtThemes[districtId].Remove(theme);
-                        m_district_areaBuildings = GenerateDistrictBuildingLists();
+                        GenerateDistrictBuildingLists(districtId);
                         Debug.Log("disabled theme " + theme.name + " in district " + districtId);
                     }
                 }
