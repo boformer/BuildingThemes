@@ -53,9 +53,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildingThemesMod.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="DetoursHolder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RedirectionHelper.cs" />
+    <Compile Include="ThemePolicyContainer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
