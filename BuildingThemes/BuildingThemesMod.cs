@@ -100,7 +100,7 @@ namespace BuildingThemes
         private Configuration config;
 
         // district id --> list of enabled themes
-        private List<Configuration.Theme>[] districtThemes;
+        public static List<Configuration.Theme>[] districtThemes;
 
         // [district id][area index] --> prefab fastlist
         public static FastList<ushort>[,] m_district_areaBuildings;
@@ -148,7 +148,7 @@ namespace BuildingThemes
             districtThemes[1] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("European")});
             districtThemes[2] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("International") });
 
-            for (uint i = 3; i < 128; i++) 
+            for (ushort i = 3; i < 128; i++) 
             {
                 districtThemes[i] = new List<Configuration.Theme>(new Configuration.Theme[] { config.getTheme("European"), config.getTheme("International") });
             }
@@ -156,7 +156,7 @@ namespace BuildingThemes
             // compile the fastlists for every district.
             // 128 districts, 2720 possible area indexes
             m_district_areaBuildings = new FastList<ushort>[128, 2720];
-            for (uint i = 0; i < 128; i++)
+            for (ushort i = 0; i < 128; i++)
             {
                 GenerateDistrictBuildingLists(i);
             }
@@ -373,17 +373,12 @@ namespace BuildingThemes
             policyCheckBox.size = new Vector2(363f, 44f);
             policyCheckBox.relativePosition = new Vector3(0f, -2f, 0f);
             policyCheckBox.clipChildren = true;
+            policyCheckBox.objectUserData = theme;
 
-            uint districtId1 = (uint)ToolsModifierControl.policiesPanel.targetDistrict;
+            ushort districtId1 = (ushort)ToolsModifierControl.policiesPanel.targetDistrict;
 
-            if (!districtThemes[districtId1].Contains(theme))
-            {
-                policyCheckBox.isChecked = true;
-            }
-            else
-            {
-                policyCheckBox.isChecked = false;
-            }
+            policyCheckBox.isChecked = districtThemes[districtId1].Contains(theme);
+
 
             policyCheckBox.eventCheckChanged += delegate(UIComponent component, bool enabled)
             {

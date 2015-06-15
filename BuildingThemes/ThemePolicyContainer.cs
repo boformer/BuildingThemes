@@ -20,7 +20,13 @@ namespace BuildingThemes
 	    {
 		    if (base.component.isVisible)
 		    {
-			    this.m_Button.state = ((!this.m_Check.isEnabled) ? UIButton.ButtonState.Disabled : ((!this.m_Check.isChecked) ? UIButton.ButtonState.Normal : UIButton.ButtonState.Focused));
+                ushort districtId = (ushort)ToolsModifierControl.policiesPanel.targetDistrict;
+                if (BuildingThemesMod.districtThemes[districtId].Contains((Configuration.Theme)m_Check.objectUserData) != this.m_Check.isChecked) 
+                {
+                    this.m_Check.isChecked = !this.m_Check.isChecked;
+                }
+            
+                this.m_Button.state = ((!this.m_Check.isEnabled) ? UIButton.ButtonState.Disabled : ((!this.m_Check.isChecked) ? UIButton.ButtonState.Normal : UIButton.ButtonState.Focused));
 		    }
 	    }
     }
