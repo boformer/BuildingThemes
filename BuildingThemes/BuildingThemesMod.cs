@@ -107,6 +107,7 @@ namespace BuildingThemes
         {
             base.OnCreated(loading);
             DetoursHolder.InitTable();
+            DetoursHolder.FilteringStrategy = new DefaultFilteringStrategy();//new StubFilteringStrategy();
             ReplaceBuildingManager();
 
             DetoursHolder.zoneBlockSimulationStep = typeof(ZoneBlock).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
@@ -283,10 +284,5 @@ namespace BuildingThemes
             // TODO link the checkbox and the focus of the button (like PolicyContainer component does)
         }
 
-    }
-
-    public class Configuration 
-    { 
-        // TODO the xml configuration for the themes
     }
 }

@@ -15,6 +15,7 @@ namespace BuildingThemes
     {
 
         private static Dictionary<ulong, ushort> seedTable = new Dictionary<ulong, ushort>();
+        public static IFilteringStrategy FilteringStrategy;
 
         public static void InitTable()
         {
@@ -137,32 +138,24 @@ namespace BuildingThemes
 
         private static void FilterList(Vector3 position, ref FastList<ushort> list)
         {
-            ushort districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position);
             //districtIdx==0 probably means 'outside of any district'
+            var districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position);
+
             if (BuildingThemesMod.isDebug)
             {
                 UnityEngine.Debug.LogFormat(
                     "Building Themes: Detoured GetRandomBuildingInfo. districtIdx: {0};current thread: {1}",
                     districtIdx, Thread.CurrentThread.ManagedThreadId);
             }
-            //District district = Singleton<DistrictManager>.instance.m_districts.m_buffer[districtIdx];
-            //TODO(earalov): here fastList variable should be filtered. All buildings that  don't belong to the district should be removed from this list.
 
-            //this is stub implementation
-            FastList<ushort> newList = new FastList<ushort>();
-            for (int i = 0; i < list.m_size; i++)
+            var newList = new FastList<ushort>();
+            for (var i = 0; i < list.m_size; i++)
             {
                 var name = PrefabCollection<BuildingInfo>.GetPrefab(list.m_buffer[i]).name;
-                var isEuropean = (name.Contains("lock") || name.Contains("EU"));
-                if (isEuropean && districtIdx == 0)
+                if (FilteringStrategy.DoesBuildingBelongToDistrict(name, districtIdx))
                 {
-                    continue;
+                    newList.Add(list.m_buffer[i]);
                 }
-                if (!isEuropean && districtIdx != 0)
-                {
-                    continue;
-                }
-                newList.Add(list.m_buffer[i]);
             }
             list = newList;
         }
