@@ -109,7 +109,7 @@ namespace BuildingThemes
             }
         }
 
-        public static Configuration GenerateDefaultConfig()
+        public static Configuration.Theme[] GetBuitInThemes()
         {
 
             string[] sharedBuildings = {
@@ -622,10 +622,10 @@ namespace BuildingThemes
             intTheme.addAll(sharedBuildings);
             intTheme.addAll(intOnlyBuildings);
 
-            Configuration config = new Configuration();
-            config.themes.Add(euroTheme);
-            config.themes.Add(intTheme);
-            return config;
+            return new Configuration.Theme[]
+            {
+                euroTheme, intTheme
+            };
         }
     }
 }
