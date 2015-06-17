@@ -270,7 +270,7 @@ namespace BuildingThemes
 
             ushort districtId1 = (ushort)ToolsModifierControl.policiesPanel.targetDistrict;
 
-            var districtThemes = Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId1);
+            var districtThemes = Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId1, true);
             policyCheckBox.isChecked = districtThemes.Contains(theme);
 
 

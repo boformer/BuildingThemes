@@ -8,33 +8,24 @@ namespace BuildingThemes
     public class BuildingThemesManager : Singleton<BuildingThemesManager>
     {
 
-        private readonly Dictionary<uint, HashSet<Configuration.Theme>> districtsThemes =
+        private readonly Dictionary<uint, HashSet<Configuration.Theme>> _districtsThemes =
             new Dictionary<uint, HashSet<Configuration.Theme>>(128);
-        private readonly Dictionary<uint, HashSet<string>> mergedThemes =
+        private readonly Dictionary<uint, HashSet<string>> _mergedThemes =
             new Dictionary<uint, HashSet<string>>(128);
 
-        private Configuration configuration;
+        private readonly Configuration configuration;
 
 
         public BuildingThemesManager()
         {
             UnityEngine.Debug.LogFormat("Building Themes: Constructing BuildingThemesManager", Thread.CurrentThread.ManagedThreadId);
             configuration = Configuration.Deserialize("BuildingThemes.xml");
-            if (configuration == null)
+            if (configuration != null)
             {
-                UnityEngine.Debug.LogFormat("Building Themes: No theme config file discovered. Generating default config");
-                configuration = Configuration.GenerateDefaultConfig();
+                return;
             }
-            for (uint i = 0; i < 128; ++i)
-            {
-                districtsThemes.Add(i, new HashSet<Configuration.Theme>());
-                mergedThemes.Add(i, new HashSet<string>());
-                foreach (var theme in configuration.themes)
-                {
-                    EnableTheme(i, theme, false);
-                }
-                MergeDistrictThemes(i);
-            }
+            UnityEngine.Debug.LogFormat("Building Themes: No theme config file discovered. Generating default config");
+            configuration = Configuration.GenerateDefaultConfig();
         }
 
 
@@ -42,14 +33,16 @@ namespace BuildingThemes
         {
             UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Enabling theme {0} for district {1}. auto merge: {2}",
                 theme.name, districtIdx, autoMerge);
-            var themes = districtsThemes[districtIdx];
+            HashSet<Configuration.Theme> themes;
+            themes = GetDistrictThemes(districtIdx, true);
+
             if (!themes.Add(theme))
             {
                 UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Theme {0} was already enabled for district {1}.",
                     theme.name, districtIdx);
                 return;
             }
-            districtsThemes[districtIdx] = themes;
+            _districtsThemes[districtIdx] = themes;
             if (autoMerge)
             {
                 MergeDistrictThemes(districtIdx);
@@ -60,14 +53,14 @@ namespace BuildingThemes
         {
             UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Disabling theme {0} for district {1}. auto merge: {2}",
                 themeName, districtIdx, autoMerge);
-            var themes = districtsThemes[districtIdx];
+            var themes = GetDistrictThemes(districtIdx, true);
             if (themes.RemoveWhere(theme => theme.name.Equals(themeName)) <= 0)
             {
                 UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Theme {0} was already disabled for district {1}.",
                     themeName, districtIdx);
                 return;
             }
-            districtsThemes[districtIdx] = themes;
+            _districtsThemes[districtIdx] = themes;
             if (autoMerge)
             {
                 MergeDistrictThemes(districtIdx);
@@ -76,12 +69,13 @@ namespace BuildingThemes
 
 
 
-        public void MergeDistrictThemes(uint districtIdx)
+        public HashSet<string> MergeDistrictThemes(uint districtIdx)
         {
             UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Merging themes for district {0}.", districtIdx);
-            var themes = districtsThemes[districtIdx];
+            var themes = GetDistrictThemes(districtIdx, true);
             var mergedTheme = MergeThemes(themes);
-            mergedThemes[districtIdx] = mergedTheme;
+            _mergedThemes[districtIdx] = mergedTheme;
+            return mergedTheme;
 
         }
 
@@ -101,17 +95,33 @@ namespace BuildingThemes
 
         public bool DoesBuildingBelongToDistrict(string buildingName, uint districtIdx)
         {
-            return mergedThemes[districtIdx].Contains(buildingName);
+            return GetDistrictThemes(districtIdx, true).Count == 0 || GetMergedThemes(districtIdx).Contains(buildingName);
         }
 
-        public HashSet<Configuration.Theme> GetDistrictThemes(uint districtIdx)
+        private HashSet<string> GetMergedThemes(uint districtIdx)
         {
-            return districtsThemes[districtIdx];
+            HashSet<string> theme;
+            _mergedThemes.TryGetValue(districtIdx, out theme);
+            return theme ?? (_mergedThemes[districtIdx] = MergeDistrictThemes(districtIdx));
+        }
+
+
+        public HashSet<Configuration.Theme> GetDistrictThemes(uint districtIdx, bool initializeIfNull)
+        {
+            HashSet<Configuration.Theme> themes;
+            _districtsThemes.TryGetValue(districtIdx, out themes);
+            return themes ?? (initializeIfNull ? _districtsThemes[districtIdx] = new HashSet<Configuration.Theme>() : null);
         }
 
         public List<Configuration.Theme> GetAllThemes()
         {
             return configuration.themes;
+        }
+
+        public Configuration.Theme GetThemeNyName(string themeName)
+        {
+            var themes = configuration.themes.Where(theme => theme.name == themeName).ToList();
+            return themes.Count == 0 ? null : themes[0];
         }
     }
 }
