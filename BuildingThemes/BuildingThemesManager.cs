@@ -24,11 +24,13 @@ namespace BuildingThemes
             {
                 UnityEngine.Debug.LogFormat("Building Themes: No theme config file discovered. Generating default config");
                 configuration = new Configuration();
-            }
 
-            foreach (var theme in Configuration.GetBuitInThemes())
-            {
-                configuration.themes.Add(theme);
+                foreach (var theme in Configuration.GetBuitInThemes())
+                {
+                    configuration.themes.Add(theme);
+                }
+
+                Configuration.Serialize("BuildingThemes.xml", configuration);
             }
         }
 
