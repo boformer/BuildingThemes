@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using ColossalFramework;
 
 namespace BuildingThemes
@@ -17,13 +18,18 @@ namespace BuildingThemes
 
         public BuildingThemesManager()
         {
+            UnityEngine.Debug.LogFormat("Building Themes: Constructing BuildingThemesManager, current thread: {0}",
+                Thread.CurrentThread.ManagedThreadId);
             configuration = Configuration.Deserialize("BuildingThemes.xml");
             if (configuration == null)
             {
+                UnityEngine.Debug.LogFormat("Building Themes: No theme config file discovered. Generating default config");
                 configuration = Configuration.GenerateDefaultConfig();
             }
             for (int i = 0; i < 128; ++i)
             {
+                districtsThemes.Add(i, new HashSet<Configuration.Theme>());
+                mergedThemes.Add(i, new HashSet<string>());
                 foreach (var theme in configuration.themes)
                 {
                     EnableTheme(i, theme, false);
@@ -54,7 +60,7 @@ namespace BuildingThemes
             }
             if (autoMerge)
             {
-                MergeDistrictThemes(districtIdx);      
+                MergeDistrictThemes(districtIdx);
             }
         }
 
@@ -89,5 +95,9 @@ namespace BuildingThemes
             return districtsThemes[districtIdx];
         }
 
+        public List<Configuration.Theme> GetAllThemes()
+        {
+            return configuration.themes;
+        }
     }
 }

@@ -209,16 +209,13 @@ namespace BuildingThemes
             container.autoLayoutDirection = LayoutDirection.Vertical;
             container.autoLayoutPadding.top = 5;
 
-            // add some sample buttons
-
-            AddThemePolicyButton(container, "Chicago 1890");
-            AddThemePolicyButton(container, "New York 1940");
-            AddThemePolicyButton(container, "Houston 1990");
-            AddThemePolicyButton(container, "Euro-Contemporary");
-            AddThemePolicyButton(container, "My first custom theme");
+            foreach (Configuration.Theme theme in Singleton<BuildingThemesManager>.instance.GetAllThemes())
+            {
+                AddThemePolicyButton(container, theme);
+            }
         }
 
-        private void RemoveThemesTab() 
+        private void RemoveThemesTab()
         {
             // TODO this is hacky. better store it in a field
             GameObject go = GameObject.Find("Tab 5 - Themes");
@@ -233,11 +230,11 @@ namespace BuildingThemes
             GameObject.Destroy(tab.gameObject);
         }
 
-        private void AddThemePolicyButton(UIPanel container, string name) 
+        private void AddThemePolicyButton(UIPanel container, Configuration.Theme theme)
         {
-            
+
             UIPanel policyPanel = container.AddUIComponent<UIPanel>();
-            policyPanel.name = name;
+            policyPanel.name = theme.name;
             policyPanel.backgroundSprite = "GenericPanel";
             policyPanel.size = new Vector2(364f, 44f);
             policyPanel.objectUserData = ToolsModifierControl.policiesPanel;
@@ -245,13 +242,13 @@ namespace BuildingThemes
 
             UIButton policyButton = policyPanel.AddUIComponent<UIButton>();
             policyButton.name = "PolicyButton";
-            policyButton.text = name;
+            policyButton.text = theme.name;
             policyButton.size = new Vector2(324f, 40f);
             policyButton.focusedBgSprite = "PolicyBarBackActive";
             policyButton.normalBgSprite = "PolicyBarBack";
             policyButton.relativePosition = new Vector3(2f, 2f, 0f);
             policyButton.textPadding.left = 50;
-            policyButton.textColor = new Color32(0,0,0,255);
+            policyButton.textColor = new Color32(0, 0, 0, 255);
             policyButton.disabledTextColor = new Color32(0, 0, 0, 255);
             policyButton.hoveredTextColor = new Color32(0, 0, 0, 255);
             policyButton.pressedTextColor = new Color32(0, 0, 0, 255);
@@ -262,18 +259,43 @@ namespace BuildingThemes
             policyButton.textHorizontalAlignment = UIHorizontalAlignment.Left;
             policyButton.useDropShadow = false;
             policyButton.textScale = 0.875f;
+            policyButton.gameObject.AddComponent<ThemePolicyContainer>();
 
             UICheckBox policyCheckBox = policyButton.AddUIComponent<UICheckBox>();
             policyCheckBox.name = "Checkbox";
             policyCheckBox.size = new Vector2(363f, 44f);
             policyCheckBox.relativePosition = new Vector3(0f, -2f, 0f);
             policyCheckBox.clipChildren = true;
+            policyCheckBox.objectUserData = theme;
+
+            ushort districtId1 = (ushort)ToolsModifierControl.policiesPanel.targetDistrict;
+
+            var districtThemes = Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId1);
+            policyCheckBox.isChecked = districtThemes.Contains(theme);
+
+
+            policyCheckBox.eventCheckChanged += delegate(UIComponent component, bool enabled)
+            {
+                uint districtId = (uint)ToolsModifierControl.policiesPanel.targetDistrict;
+
+                if (enabled)
+                {
+                    Singleton<BuildingThemesManager>.instance.EnableTheme(districtId1, theme, true);
+                    Debug.Log("enabled theme " + theme.name + " in district " + districtId);
+                }
+                else
+                {
+                    Singleton<BuildingThemesManager>.instance.DisableTheme(districtId1, theme.name, true);
+                    Debug.Log("disabled theme " + theme.name + " in district " + districtId);
+                }
+            };
+
 
             UISprite sprite = policyCheckBox.AddUIComponent<UISprite>();
             sprite.name = "Unchecked";
             sprite.spriteName = "ToggleBase";
             sprite.size = new Vector2(16f, 16f);
-            sprite.relativePosition = new Vector3(336.6984f,14,0f);
+            sprite.relativePosition = new Vector3(336.6984f, 14, 0f);
 
             policyCheckBox.checkedBoxObject = sprite.AddUIComponent<UISprite>();
             policyCheckBox.checkedBoxObject.name = "Checked";
