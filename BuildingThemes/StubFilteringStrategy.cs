@@ -2,7 +2,7 @@
 {
     public class StubFilteringStrategy : IFilteringStrategy
     {
-        public bool DoesBuildingBelongToDistrict(string name, int districtIdx)
+        public bool DoesBuildingBelongToDistrict(string name, uint districtIdx)
         {
 
             var isEuropean = (name.Contains("lock") || name.Contains("EU"));

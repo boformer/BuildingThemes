@@ -2,6 +2,6 @@
 {
     public interface IFilteringStrategy
     {
-        bool DoesBuildingBelongToDistrict(string name, int districtIdx);
+        bool DoesBuildingBelongToDistrict(string name, uint districtIdx);
     }
 }

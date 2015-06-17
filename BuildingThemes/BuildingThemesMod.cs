@@ -276,18 +276,21 @@ namespace BuildingThemes
 
             policyCheckBox.eventCheckChanged += delegate(UIComponent component, bool enabled)
             {
-                uint districtId = (uint)ToolsModifierControl.policiesPanel.targetDistrict;
+                lock (component)
+                {
+                    uint districtId = (uint)ToolsModifierControl.policiesPanel.targetDistrict;
+                    if (enabled)
+                    {
+                        Singleton<BuildingThemesManager>.instance.EnableTheme(districtId, theme, true);
+                        Debug.Log("enabled theme " + theme.name + " in district " + districtId);
+                    }
+                    else
+                    {
+                        Singleton<BuildingThemesManager>.instance.DisableTheme(districtId, theme.name, true);
+                        Debug.Log("disabled theme " + theme.name + " in district " + districtId);
+                    } 
+                }
 
-                if (enabled)
-                {
-                    Singleton<BuildingThemesManager>.instance.EnableTheme(districtId1, theme, true);
-                    Debug.Log("enabled theme " + theme.name + " in district " + districtId);
-                }
-                else
-                {
-                    Singleton<BuildingThemesManager>.instance.DisableTheme(districtId1, theme.name, true);
-                    Debug.Log("disabled theme " + theme.name + " in district " + districtId);
-                }
             };
 
 
