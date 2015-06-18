@@ -28,6 +28,9 @@ namespace BuildingThemes
             [XmlAttribute("name")]
             public string name;
 
+            [XmlIgnoreAttribute]
+            public bool isBuiltIn = false;
+
             [XmlArray(ElementName = "Buildings")]
             [XmlArrayItem(ElementName = "Building")]
             public List<Building> buildings = new List<Building>();
@@ -99,7 +102,16 @@ namespace BuildingThemes
             {
                 using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(filename))
                 {
-                    xmlSerializer.Serialize(streamWriter, config);
+                    Configuration configCopy = new Configuration();
+                    foreach (var theme in config.themes)
+                    {
+                        if (!theme.isBuiltIn)
+                        {
+                            configCopy.themes.Add(theme);
+                        }
+                    }
+
+                    xmlSerializer.Serialize(streamWriter, configCopy);
                 }
             }
             catch (Exception e)
@@ -615,10 +627,12 @@ namespace BuildingThemes
                                         };
 
             var euroTheme = new Configuration.Theme("European");
+            euroTheme.isBuiltIn = true;
             euroTheme.addAll(sharedBuildings);
             euroTheme.addAll(euroOnlyBuildings);
 
             var intTheme = new Configuration.Theme("International");
+            intTheme.isBuiltIn = true;
             intTheme.addAll(sharedBuildings);
             intTheme.addAll(intOnlyBuildings);
 

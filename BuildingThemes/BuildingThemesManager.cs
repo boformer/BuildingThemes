@@ -19,18 +19,18 @@ namespace BuildingThemes
         public BuildingThemesManager()
         {
             UnityEngine.Debug.LogFormat("Building Themes: Constructing BuildingThemesManager", Thread.CurrentThread.ManagedThreadId);
-            configuration = Configuration.Deserialize("BuildingThemes.xml");
+            var filename = "BuildingThemes.xml";
+            configuration = Configuration.Deserialize(filename);
             if (configuration == null)
             {
                 UnityEngine.Debug.LogFormat("Building Themes: No theme config file discovered. Generating default config");
                 configuration = new Configuration();
+                Configuration.Serialize(filename, configuration);
+            }
 
-                foreach (var theme in Configuration.GetBuitInThemes())
-                {
-                    configuration.themes.Add(theme);
-                }
-
-                Configuration.Serialize("BuildingThemes.xml", configuration);
+            foreach (var theme in Configuration.GetBuitInThemes())
+            {
+                configuration.themes.Add(theme);
             }
         }
 
