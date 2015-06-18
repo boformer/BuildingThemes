@@ -177,22 +177,27 @@ namespace BuildingThemes
 
         }
 
+        private object addRessourceLock = new object();
+
         public int ImmaterialResourceManagerAddResource(ImmaterialResourceManager.Resource resource, int rate, Vector3 positionArg, float radius)
         {
-            if (BuildingThemesMod.isDebug)
+            lock (addRessourceLock)
             {
-                UnityEngine.Debug.LogFormat(
-                    "Building Themes: Detoured ImmaterialResource.AddResource was called. position: {0}. current thread: {1}",
-                    positionArg, Thread.CurrentThread.ManagedThreadId);
+                if (BuildingThemesMod.isDebug)
+                {
+                    UnityEngine.Debug.LogFormat(
+                        "Building Themes: Detoured ImmaterialResource.AddResource was called. position: {0}. current thread: {1}",
+                        positionArg, Thread.CurrentThread.ManagedThreadId);
+                }
+                if (resource == ImmaterialResourceManager.Resource.Abandonment)
+                {
+                    position = positionArg;
+                }
+                RedirectionHelper.RevertJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceState);
+                var result = Singleton<ImmaterialResourceManager>.instance.AddResource(resource, rate, positionArg, radius);
+                RedirectionHelper.PatchJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceDetourPtr);
+                return result;
             }
-            if (resource == ImmaterialResourceManager.Resource.Abandonment)
-            {
-                position = positionArg;
-            }
-            RedirectionHelper.RevertJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceState);
-            var result = Singleton<ImmaterialResourceManager>.instance.AddResource(resource, rate, positionArg, radius);
-            RedirectionHelper.PatchJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceDetourPtr);
-            return result;
         }
 
         internal static object GetInstanceField(Type type, object instance, string fieldName)
