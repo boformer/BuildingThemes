@@ -208,6 +208,8 @@ namespace BuildingThemes
             container.autoLayoutDirection = LayoutDirection.Vertical;
             container.autoLayoutPadding.top = 5;
 
+            container.isVisible = tabstrip.selectedIndex == 3;
+
             // add some sample buttons
 
             AddThemePolicyButton(container, "Chicago 1890");
