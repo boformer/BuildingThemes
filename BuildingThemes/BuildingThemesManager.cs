@@ -34,6 +34,11 @@ namespace BuildingThemes
             }
         }
 
+        public void Reset()
+        {
+            _districtsThemes.Clear();
+            _mergedThemes.Clear();
+        }
 
         public void EnableTheme(uint districtIdx, Configuration.Theme theme, bool autoMerge)
         {

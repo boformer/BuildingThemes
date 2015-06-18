@@ -19,7 +19,7 @@ namespace BuildingThemes
 
         public static void InitTable()
         {
-
+            seedTable.Clear();
             for (ushort _seed = 0; _seed <= 65534; ++_seed)
             {
                 var seed = (ulong)(6364136223846793005L * (long)_seed + 1442695040888963407L);

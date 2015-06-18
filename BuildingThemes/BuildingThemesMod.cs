@@ -106,9 +106,18 @@ namespace BuildingThemes
         public override void OnCreated(ILoading loading)
         {
             base.OnCreated(loading);
+            if (isDebug)
+            {
+                Debug.Log("Building Themes: Initializing Building Themes Mod...");
+            }
+            Singleton<BuildingThemesManager>.instance.Reset();
             DetoursHolder.InitTable();
             DetoursHolder.FilteringStrategy = new DefaultFilteringStrategy();//new StubFilteringStrategy();
-            ReplaceBuildingManager();
+            //TODO(earalov): save redirected state
+            RedirectionHelper.RedirectCalls(
+                typeof(BuildingManager).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public),
+                typeof(DetoursHolder).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public)
+                );
 
             DetoursHolder.zoneBlockSimulationStep = typeof(ZoneBlock).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
             DetoursHolder.zoneBlockSimulationStepPtr = DetoursHolder.zoneBlockSimulationStep.MethodHandle.GetFunctionPointer();
@@ -124,6 +133,10 @@ namespace BuildingThemes
                 DetoursHolder.resourceManagerAddResourcePtr,
                 DetoursHolder.resourceManagerAddResourceDetourPtr
                 );
+            if (isDebug)
+            {
+                Debug.Log("Building Themes: Building Themes Mod successfully intialized.");
+            }
         }
 
         public override void OnLevelLoaded(LoadMode mode) 
@@ -141,6 +154,7 @@ namespace BuildingThemes
         {
             // Remove the custom policy tab
             RemoveThemesTab();
+            Singleton<BuildingThemesManager>.instance.Reset();
 
             //TODO(earalov): revert detoured methods
         }
@@ -149,18 +163,6 @@ namespace BuildingThemes
         {
             return Singleton<SimulationManager>.instance.m_metaData.m_environment;
         }
-
-        private void ReplaceBuildingManager()
-        {
-            //TODO(earalov): save redirected state
-            RedirectionHelper.RedirectCalls(
-                typeof (BuildingManager).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public),
-                typeof (DetoursHolder).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public)
-                );
-            Debug.Log("Building Themes: Building Manager successfully replaced.");
-
-        }
-
 
         // GUI stuff
 
