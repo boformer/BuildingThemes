@@ -211,7 +211,7 @@ namespace BuildingThemes
             container.autoLayoutDirection = LayoutDirection.Vertical;
             container.autoLayoutPadding.top = 5;
             
-            container.isVisible = tabstrip.selectedIndex == 3;
+            container.isVisible = tabstrip.selectedIndex == 4;
 
             foreach (Configuration.Theme theme in Singleton<BuildingThemesManager>.instance.GetAllThemes())
             {
