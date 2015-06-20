@@ -18,12 +18,18 @@ namespace BuildingThemes
 
         public BuildingThemesManager()
         {
-            UnityEngine.Debug.LogFormat("Building Themes: Constructing BuildingThemesManager", Thread.CurrentThread.ManagedThreadId);
+            if (BuildingThemesMod.isDebug)
+            {
+                UnityEngine.Debug.LogFormat("Building Themes: Constructing BuildingThemesManager", Thread.CurrentThread.ManagedThreadId);
+            }
             var filename = "BuildingThemes.xml";
             configuration = Configuration.Deserialize(filename);
             if (configuration == null)
             {
-                UnityEngine.Debug.LogFormat("Building Themes: No theme config file discovered. Generating default config");
+                if (BuildingThemesMod.isDebug)
+                {
+                    UnityEngine.Debug.LogFormat("Building Themes: No theme config file discovered. Generating default config");
+                }
                 configuration = new Configuration();
                 Configuration.Serialize(filename, configuration);
             }
@@ -42,15 +48,21 @@ namespace BuildingThemes
 
         public void EnableTheme(uint districtIdx, Configuration.Theme theme, bool autoMerge)
         {
-            UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Enabling theme {0} for district {1}. auto merge: {2}",
-                theme.name, districtIdx, autoMerge);
+            if (BuildingThemesMod.isDebug)
+            {
+                UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Enabling theme {0} for district {1}. auto merge: {2}",
+                    theme.name, districtIdx, autoMerge);
+            }
             HashSet<Configuration.Theme> themes;
             themes = GetDistrictThemes(districtIdx, true);
 
             if (!themes.Add(theme))
             {
-                UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Theme {0} was already enabled for district {1}.",
-                    theme.name, districtIdx);
+                if (BuildingThemesMod.isDebug)
+                {
+                    UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Theme {0} was already enabled for district {1}.",
+                        theme.name, districtIdx);
+                }
                 return;
             }
             _districtsThemes[districtIdx] = themes;
@@ -62,13 +74,19 @@ namespace BuildingThemes
 
         public void DisableTheme(uint districtIdx, string themeName, bool autoMerge)
         {
-            UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Disabling theme {0} for district {1}. auto merge: {2}",
+            if (BuildingThemesMod.isDebug)
+            {
+                UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Disabling theme {0} for district {1}. auto merge: {2}",
                 themeName, districtIdx, autoMerge);
+            }
             var themes = GetDistrictThemes(districtIdx, true);
             if (themes.RemoveWhere(theme => theme.name.Equals(themeName)) <= 0)
             {
-                UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Theme {0} was already disabled for district {1}.",
-                    themeName, districtIdx);
+                if (BuildingThemesMod.isDebug)
+                {
+                    UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Theme {0} was already disabled for district {1}.",
+                        themeName, districtIdx);
+                }
                 return;
             }
             _districtsThemes[districtIdx] = themes;
@@ -97,7 +115,10 @@ namespace BuildingThemes
             {
                 if (mergedTheme.Add(building.name))
                 {
-                    UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Adding building {0} to merged theme.", building.name);
+                    if (BuildingThemesMod.isDebug)
+                    {
+                        UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Adding building {0} to merged theme.", building.name);
+                    }
                 }
             }
             return mergedTheme;

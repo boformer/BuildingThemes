@@ -304,12 +304,18 @@ namespace BuildingThemes
                     if (enabled)
                     {
                         Singleton<BuildingThemesManager>.instance.EnableTheme(districtId, theme, true);
-                        Debug.Log("enabled theme " + theme.name + " in district " + districtId);
+                        if (BuildingThemesMod.isDebug)
+                        {
+                            Debug.Log("enabled theme " + theme.name + " in district " + districtId);
+                        }
                     }
                     else
                     {
                         Singleton<BuildingThemesManager>.instance.DisableTheme(districtId, theme.name, true);
-                        Debug.Log("disabled theme " + theme.name + " in district " + districtId);
+                        if (BuildingThemesMod.isDebug)
+                        {
+                            Debug.Log("disabled theme " + theme.name + " in district " + districtId);
+                        }
                     } 
                 }
 
