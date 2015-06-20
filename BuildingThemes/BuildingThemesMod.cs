@@ -114,7 +114,9 @@ namespace BuildingThemes
             DetoursHolder.InitTable();
             DetoursHolder.FilteringStrategy = new DefaultFilteringStrategy();//new StubFilteringStrategy();
             //TODO(earalov): save redirected state
-            RedirectionHelper.RedirectCalls(
+
+            DetoursHolder.getRandomBuildingInfo = typeof(BuildingManager).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public);
+            DetoursHolder.getRandomBuildingInfoState = RedirectionHelper.RedirectCalls(
                 typeof(BuildingManager).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public),
                 typeof(DetoursHolder).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public)
                 );
@@ -139,10 +141,15 @@ namespace BuildingThemes
             }
         }
 
+        private Boolean initializedGUI = false;
+
         public override void OnLevelLoaded(LoadMode mode) 
         {
             // Is it an actual game ?
             if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
+
+            initializedGUI = true;
+
 
             // TODO load data (serialized for policies, xml for themes)
 
@@ -152,12 +159,23 @@ namespace BuildingThemes
 
         public override void OnLevelUnloading()
         {
+            if (!initializedGUI) return;
+
             // Remove the custom policy tab
             RemoveThemesTab();
             Singleton<BuildingThemesManager>.instance.Reset();
 
-            //TODO(earalov): revert detoured methods
+            ToolsModifierControl.policiesPanel.component.eventVisibilityChanged -= OnPoliciesPanelVisibilityChanged;
         }
+
+        public override void OnReleased() 
+        {
+            RedirectionHelper.RevertRedirect(DetoursHolder.getRandomBuildingInfo, DetoursHolder.getRandomBuildingInfoState);
+            RedirectionHelper.RevertJumpTo(DetoursHolder.zoneBlockSimulationStepPtr, DetoursHolder.zoneBlockSimulationStepState);
+            RedirectionHelper.RevertJumpTo(DetoursHolder.resourceManagerAddResourcePtr, DetoursHolder.resourceManagerAddResourceState);
+        }
+
+
 
         private string GetCurrentEnvironment()
         {

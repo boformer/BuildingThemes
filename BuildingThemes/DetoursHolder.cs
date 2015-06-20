@@ -30,6 +30,9 @@ namespace BuildingThemes
         //we'll use this variable to pass position to GetRandomBuildingInfo method. Or we can just pass District
         public static Vector3 position;
 
+        public static RedirectCallsState getRandomBuildingInfoState;
+        public static MethodInfo getRandomBuildingInfo;
+
         public static RedirectCallsState zoneBlockSimulationStepState;
         public static MethodInfo zoneBlockSimulationStep;
         public static IntPtr zoneBlockSimulationStepPtr;
@@ -181,8 +184,6 @@ namespace BuildingThemes
 
         public int ImmaterialResourceManagerAddResource(ImmaterialResourceManager.Resource resource, int rate, Vector3 positionArg, float radius)
         {
-            lock (addRessourceLock)
-            {
                 if (BuildingThemesMod.isDebug)
                 {
                     UnityEngine.Debug.LogFormat(
@@ -197,7 +198,7 @@ namespace BuildingThemes
                 var result = Singleton<ImmaterialResourceManager>.instance.AddResource(resource, rate, positionArg, radius);
                 RedirectionHelper.PatchJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceDetourPtr);
                 return result;
-            }
+
         }
 
         internal static object GetInstanceField(Type type, object instance, string fieldName)
