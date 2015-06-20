@@ -34,6 +34,9 @@ namespace BuildingThemes
                 Configuration.Serialize(filename, configuration);
             }
 
+
+
+
             foreach (var theme in Configuration.GetBuitInThemes())
             {
                 configuration.themes.Add(theme);
@@ -100,7 +103,10 @@ namespace BuildingThemes
 
         public HashSet<string> MergeDistrictThemes(uint districtIdx)
         {
-            UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Merging themes for district {0}.", districtIdx);
+            if (BuildingThemesMod.isDebug)
+            {
+                UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Merging themes for district {0}.", districtIdx);
+            }
             var themes = GetDistrictThemes(districtIdx, true);
             var mergedTheme = MergeThemes(themes);
             _mergedThemes[districtIdx] = mergedTheme;
