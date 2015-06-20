@@ -15,10 +15,11 @@ namespace BuildingThemes
     {
 
         private static Dictionary<ulong, ushort> seedTable = new Dictionary<ulong, ushort>();
+        public static IFilteringStrategy FilteringStrategy;
 
         public static void InitTable()
         {
-
+            seedTable.Clear();
             for (ushort _seed = 0; _seed <= 65534; ++_seed)
             {
                 var seed = (ulong)(6364136223846793005L * (long)_seed + 1442695040888963407L);
@@ -28,6 +29,9 @@ namespace BuildingThemes
 
         //we'll use this variable to pass position to GetRandomBuildingInfo method. Or we can just pass District
         public static Vector3 position;
+
+        public static RedirectCallsState getRandomBuildingInfoState;
+        public static MethodInfo getRandomBuildingInfo;
 
         public static RedirectCallsState zoneBlockSimulationStepState;
         public static MethodInfo zoneBlockSimulationStep;
@@ -137,32 +141,24 @@ namespace BuildingThemes
 
         private static void FilterList(Vector3 position, ref FastList<ushort> list)
         {
-            ushort districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position);
             //districtIdx==0 probably means 'outside of any district'
+            var districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position);
+
             if (BuildingThemesMod.isDebug)
             {
                 UnityEngine.Debug.LogFormat(
                     "Building Themes: Detoured GetRandomBuildingInfo. districtIdx: {0};current thread: {1}",
                     districtIdx, Thread.CurrentThread.ManagedThreadId);
             }
-            //District district = Singleton<DistrictManager>.instance.m_districts.m_buffer[districtIdx];
-            //TODO(earalov): here fastList variable should be filtered. All buildings that  don't belong to the district should be removed from this list.
 
-            //this is stub implementation
-            FastList<ushort> newList = new FastList<ushort>();
-            for (int i = 0; i < list.m_size; i++)
+            var newList = new FastList<ushort>();
+            for (var i = 0; i < list.m_size; i++)
             {
                 var name = PrefabCollection<BuildingInfo>.GetPrefab(list.m_buffer[i]).name;
-                var isEuropean = (name.Contains("lock") || name.Contains("EU"));
-                if (isEuropean && districtIdx == 0)
+                if (FilteringStrategy.DoesBuildingBelongToDistrict(name, districtIdx))
                 {
-                    continue;
+                    newList.Add(list.m_buffer[i]);
                 }
-                if (!isEuropean && districtIdx != 0)
-                {
-                    continue;
-                }
-                newList.Add(list.m_buffer[i]);
             }
             list = newList;
         }
@@ -184,22 +180,25 @@ namespace BuildingThemes
 
         }
 
+        private object addRessourceLock = new object();
+
         public int ImmaterialResourceManagerAddResource(ImmaterialResourceManager.Resource resource, int rate, Vector3 positionArg, float radius)
         {
-            if (BuildingThemesMod.isDebug)
-            {
-                UnityEngine.Debug.LogFormat(
-                    "Building Themes: Detoured ImmaterialResource.AddResource was called. position: {0}. current thread: {1}",
-                    positionArg, Thread.CurrentThread.ManagedThreadId);
-            }
-            if (resource == ImmaterialResourceManager.Resource.Abandonment)
-            {
-                position = positionArg;
-            }
-            RedirectionHelper.RevertJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceState);
-            var result = Singleton<ImmaterialResourceManager>.instance.AddResource(resource, rate, positionArg, radius);
-            RedirectionHelper.PatchJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceDetourPtr);
-            return result;
+                if (BuildingThemesMod.isDebug)
+                {
+                    UnityEngine.Debug.LogFormat(
+                        "Building Themes: Detoured ImmaterialResource.AddResource was called. position: {0}. current thread: {1}",
+                        positionArg, Thread.CurrentThread.ManagedThreadId);
+                }
+                if (resource == ImmaterialResourceManager.Resource.Abandonment)
+                {
+                    position = positionArg;
+                }
+                RedirectionHelper.RevertJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceState);
+                var result = Singleton<ImmaterialResourceManager>.instance.AddResource(resource, rate, positionArg, radius);
+                RedirectionHelper.PatchJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceDetourPtr);
+                return result;
+
         }
 
         internal static object GetInstanceField(Type type, object instance, string fieldName)
