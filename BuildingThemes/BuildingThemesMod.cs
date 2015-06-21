@@ -292,7 +292,7 @@ namespace BuildingThemes
 
             ushort districtId1 = (ushort)ToolsModifierControl.policiesPanel.targetDistrict;
 
-            var districtThemes = Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId1, true);
+            var districtThemes = Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId1, true, true);
             policyCheckBox.isChecked = districtThemes.Contains(theme);
 
 
@@ -303,7 +303,7 @@ namespace BuildingThemes
                     uint districtId = (uint)ToolsModifierControl.policiesPanel.targetDistrict;
                     if (enabled)
                     {
-                        Singleton<BuildingThemesManager>.instance.EnableTheme(districtId, theme, true);
+                        Singleton<BuildingThemesManager>.instance.EnableTheme(districtId, theme, true, true);
                         if (BuildingThemesMod.isDebug)
                         {
                             Debug.Log("enabled theme " + theme.name + " in district " + districtId);
@@ -311,7 +311,7 @@ namespace BuildingThemes
                     }
                     else
                     {
-                        Singleton<BuildingThemesManager>.instance.DisableTheme(districtId, theme.name, true);
+                        Singleton<BuildingThemesManager>.instance.DisableTheme(districtId, theme.name, true, true);
                         if (BuildingThemesMod.isDebug)
                         {
                             Debug.Log("disabled theme " + theme.name + " in district " + districtId);
