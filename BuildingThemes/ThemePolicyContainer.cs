@@ -27,8 +27,11 @@ namespace BuildingThemes
                     if (Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId, true).Contains(theme) != this.m_Check.isChecked) 
                     {
                         this.m_Check.isChecked = !this.m_Check.isChecked;
-                        UnityEngine.Debug.LogFormat("Building Themes: ThemePolicyContainer. Chacnging theme {0} checkbox for district {1} to state: {2}",
-                            theme.name, districtId, this.m_Check.isChecked);
+                        if (BuildingThemesMod.isDebug)
+                        {
+                            UnityEngine.Debug.LogFormat("Building Themes: ThemePolicyContainer. Chacnging theme {0} checkbox for district {1} to state: {2}",
+                                theme.name, districtId, this.m_Check.isChecked);
+                        }
                     }
                     this.m_Button.state = ((!this.m_Check.isEnabled) ? UIButton.ButtonState.Disabled : ((!this.m_Check.isChecked) ? UIButton.ButtonState.Normal : UIButton.ButtonState.Focused));
                  }
