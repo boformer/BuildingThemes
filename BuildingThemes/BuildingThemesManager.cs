@@ -143,12 +143,41 @@ namespace BuildingThemes
             return theme ?? (_mergedThemes[districtIdx] = MergeDistrictThemes(districtIdx));
         }
 
+        private HashSet<Configuration.Theme> getDefaultDistrictThemes(uint districtIdx) 
+        {
+            var theme = new HashSet<Configuration.Theme>();
+            
+            if (districtIdx == 0)
+            {
+                // city-wide default derived from environment (european, sunny, boreal, tropical)
+
+                var env = Singleton<SimulationManager>.instance.m_metaData.m_environment;
+
+                if (env == "Europe")
+                {
+                    theme.Add(GetThemeNyName("European"));
+                }
+                else
+                {
+                    theme.Add(GetThemeNyName("International"));
+                }
+            }
+            else
+            { 
+                // district theme derived from city-wide theme
+
+                theme.UnionWith(GetDistrictThemes(0, true));
+            }
+
+            return theme;
+        }
+
 
         public HashSet<Configuration.Theme> GetDistrictThemes(uint districtIdx, bool initializeIfNull)
         {
             HashSet<Configuration.Theme> themes;
             _districtsThemes.TryGetValue(districtIdx, out themes);
-            return themes ?? (initializeIfNull ? _districtsThemes[districtIdx] = new HashSet<Configuration.Theme>() : null);
+            return themes ?? (initializeIfNull ? _districtsThemes[districtIdx] = getDefaultDistrictThemes(districtIdx) : null);
         }
 
         public List<Configuration.Theme> GetAllThemes()
