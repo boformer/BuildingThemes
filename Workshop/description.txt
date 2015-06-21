@@ -1,31 +1,40 @@
-[h1]This mod makes possible assigning of building themes citywide or per district[/h1]
+[h1]This mod makes possible to apply building themes to a district or the whole city. Only buildings which are contained in one of the selected themes will grow in a district.[/h1]
 
-What this mod does:
-* Adds 'Themes' tab to districts policies panel
-* Filters buildings in districts by districts' active themes.
-* Provides two built-in themes, 'European' and 'International'
-* Stores building themes in an XML file ({Steam folder}\steamapps\common\Cities_Skylines\BuildingThemes.xml)
-* Allows adding custom themes and extending built-in themes via the XML configuration file (Later this will be possible with UI - see 'Upcoming features' section)
-* Saves district data in XML files for each saved game (buildingThemesSave_{ID}.xml). They can be found in {Steam folder}\steamapps\common\Cities_Skylines\Cities_Data. Cloud saves supported too. To clear themes assignment just delete those files.
+[h1]What this mod does:[/h1]
+[list]
+[*] Adds 'Themes' tab to districts policies panel
+[*] Filters buildings in districts by districts' active themes.
+[*] Provides two built-in themes, 'European' and 'International'
+[*] Stores building themes in an XML file ({Steam folder}\steamapps\common\Cities_Skylines\BuildingThemes.xml)
+[*] Allows adding custom themes and extending built-in themes via the XML configuration file (Later this will be possible with UI - see 'Upcoming features' section)
+[*] Saves district data in XML files for each saved game (buildingThemesSave_{ID}.xml). They can be found in {Steam folder}\steamapps\common\Cities_Skylines\Cities_Data. Cloud saves supported too. To clear themes assignment just delete those files.
+[/list]
 
 Use 'Themes' tab to enable or disable district's themes. You can specify any number of active themes. If no theme is active for district it will mean that any growable is allowed.
-Biome's native theme will be active by default('European' for 'European' biome and 'International' for 'Boreal', 'Temperate' or 'Tropical')
+
+Biome's native theme will be active by default ('European' theme for 'European' biome, 'International' theme for 'Boreal', 'Temperate' or 'Tropical' biome).
+
 Themes specified city-wide will be applied to each new district you add automatically.
-If you redraw district's borders the buildings not belonging to district's theme won't disappear. When it's time for them to levelup they will levelup to theme's buildings.
 
-What this mod doesn't do:
-* It won't corrupt your save games if you disable it
-* It doesn't unlock European growables for non-European biomes or vice versa. Use [b]European Buildings Unlocker[/b] for that.
+If you redraw district's borders the buildings not belonging to district's theme won't disappear. When it's time for them to upgrade they will level up to a building that is allowed in the district.
 
-Upcoming features:
-* Building Themes Manager UI
+[h1]What this mod doesn't do:[/h1]
+[list]
+[*] It won't corrupt your save games if you disable it
+[*] It doesn't unlock European growables for non-European biomes or vice versa. Use [b]European Buildings Unlocker[/b] for that.
+[/list]
+
+[h1]Upcoming features:[/h1]
+[list]
+[*] Building Themes Manager UI: Allows you to create your own themes (supporting vanilla and custom assets)
+[/list]
 
 This mod should be 100% compatible with all other mods. If it's not just tell us.
 Recommended mods to use together with this one:
 
-* [url=http://steamcommunity.com/sharedfiles/filedetails/?id=456408505]European Buildings Unlocker (+vice versa)[/url]
-* [url=http://steamcommunity.com/sharedfiles/filedetails/?id=448761345]Building Remover Tool[/url]
-* [url=https://steamcommunity.com/sharedfiles/filedetails/?id=438449058]Building Eyedropper Tool[/url]
-* [url=https://steamcommunity.com/sharedfiles/filedetails/?id=410535198]Control Building Level Up[/url]
+[list]
+[*] [url=http://steamcommunity.com/sharedfiles/filedetails/?id=456408505]European Buildings Unlocker (+vice versa)[/url]
+[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=410535198]Control Building Level Up[/url]
+[/list]
 
 Feel free to comment. If you have any errors/exceptions please don't paste them or output_log to comments. Use dropbox, pastebin or similar tool.
