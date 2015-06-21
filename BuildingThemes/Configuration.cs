@@ -39,7 +39,7 @@ namespace BuildingThemes
             {
                 foreach (string b in buildingNames)
                 {
-                    if(!containsBuilding(b))
+                    if (!containsBuilding(b))
                     {
                         buildings.Add(new Building(b, builtIn));
                     }
@@ -109,28 +109,21 @@ namespace BuildingThemes
 
         public static void Serialize(string filename, Configuration config)
         {
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Configuration));
+            var xmlSerializer = new XmlSerializer(typeof(Configuration));
             try
             {
                 using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(filename))
                 {
-                    Configuration configCopy = new Configuration();
+                    var configCopy = new Configuration();
                     foreach (var theme in config.themes)
                     {
-                        if (!theme.isBuiltIn)
+                        var newTheme = new Theme(theme.name);
+                        foreach (var building in theme.buildings.Where(building => !theme.isBuiltIn || !building.isBuiltIn))
                         {
-                            Theme newTheme = new Theme(theme.name);
-
-                            foreach (var building in theme.buildings)
-                            {
-                                if (!building.isBuiltIn) 
-                                {
-                                    newTheme.buildings.Add(building);
-                                }
-                            }
-                            
-                            configCopy.themes.Add(newTheme);
+                            newTheme.buildings.Add(building);
                         }
+
+                        configCopy.themes.Add(newTheme);
                     }
 
                     xmlSerializer.Serialize(streamWriter, configCopy);
@@ -145,31 +138,26 @@ namespace BuildingThemes
 
         public static void addBuiltInEuropeanTheme(Configuration config)
         {
-            var theme = config.getTheme("European");
-
-            if(theme == null) 
-            {
-                theme = new Theme("European");
-                //theme.isBuiltIn = true;
-                config.themes.Add(theme);
-            }
-            theme.addAll(sharedBuildings, true);
-            theme.addAll(euroOnlyBuildings, true);
+            addBuiltInTheme(config, "European", euroOnlyBuildings);
         }
 
         public static void addBuiltInInternationalTheme(Configuration config)
         {
-            var theme = config.getTheme("International");
+            addBuiltInTheme(config, "International", intOnlyBuildings);
+        }
+
+        private static void addBuiltInTheme(Configuration config, string themeName, string[] specificBuildings)
+        {
+            var theme = config.getTheme(themeName);
 
             if (theme == null)
             {
-                theme = new Theme("International");
+                theme = new Theme(themeName);
                 //theme.isBuiltIn = true;
                 config.themes.Add(theme);
             }
-            //intTheme.isBuiltIn = true;
             theme.addAll(sharedBuildings, true);
-            theme.addAll(intOnlyBuildings, true);
+            theme.addAll(specificBuildings, true);
         }
 
         private static string[] sharedBuildings = {
