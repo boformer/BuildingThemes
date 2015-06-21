@@ -83,8 +83,11 @@ namespace BuildingThemes
 
             var configuration = DistrictsConfiguration.Deserialize(filepath);
             var buildingThemesManager = Singleton<BuildingThemesManager>.instance;
+
             foreach (var district in configuration.Districts)
             {
+                var themes = new HashSet<Configuration.Theme>();
+                
                 foreach (var themeName in district.themes)
                 {
                     var theme = buildingThemesManager.GetThemeNyName(themeName);
@@ -92,9 +95,10 @@ namespace BuildingThemes
                     {
                         continue;
                     }
-                    buildingThemesManager.EnableTheme(district.id, theme, false);
+                    themes.Add(theme);
                 }
-                buildingThemesManager.MergeDistrictThemes(district.id);
+
+                buildingThemesManager.SetThemes(district.id, themes, true);
             }
         }
 

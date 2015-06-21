@@ -63,6 +63,11 @@ namespace BuildingThemes
                 }
                 return;
             }
+            SetThemes(districtIdx, themes, autoMerge);
+        }
+
+        public void SetThemes(uint districtIdx, HashSet<Configuration.Theme> themes, bool autoMerge)
+        {
             _districtsThemes[districtIdx] = themes;
             if (autoMerge)
             {
@@ -87,11 +92,7 @@ namespace BuildingThemes
                 }
                 return;
             }
-            _districtsThemes[districtIdx] = themes;
-            if (autoMerge)
-            {
-                MergeDistrictThemes(districtIdx);
-            }
+            SetThemes(districtIdx, themes, autoMerge);
         }
 
 
