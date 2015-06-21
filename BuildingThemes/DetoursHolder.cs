@@ -190,18 +190,18 @@ namespace BuildingThemes
 
             float m_angle = zoneBlock.m_angle;
 
-            Vector2 vector = new Vector2(Mathf.Cos(m_angle), Mathf.Sin(m_angle)) * 8f;
-            Vector2 vector2 = new Vector2(vector.y, -vector.x);
+            Vector2 xDirection = new Vector2(Mathf.Cos(m_angle), Mathf.Sin(m_angle)) * 8f;
+            Vector2 zDirection = new Vector2(xDirection.y, -xDirection.x);
             ulong num = zoneBlock.m_valid & ~(zoneBlock.m_occupied1 | zoneBlock.m_occupied2);
-            int num2 = 0;
+            int spawnpointRow = 0;
             ItemClass.Zone zone = ItemClass.Zone.Unzoned;
             int num3 = 0;
             while (num3 < 4 && zone == ItemClass.Zone.Unzoned)
             {
-                num2 = Singleton<SimulationManager>.instance.m_randomizer.Int32((uint)rowCount);
-                if ((num & 1uL << (num2 << 3)) != 0uL)
+                spawnpointRow = Singleton<SimulationManager>.instance.m_randomizer.Int32((uint)rowCount);
+                if ((num & 1uL << (spawnpointRow << 3)) != 0uL)
                 {
-                    zone = zoneBlock.GetZone(0, num2);
+                    zone = zoneBlock.GetZone(0, spawnpointRow);
                 }
                 num3++;
             }
@@ -241,7 +241,7 @@ namespace BuildingThemes
                     return;
             }
             Vector2 a = VectorUtils.XZ(m_position);
-            Vector2 vector3 = a - 3.5f * vector + ((float)num2 - 3.5f) * vector2;
+            Vector2 vector3 = a - 3.5f * xDirection + ((float)spawnpointRow - 3.5f) * zDirection;
             int[] tmpXBuffer = instance.m_tmpXBuffer;
             for (int i = 0; i < 13; i++)
             {
@@ -249,10 +249,10 @@ namespace BuildingThemes
             }
 
             Quad2 quad = default(Quad2);
-            quad.a = a - 4f * vector + ((float)num2 - 10f) * vector2;
-            quad.b = a + 3f * vector + ((float)num2 - 10f) * vector2;
-            quad.c = a + 3f * vector + ((float)num2 + 2f) * vector2;
-            quad.d = a - 4f * vector + ((float)num2 + 2f) * vector2;
+            quad.a = a - 4f * xDirection + ((float)spawnpointRow - 10f) * zDirection;
+            quad.b = a + 3f * xDirection + ((float)spawnpointRow - 10f) * zDirection;
+            quad.c = a + 3f * xDirection + ((float)spawnpointRow + 2f) * zDirection;
+            quad.d = a - 4f * xDirection + ((float)spawnpointRow + 2f) * zDirection;
             Vector2 vector4 = quad.Min();
             Vector2 vector5 = quad.Max();
             int num5 = Mathf.Max((int)((vector4.x - 46f) / 64f + 75f), 0);
@@ -277,7 +277,7 @@ namespace BuildingThemes
                                 _CheckBlock = typeof(ZoneBlock).GetMethod("CheckBlock", BindingFlags.NonPublic | BindingFlags.Instance);
                             }
                             
-                            _CheckBlock.Invoke(zoneBlock, new object[] {instance.m_blocks.m_buffer[(int)num9], tmpXBuffer, zone, vector3, vector, vector2, quad});
+                            _CheckBlock.Invoke(zoneBlock, new object[] {instance.m_blocks.m_buffer[(int)num9], tmpXBuffer, zone, vector3, xDirection, zDirection, quad});
                         }
                         num9 = instance.m_blocks.m_buffer[(int)num9].m_nextGridBlock;
                         if (++num10 >= 32768)
@@ -595,13 +595,13 @@ namespace BuildingThemes
                 }
                 while (num16 - num15 > 3 || num20 - num19 > 3);
             }
-            int num21 = 4;
-            int num22 = num16 - num15 + 1;
+            int depth_A = 4;
+            int width_A = num16 - num15 + 1;
             BuildingInfo.ZoningMode zoningMode = BuildingInfo.ZoningMode.Straight;
             bool flag7 = true;
             for (int m = num15; m <= num16; m++)
             {
-                num21 = Mathf.Min(num21, tmpXBuffer[m] & 65535);
+                depth_A = Mathf.Min(depth_A, tmpXBuffer[m] & 65535);
                 if ((tmpXBuffer[m] & 131072) == 0)
                 {
                     flag7 = false;
@@ -622,13 +622,13 @@ namespace BuildingThemes
                     num20 = num16;
                 }
             }
-            int num23 = 4;
-            int num24 = num20 - num19 + 1;
+            int depth_B = 4;
+            int width_B = num20 - num19 + 1;
             BuildingInfo.ZoningMode zoningMode2 = BuildingInfo.ZoningMode.Straight;
             bool flag8 = true;
             for (int n = num19; n <= num20; n++)
             {
-                num23 = Mathf.Min(num23, tmpXBuffer[n] & 65535);
+                depth_B = Mathf.Min(depth_B, tmpXBuffer[n] & 65535);
                 if ((tmpXBuffer[n] & 131072) == 0)
                 {
                     flag8 = false;
@@ -678,21 +678,23 @@ namespace BuildingThemes
             }
             BuildingInfo buildingInfo = null;
             Vector3 vector6 = Vector3.zero;
-            int num25 = 0;
-            int num26 = 0;
-            int num27 = 0;
+            int num25_row = 0;
+            int depth = 0;
+            int width = 0;
             BuildingInfo.ZoningMode zoningMode3 = BuildingInfo.ZoningMode.Straight;
             int num28 = 0;
             while (num28 < 6)
             {
                 switch (num28)
                 {
+                    // Corner cases
+                    
                     case 0:
                         if (zoningMode != BuildingInfo.ZoningMode.Straight)
                         {
-                            num25 = num15 + num16 + 1;
-                            num26 = num21;
-                            num27 = num22;
+                            num25_row = num15 + num16 + 1;
+                            depth = depth_A;
+                            width = width_A;
                             zoningMode3 = zoningMode;
                             goto IL_D6A;
                         }
@@ -700,9 +702,9 @@ namespace BuildingThemes
                     case 1:
                         if (zoningMode2 != BuildingInfo.ZoningMode.Straight)
                         {
-                            num25 = num19 + num20 + 1;
-                            num26 = num23;
-                            num27 = num24;
+                            num25_row = num19 + num20 + 1;
+                            depth = depth_B;
+                            width = width_B;
                             zoningMode3 = zoningMode2;
                             goto IL_D6A;
                         }
@@ -710,11 +712,11 @@ namespace BuildingThemes
                     case 2:
                         if (zoningMode != BuildingInfo.ZoningMode.Straight)
                         {
-                            if (num21 >= 4)
+                            if (depth_A >= 4)
                             {
-                                num25 = num15 + num16 + 1;
-                                num26 = ((!flag7) ? 2 : 3);
-                                num27 = num22;
+                                num25_row = num15 + num16 + 1;
+                                depth = ((!flag7) ? 2 : 3);
+                                width = width_A;
                                 zoningMode3 = zoningMode;
                                 goto IL_D6A;
                             }
@@ -723,26 +725,30 @@ namespace BuildingThemes
                     case 3:
                         if (zoningMode2 != BuildingInfo.ZoningMode.Straight)
                         {
-                            if (num23 >= 4)
+                            if (depth_B >= 4)
                             {
-                                num25 = num19 + num20 + 1;
-                                num26 = ((!flag8) ? 2 : 3);
-                                num27 = num24;
+                                num25_row = num19 + num20 + 1;
+                                depth = ((!flag8) ? 2 : 3);
+                                width = width_B;
                                 zoningMode3 = zoningMode2;
                                 goto IL_D6A;
                             }
                         }
                         break;
+
+                    // Straight cases
                     case 4:
-                        num25 = num15 + num16 + 1;
-                        num26 = num21;
-                        num27 = num22;
+                        //int width_A = num16 - num15 + 1;
+                        num25_row = num15 + num16 + 1;
+                        depth = depth_A;
+                        width = width_A;
                         zoningMode3 = BuildingInfo.ZoningMode.Straight;
                         goto IL_D6A;
                     case 5:
-                        num25 = num19 + num20 + 1;
-                        num26 = num23;
-                        num27 = num24;
+                        //int width_B = num20 - num19 + 1;
+                        num25_row = num19 + num20 + 1;
+                        depth = depth_B;
+                        width = width_B;
                         zoningMode3 = BuildingInfo.ZoningMode.Straight;
                         goto IL_D6A;
                     default:
@@ -752,15 +758,15 @@ namespace BuildingThemes
                 num28++;
                 continue;
             IL_D6A:
-                vector6 = m_position + VectorUtils.X_Y(((float)num26 * 0.5f - 4f) * vector + ((float)num25 * 0.5f + (float)num2 - 10f) * vector2);
+                vector6 = m_position + VectorUtils.X_Y(((float)depth * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                 if (zone == ItemClass.Zone.Industrial)
                 {
                     ZoneBlock.GetIndustryType(vector6, out subService, out level);
                 }
-                buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, num27, num26, zoningMode3);
+                buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, depth, zoningMode3);
 
                 UnityEngine.Debug.LogFormat("Trying to find buildingInfo (num28: {6}). service: {0}, subService: {1}, level: {2}, footprint: {3} x {4}, zoning mode: {5}", 
-                    service, subService, level, num27, num26, zoningMode3, num28);
+                    service, subService, level, width, depth, zoningMode3, num28);
 
                 if (buildingInfo != null)
                 {
@@ -783,15 +789,15 @@ namespace BuildingThemes
             if (zoningMode3 == BuildingInfo.ZoningMode.CornerLeft && buildingInfo.m_zoningMode == BuildingInfo.ZoningMode.CornerRight)
             {
                 num30 -= 1.57079637f;
-                num26 = num27;
+                depth = width;
             }
             else if (zoningMode3 == BuildingInfo.ZoningMode.CornerRight && buildingInfo.m_zoningMode == BuildingInfo.ZoningMode.CornerLeft)
             {
                 num30 += 1.57079637f;
-                num26 = num27;
+                depth = width;
             }
             ushort num31;
-            if (Singleton<BuildingManager>.instance.CreateBuilding(out num31, ref Singleton<SimulationManager>.instance.m_randomizer, buildingInfo, vector6, num30, num26, Singleton<SimulationManager>.instance.m_currentBuildIndex))
+            if (Singleton<BuildingManager>.instance.CreateBuilding(out num31, ref Singleton<SimulationManager>.instance.m_randomizer, buildingInfo, vector6, num30, depth, Singleton<SimulationManager>.instance.m_currentBuildIndex))
             {
                 UnityEngine.Debug.LogFormat("Building created: {0}", buildingInfo.name);
                 
