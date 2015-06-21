@@ -35,11 +35,14 @@ namespace BuildingThemes
             [XmlArrayItem(ElementName = "Building")]
             public List<Building> buildings = new List<Building>();
 
-            public void addAll(string[] buildingNames)
+            public void addAll(string[] buildingNames, bool builtIn)
             {
                 foreach (string b in buildingNames)
                 {
-                    buildings.Add(new Building(b));
+                    if (!containsBuilding(b))
+                    {
+                        buildings.Add(new Building(b, builtIn));
+                    }
                 }
             }
             public bool containsBuilding(string name)
@@ -66,9 +69,18 @@ namespace BuildingThemes
             [XmlAttribute("name")]
             public string name;
 
+            [XmlIgnoreAttribute]
+            public bool isBuiltIn = false;
+
             public Building(string name)
             {
                 this.name = name;
+            }
+
+            public Building(string name, bool builtIn)
+            {
+                this.name = name;
+                this.isBuiltIn = true;
             }
 
             public Building()
@@ -97,18 +109,21 @@ namespace BuildingThemes
 
         public static void Serialize(string filename, Configuration config)
         {
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(Configuration));
+            var xmlSerializer = new XmlSerializer(typeof(Configuration));
             try
             {
                 using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(filename))
                 {
-                    Configuration configCopy = new Configuration();
+                    var configCopy = new Configuration();
                     foreach (var theme in config.themes)
                     {
-                        if (!theme.isBuiltIn)
+                        var newTheme = new Theme(theme.name);
+                        foreach (var building in theme.buildings.Where(building => !theme.isBuiltIn || !building.isBuiltIn))
                         {
-                            configCopy.themes.Add(theme);
+                            newTheme.buildings.Add(building);
                         }
+
+                        configCopy.themes.Add(newTheme);
                     }
 
                     xmlSerializer.Serialize(streamWriter, configCopy);
@@ -121,10 +136,31 @@ namespace BuildingThemes
             }
         }
 
-        public static Configuration.Theme[] GetBuitInThemes()
+        public static void addBuiltInEuropeanTheme(Configuration config)
         {
+            addBuiltInTheme(config, "European", euroOnlyBuildings);
+        }
 
-            string[] sharedBuildings = {
+        public static void addBuiltInInternationalTheme(Configuration config)
+        {
+            addBuiltInTheme(config, "International", intOnlyBuildings);
+        }
+
+        private static void addBuiltInTheme(Configuration config, string themeName, string[] specificBuildings)
+        {
+            var theme = config.getTheme(themeName);
+
+            if (theme == null)
+            {
+                theme = new Theme(themeName);
+                //theme.isBuiltIn = true;
+                config.themes.Add(theme);
+            }
+            theme.addAll(sharedBuildings, true);
+            theme.addAll(specificBuildings, true);
+        }
+
+        private static string[] sharedBuildings = {
                                          "Agricultural 1x1 processing 1",
                                          "Agricultural 2x2 processing 2",
                                          "Agricultural 3x2 processing 2",
@@ -311,7 +347,7 @@ namespace BuildingThemes
                                          "Ore 4x4 Extractor",
                                          "Ore1x1",
                                          "OreCrusher" };
-            string[] euroOnlyBuildings = {
+        private static string[] euroOnlyBuildings = {
                                          "1x1_Factory_EU01",
                                          "2X2_Factory_EU04",
                                          "3x3_Factory_EU05",
@@ -474,7 +510,7 @@ namespace BuildingThemes
                                          "H5_4x3_Blockhouse",
                                          "H5_4x4_Blockhouse"
                                        };
-            string[] intOnlyBuildings = {
+        private static string[] intOnlyBuildings = {
                                          "H1 1x1 Shop01",
                                          "H1 1x1 Office",
                                          "H1 1x1 Shop07",
@@ -625,21 +661,5 @@ namespace BuildingThemes
                                          "H5 4x4 Highrise08",
                                          "H5 4x4 Tenement01"
                                         };
-
-            var euroTheme = new Configuration.Theme("European");
-            euroTheme.isBuiltIn = true;
-            euroTheme.addAll(sharedBuildings);
-            euroTheme.addAll(euroOnlyBuildings);
-
-            var intTheme = new Configuration.Theme("International");
-            intTheme.isBuiltIn = true;
-            intTheme.addAll(sharedBuildings);
-            intTheme.addAll(intOnlyBuildings);
-
-            return new Configuration.Theme[]
-            {
-                euroTheme, intTheme
-            };
-        }
     }
 }

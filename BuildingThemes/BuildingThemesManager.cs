@@ -34,13 +34,8 @@ namespace BuildingThemes
                 Configuration.Serialize(filename, configuration);
             }
 
-
-
-
-            foreach (var theme in Configuration.GetBuitInThemes())
-            {
-                configuration.themes.Add(theme);
-            }
+            Configuration.addBuiltInEuropeanTheme(configuration);
+            Configuration.addBuiltInInternationalTheme(configuration);
         }
 
         public void Reset()
