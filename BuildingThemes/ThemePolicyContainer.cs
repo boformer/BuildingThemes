@@ -24,7 +24,7 @@ namespace BuildingThemes
                 lock (m_Check) {
                     ushort districtId = (ushort)ToolsModifierControl.policiesPanel.targetDistrict;
                     var theme = (Configuration.Theme)m_Check.objectUserData;
-                    if (Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId, true, true).Contains(theme) != this.m_Check.isChecked) 
+                    if (Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId, true).Contains(theme) != this.m_Check.isChecked) 
                     {
                         this.m_Check.isChecked = !this.m_Check.isChecked;
                         if (BuildingThemesMod.isDebug)

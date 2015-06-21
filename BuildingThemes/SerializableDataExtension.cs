@@ -92,7 +92,7 @@ namespace BuildingThemes
                     {
                         continue;
                     }
-                    buildingThemesManager.EnableTheme(district.id, theme, false, false);
+                    buildingThemesManager.EnableTheme(district.id, theme, false);
                 }
                 buildingThemesManager.MergeDistrictThemes(district.id);
             }
@@ -121,7 +121,7 @@ namespace BuildingThemes
             var themesManager = Singleton<BuildingThemesManager>.instance;
             for (uint i = 0; i < 128; i++)
             {
-                var themes = themesManager.GetDistrictThemes(i, false, false);
+                var themes = themesManager.GetDistrictThemes(i, false);
                 if (themes == null)
                 {
                     continue; ;
