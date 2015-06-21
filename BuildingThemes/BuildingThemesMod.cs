@@ -98,7 +98,7 @@ namespace BuildingThemes
 
         public string Description
         {
-            get { return "Create building themes and apply them to map themes, cities and districts."; }
+            get { return "Create building themes and apply them to cities and districts."; }
         }
 
         private UIButton tab;
