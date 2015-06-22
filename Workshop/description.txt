@@ -38,3 +38,5 @@ Recommended mods to use together with this one:
 [/list]
 
 Feel free to comment. If you have any errors/exceptions please don't paste them or output_log to comments. Use dropbox, pastebin or similar tool.
+
+[url=https://github.com/boformer/BuildingThemes]Source Code[/url]
