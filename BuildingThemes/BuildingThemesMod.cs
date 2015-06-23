@@ -117,7 +117,7 @@ namespace BuildingThemes
 
             DetoursHolder.getRandomBuildingInfo = typeof(BuildingManager).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public);
             DetoursHolder.getRandomBuildingInfoState = RedirectionHelper.RedirectCalls(
-                typeof(BuildingManager).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public),
+                DetoursHolder.getRandomBuildingInfo,
                 typeof(DetoursHolder).GetMethod("GetRandomBuildingInfo", BindingFlags.Instance | BindingFlags.Public)
                 );
 
@@ -135,6 +135,21 @@ namespace BuildingThemes
                 DetoursHolder.resourceManagerAddResourcePtr,
                 DetoursHolder.resourceManagerAddResourceDetourPtr
                 );
+
+            // neccessary because of how the game logic is bound to the GUI
+
+            DetoursHolder.refreshPanel = typeof(PoliciesPanel).GetMethod("RefreshPanel", BindingFlags.Instance | BindingFlags.NonPublic);
+            DetoursHolder.refreshPanelState = RedirectionHelper.RedirectCalls(
+                DetoursHolder.refreshPanel,
+                typeof(DetoursHolder).GetMethod("PoliciesPanelRefreshPanel", BindingFlags.Instance | BindingFlags.Public)
+                );
+
+            DetoursHolder.setParentButton = typeof(PoliciesPanel).GetMethod("SetParentButton", BindingFlags.Instance | BindingFlags.Public);
+            DetoursHolder.setParentButtonState = RedirectionHelper.RedirectCalls(
+                DetoursHolder.setParentButton,
+                typeof(DetoursHolder).GetMethod("PoliciesPanelSetParentButton", BindingFlags.Instance | BindingFlags.Public)
+                );
+
             if (isDebug)
             {
                 Debug.Log("Building Themes: Building Themes Mod successfully intialized.");
@@ -150,11 +165,11 @@ namespace BuildingThemes
 
             initializedGUI = true;
 
-
+            AddThemesTab();
             // TODO load data (serialized for policies, xml for themes)
 
             // Hook into policies GUI
-            ToolsModifierControl.policiesPanel.component.eventVisibilityChanged += OnPoliciesPanelVisibilityChanged;
+            //ToolsModifierControl.policiesPanel.component.eventVisibilityChanged += OnPoliciesPanelVisibilityChanged;
         }
 
         public override void OnLevelUnloading()
@@ -173,6 +188,10 @@ namespace BuildingThemes
             RedirectionHelper.RevertRedirect(DetoursHolder.getRandomBuildingInfo, DetoursHolder.getRandomBuildingInfoState);
             RedirectionHelper.RevertJumpTo(DetoursHolder.zoneBlockSimulationStepPtr, DetoursHolder.zoneBlockSimulationStepState);
             RedirectionHelper.RevertJumpTo(DetoursHolder.resourceManagerAddResourcePtr, DetoursHolder.resourceManagerAddResourceState);
+
+            // GUI
+            RedirectionHelper.RevertRedirect(DetoursHolder.refreshPanel, DetoursHolder.refreshPanelState);
+            RedirectionHelper.RevertRedirect(DetoursHolder.setParentButton, DetoursHolder.setParentButtonState);
         }
 
 

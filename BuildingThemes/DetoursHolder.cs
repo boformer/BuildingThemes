@@ -7,6 +7,7 @@ using System.Threading;
 using ColossalFramework;
 using ColossalFramework.Math;
 using UnityEngine;
+using ColossalFramework.UI;
 
 namespace BuildingThemes
 {
@@ -199,6 +200,113 @@ namespace BuildingThemes
                 RedirectionHelper.PatchJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceDetourPtr);
                 return result;
 
+        }
+
+        private FieldInfo _m_Tabstrip;
+        private MethodInfo _GetUnlockText;
+        private FieldInfo _m_ObjectIndex;
+        private MethodInfo _SpawnPolicyEntry;
+        private FieldInfo _m_Initialized;
+
+        public static RedirectCallsState setParentButtonState;
+        public static MethodInfo setParentButton;
+
+        public static RedirectCallsState refreshPanelState;
+        public static MethodInfo refreshPanel;
+
+        public void PoliciesPanelSetParentButton(UIButton button) 
+        {
+            UnityEngine.Debug.LogFormat("PoliciesPanel.SetParentButton called");
+            
+            if (_m_Tabstrip == null) 
+            {
+                _m_Tabstrip = typeof(PoliciesPanel).GetField("m_Tabstrip", BindingFlags.Instance | BindingFlags.NonPublic);
+            }
+
+            var tabstrip = (UITabstrip) _m_Tabstrip.GetValue(this);
+
+            for (int i = 0; i < tabstrip.tabCount; i++)
+            {
+                var tutorialUITag = tabstrip.tabs[i].GetComponent<TutorialUITag>();
+
+                if(tutorialUITag != null) 
+                {
+                    tutorialUITag.m_ParentOverride = button;
+                }
+            }
+        }
+
+        public void PoliciesPanelRefreshPanel() 
+        {
+            UnityEngine.Debug.LogFormat("PoliciesPanel.RefreshPanel called");
+
+            if (_m_Tabstrip == null)
+            {
+                _m_Tabstrip = typeof(PoliciesPanel).GetField("m_Tabstrip", BindingFlags.Instance | BindingFlags.NonPublic);
+                _m_ObjectIndex = typeof(PoliciesPanel).GetField("m_ObjectIndex", BindingFlags.Instance | BindingFlags.NonPublic);
+                _m_Initialized = typeof(PoliciesPanel).GetField("m_Initialized", BindingFlags.Instance | BindingFlags.NonPublic);
+                _GetUnlockText = typeof(PoliciesPanel).GetMethod("GetUnlockText", BindingFlags.Instance | BindingFlags.NonPublic);
+                _SpawnPolicyEntry = typeof(PoliciesPanel).GetMethod("SpawnPolicyEntry", BindingFlags.Instance | BindingFlags.NonPublic);
+            }
+
+            var tabstrip = (UITabstrip)_m_Tabstrip.GetValue(this);
+
+            if (Singleton<DistrictManager>.instance.IsPolicyLoaded(DistrictPolicies.Policies.AntiHippie))
+            {
+                for (int i = 0; i < tabstrip.tabCount; i++)
+                {
+                    tabstrip.tabs[i].width = tabstrip.width / (float)tabstrip.tabCount;
+                }
+                tabstrip.ShowTab("SpecialStrip");
+            }
+            else
+            {
+                int num = tabstrip.tabCount - 1;
+                for (int j = 0; j < tabstrip.tabCount; j++)
+                {
+                    tabstrip.tabs[j].width = tabstrip.width / (float)num;
+                }
+                tabstrip.HideTab("SpecialStrip");
+            }
+            for (int k = 0; k < tabstrip.tabCount; k++)
+            {
+                UIButton uIButton = tabstrip.tabs[k] as UIButton;
+                UIPanel container = tabstrip.tabPages.components[k] as UIPanel;
+
+                if (uIButton.stringUserData == "Themes") 
+                {
+                    ThemeContainerRefresh(container);
+                    continue;
+                }
+                
+                DistrictPolicies.Types enumByName = Utils.GetEnumByName<DistrictPolicies.Types>(uIButton.stringUserData);
+                if (ToolsModifierControl.IsUnlocked(enumByName))
+                {
+                    uIButton.isEnabled = true;
+                    uIButton.tooltip = null;
+                }
+                else
+                {
+                    uIButton.isEnabled = false;
+                    uIButton.tooltip = uIButton.text + " - " + _GetUnlockText.Invoke(this, new object[] { enumByName });
+                }
+                PositionData<DistrictPolicies.Policies>[] orderedEnumData = Utils.GetOrderedEnumData<DistrictPolicies.Policies>(uIButton.stringUserData);
+                _m_ObjectIndex.SetValue(this, 0);
+                for (int l = 0; l < orderedEnumData.Length; l++)
+                {
+                    if (Singleton<DistrictManager>.instance.IsPolicyLoaded(orderedEnumData[l].enumValue))
+                    {
+                        _SpawnPolicyEntry.Invoke(this, new object[] {container, orderedEnumData[l].enumName, _GetUnlockText.Invoke(this, new object[] {orderedEnumData[l].enumValue}), ToolsModifierControl.IsUnlocked(orderedEnumData[l].enumValue)});
+                    }
+                }
+            }
+            _m_Initialized.SetValue(this, true);
+
+        }
+
+        private void ThemeContainerRefresh(UIPanel container) 
+        { 
+        
         }
 
         internal static object GetInstanceField(Type type, object instance, string fieldName)
