@@ -115,7 +115,7 @@ namespace BuildingThemes
             var mergedTheme = new HashSet<string>();
             foreach (var building in themes.SelectMany(theme => theme.buildings))
             {
-                if (mergedTheme.Add(building.name))
+                if (building.include && mergedTheme.Add(building.name))
                 {
                     if (BuildingThemesMod.isDebug)
                     {

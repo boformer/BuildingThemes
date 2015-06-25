@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
@@ -35,13 +36,13 @@ namespace BuildingThemes
             [XmlArrayItem(ElementName = "Building")]
             public List<Building> buildings = new List<Building>();
 
-            public void addAll(string[] buildingNames, bool builtIn)
+            public void addAll(string[] buildingNames, string[] removedBuildings, bool builtIn)
             {
                 foreach (string b in buildingNames)
                 {
                     if (!containsBuilding(b))
                     {
-                        buildings.Add(new Building(b, builtIn));
+                        buildings.Add(new Building(b, builtIn, !removedBuildings.Contains(b)));
                     }
                 }
             }
@@ -72,15 +73,20 @@ namespace BuildingThemes
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
 
+            [XmlAttribute(" include"), DefaultValue(true)]
+            public bool include = true;
+
             public Building(string name)
             {
                 this.name = name;
             }
 
-            public Building(string name, bool builtIn)
+            public Building(string name, bool isBuiltIn, bool include)
             {
                 this.name = name;
-                this.isBuiltIn = true;
+                this.isBuiltIn = isBuiltIn;
+                this.include = include;
+
             }
 
             public Building()
@@ -156,8 +162,12 @@ namespace BuildingThemes
                 //theme.isBuiltIn = true;
                 config.themes.Add(theme);
             }
-            theme.addAll(sharedBuildings, true);
-            theme.addAll(specificBuildings, true);
+            var removedVanillaBuildings = theme.buildings.
+                Where(building => !building.include).
+                Select(building => building.name).ToArray();
+
+            theme.addAll(sharedBuildings, removedVanillaBuildings, true);
+            theme.addAll(specificBuildings, removedVanillaBuildings, true);
         }
 
         private static string[] sharedBuildings = {
