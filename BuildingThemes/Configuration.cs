@@ -73,7 +73,7 @@ namespace BuildingThemes
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
 
-            [XmlAttribute(" include"), DefaultValue(true)]
+            [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;
 
             public Building(string name)
@@ -162,6 +162,8 @@ namespace BuildingThemes
             {
                 foreach (var building in theme.buildings)
                 {
+                    UnityEngine.Debug.LogFormat("adding theme {0}, name {1} is set to include={2}", themeName, building.name, building.include);
+                    
                     if (sharedBuildings.Contains(building.name) || specificBuildings.Contains(building.name))
                     {
                         building.isBuiltIn = true;
