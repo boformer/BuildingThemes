@@ -36,13 +36,13 @@ namespace BuildingThemes
             [XmlArrayItem(ElementName = "Building")]
             public List<Building> buildings = new List<Building>();
 
-            public void addAll(string[] buildingNames, string[] removedBuildings, bool builtIn)
+            public void addAll(string[] buildingNames, bool builtIn)
             {
                 foreach (string b in buildingNames)
                 {
                     if (!containsBuilding(b))
                     {
-                        buildings.Add(new Building(b, builtIn, !removedBuildings.Contains(b)));
+                        buildings.Add(new Building(b, builtIn));
                     }
                 }
             }
@@ -81,12 +81,10 @@ namespace BuildingThemes
                 this.name = name;
             }
 
-            public Building(string name, bool isBuiltIn, bool include)
+            public Building(string name, bool isBuiltIn)
             {
                 this.name = name;
                 this.isBuiltIn = isBuiltIn;
-                this.include = include;
-
             }
 
             public Building()
@@ -159,15 +157,11 @@ namespace BuildingThemes
             if (theme == null)
             {
                 theme = new Theme(themeName);
-                //theme.isBuiltIn = true;
                 config.themes.Add(theme);
             }
-            var removedVanillaBuildings = theme.buildings.
-                Where(building => !building.include).
-                Select(building => building.name).ToArray();
-
-            theme.addAll(sharedBuildings, removedVanillaBuildings, true);
-            theme.addAll(specificBuildings, removedVanillaBuildings, true);
+            theme.isBuiltIn = true; //if user extends a built in it should be marked as budilt-in anyway
+            theme.addAll(sharedBuildings, true);
+            theme.addAll(specificBuildings, true);
         }
 
         private static string[] sharedBuildings = {
