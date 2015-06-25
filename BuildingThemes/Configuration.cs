@@ -153,11 +153,20 @@ namespace BuildingThemes
         private static void addBuiltInTheme(Configuration config, string themeName, string[] specificBuildings)
         {
             var theme = config.getTheme(themeName);
-
             if (theme == null)
             {
                 theme = new Theme(themeName);
                 config.themes.Add(theme);
+            }
+            else
+            {
+                foreach (var building in theme.buildings)
+                {
+                    if (sharedBuildings.Contains(building.name) || specificBuildings.Contains(building.name))
+                    {
+                        building.isBuiltIn = true;
+                    }
+                }
             }
             theme.isBuiltIn = true; //if user extends a built in it should be marked as budilt-in anyway
             theme.addAll(sharedBuildings, true);
