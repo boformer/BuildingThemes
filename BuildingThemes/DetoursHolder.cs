@@ -690,22 +690,18 @@ namespace BuildingThemes
             int width_alt;
 
             // determine the calculated plot with the maximum depth
-            if (depth_A >= depth_B)
-            {
-                depth_alt = depth_A;
-                width_alt = width_A;
-            }
-            else
-            {
-                depth_alt = depth_B;
-                width_alt = width_B;
-            }
+            depth_alt = depth_A;
+            width_alt = width_A;
 
             if (depth_alt > 4) depth_alt = 4;
 
+
+            UnityEngine.Debug.Log("spawnpointRow = " + spawnpointRow);
+            UnityEngine.Debug.Log("num15 + num16 + 1 = " + (num15 + num16 + 1));
+            UnityEngine.Debug.Log("num19 + num20 + 1 = " + (num19 + num20 + 1));
             // end mod
 
-            while (num28 < 7) // while (num28 < 6)
+            while (num28 < 8) // while (num28 < 6)
             {
                 switch (num28)
                 {
@@ -757,16 +753,71 @@ namespace BuildingThemes
                             }
                         }
                         break;
-
-                    // Straight cases
+                    // begin mod
                     case 4:
+                        if (zoningMode != BuildingInfo.ZoningMode.Straight)
+                        {
+                            if (width_alt > 1)
+                            {
+                                width_alt--;
+                            }
+                            else if (depth_alt > 1)
+                            {
+                                depth_alt--;
+                                width_alt = width_A;
+                            }
+                            else
+                            {
+                                break;
+                            }
+
+                            //TODO play with this
+                            if (width_alt == width_A)
+                            {
+                                num25_row = num15 + num16 + 1;
+                                
+                            }
+                            else
+                            {
+                                if (zoningMode == BuildingInfo.ZoningMode.CornerLeft)
+                                {
+                                    num25_row = num15 + num16 + 1 - (width_A - width_alt);
+                                }
+                                else
+                                {
+                                    num25_row = num15 + num16 + 1 + (width_A - width_alt);
+                                }
+                            }
+
+
+
+                            depth = depth_alt;
+                            width = width_alt;
+
+                            zoningMode3 = zoningMode;
+
+                            num28--;
+                            goto IL_D6A;
+                        }
+                        break;
+                    // end mod
+                    // Straight cases
+                    case 5:
                         //int width_A = num16 - num15 + 1;
                         num25_row = num15 + num16 + 1;
                         depth = depth_A;
                         width = width_A;
                         zoningMode3 = BuildingInfo.ZoningMode.Straight;
                         goto IL_D6A;
-                    case 5:
+                    case 6:
+                        // begin mod
+
+                        // again for straight cases
+                        depth_alt = depth_A;
+                        width_alt = width_A;
+                        if (depth_alt > 4) depth_alt = 4;
+                        // end mod
+                    
                         //int width_B = num20 - num19 + 1;
                         num25_row = num19 + num20 + 1;
                         depth = depth_B;
@@ -774,7 +825,8 @@ namespace BuildingThemes
                         zoningMode3 = BuildingInfo.ZoningMode.Straight;
                         goto IL_D6A;
                     // begin mod
-                    case 6:
+                    case 7:
+                       
                         if (width_alt > 1)
                         {
                             width_alt--;
@@ -782,7 +834,7 @@ namespace BuildingThemes
                         else if (depth_alt > 1)
                         {
                             depth_alt--;
-                            width_alt = (depth_alt > depth_B) ? width_A : width_B;
+                            width_alt = width_A;
                         }
                         else 
                         {
@@ -794,10 +846,6 @@ namespace BuildingThemes
                         {
                             num25_row = num15 + num16 + 1;
                         }
-                        else if (width_alt == width_B)
-                        {
-                            num25_row = num19 + num20 + 1;
-                        }
                         else if (width_A % 2 != width_alt % 2)
                         {
                             num25_row = num15 + num16;
@@ -806,7 +854,6 @@ namespace BuildingThemes
                         {
                             num25_row = num15 + num16 + 1;
                         }
-                        
 
                         depth = depth_alt;
                         width = width_alt;
@@ -830,9 +877,9 @@ namespace BuildingThemes
                 }
                 buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, depth, zoningMode3);
 
-                
 
-                UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}", 
+                if (zoningMode3 != BuildingInfo.ZoningMode.Straight) UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}", 
+                
                     service, subService, level, width, depth, zoningMode3, num28);
 
                 if (buildingInfo != null)
