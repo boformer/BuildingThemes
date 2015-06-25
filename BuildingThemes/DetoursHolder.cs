@@ -684,7 +684,28 @@ namespace BuildingThemes
             int width = 0;
             BuildingInfo.ZoningMode zoningMode3 = BuildingInfo.ZoningMode.Straight;
             int num28 = 0;
-            while (num28 < 6)
+
+            // begin mod
+            int depth_alt;
+            int width_alt;
+
+            // determine the calculated plot with the maximum depth
+            if (depth_A >= depth_B)
+            {
+                depth_alt = depth_A;
+                width_alt = width_A;
+            }
+            else
+            {
+                depth_alt = depth_B;
+                width_alt = width_B;
+            }
+
+            if (depth_alt > 4) depth_alt = 4;
+
+            // end mod
+
+            while (num28 < 7) // while (num28 < 6)
             {
                 switch (num28)
                 {
@@ -752,6 +773,49 @@ namespace BuildingThemes
                         width = width_B;
                         zoningMode3 = BuildingInfo.ZoningMode.Straight;
                         goto IL_D6A;
+                    // begin mod
+                    case 6:
+                        if (width_alt > 1)
+                        {
+                            width_alt--;
+                        }
+                        else if (depth_alt > 1)
+                        {
+                            depth_alt--;
+                            width_alt = (depth_alt > depth_B) ? width_A : width_B;
+                        }
+                        else 
+                        {
+                            break;
+                        }
+
+                        //TODO play with this
+                        if (width_alt == width_A)
+                        {
+                            num25_row = num15 + num16 + 1;
+                        }
+                        else if (width_alt == width_B)
+                        {
+                            num25_row = num19 + num20 + 1;
+                        }
+                        else if (width_A % 2 != width_alt % 2)
+                        {
+                            num25_row = num15 + num16;
+                        }
+                        else
+                        {
+                            num25_row = num15 + num16 + 1;
+                        }
+                        
+
+                        depth = depth_alt;
+                        width = width_alt;
+
+                        zoningMode3 = BuildingInfo.ZoningMode.Straight;
+
+                        num28--;
+                        goto IL_D6A;
+                    // end mod
                     default:
                         goto IL_D6A;
                 }
@@ -766,15 +830,22 @@ namespace BuildingThemes
                 }
                 buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, depth, zoningMode3);
 
-                UnityEngine.Debug.LogFormat("Trying to find buildingInfo (num28: {6}). service: {0}, subService: {1}, level: {2}, footprint: {3} x {4}, zoning mode: {5}", 
+                
+
+                UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}", 
                     service, subService, level, width, depth, zoningMode3, num28);
 
                 if (buildingInfo != null)
                 {
-                    UnityEngine.Debug.Log("Success! info found");
-                    break;
+                    // begin mod
+                    if (buildingInfo.GetLength() == depth && buildingInfo.GetWidth() == width)
+                    {
+                        UnityEngine.Debug.Log("Success! Prefab found.");
+                        break;
+                    }
+                    // end mod
                 }
-                UnityEngine.Debug.Log("Failure! No info found");
+                UnityEngine.Debug.Log("Failure! No prefab found.");
                 goto IL_DF0;
             }
             if (buildingInfo == null)
