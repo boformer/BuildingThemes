@@ -124,7 +124,7 @@ namespace BuildingThemes
                     foreach (var theme in config.themes)
                     {
                         var newTheme = new Theme(theme.name);
-                        foreach (var building in theme.buildings.Where(building => !theme.isBuiltIn || !building.isBuiltIn))
+                        foreach (var building in theme.buildings.Where(building => !theme.isBuiltIn || !building.isBuiltIn || !building.include))
                         {
                             newTheme.buildings.Add(building);
                         }
