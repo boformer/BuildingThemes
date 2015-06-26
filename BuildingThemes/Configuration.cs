@@ -162,8 +162,6 @@ namespace BuildingThemes
             {
                 foreach (var building in theme.buildings)
                 {
-                    UnityEngine.Debug.LogFormat("adding theme {0}, name {1} is set to include={2}", themeName, building.name, building.include);
-                    
                     if (sharedBuildings.Contains(building.name) || specificBuildings.Contains(building.name))
                     {
                         building.isBuiltIn = true;
