@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
@@ -72,15 +73,18 @@ namespace BuildingThemes
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
 
+            [XmlAttribute("include"), DefaultValue(true)]
+            public bool include = true;
+
             public Building(string name)
             {
                 this.name = name;
             }
 
-            public Building(string name, bool builtIn)
+            public Building(string name, bool isBuiltIn)
             {
                 this.name = name;
-                this.isBuiltIn = true;
+                this.isBuiltIn = isBuiltIn;
             }
 
             public Building()
@@ -118,7 +122,7 @@ namespace BuildingThemes
                     foreach (var theme in config.themes)
                     {
                         var newTheme = new Theme(theme.name);
-                        foreach (var building in theme.buildings.Where(building => !theme.isBuiltIn || !building.isBuiltIn))
+                        foreach (var building in theme.buildings.Where(building => !theme.isBuiltIn || !building.isBuiltIn || !building.include))
                         {
                             newTheme.buildings.Add(building);
                         }
@@ -149,13 +153,22 @@ namespace BuildingThemes
         private static void addBuiltInTheme(Configuration config, string themeName, string[] specificBuildings)
         {
             var theme = config.getTheme(themeName);
-
             if (theme == null)
             {
                 theme = new Theme(themeName);
-                //theme.isBuiltIn = true;
                 config.themes.Add(theme);
             }
+            else
+            {
+                foreach (var building in theme.buildings)
+                {
+                    if (sharedBuildings.Contains(building.name) || specificBuildings.Contains(building.name))
+                    {
+                        building.isBuiltIn = true;
+                    }
+                }
+            }
+            theme.isBuiltIn = true; //if user extends a built in it should be marked as budilt-in anyway
             theme.addAll(sharedBuildings, true);
             theme.addAll(specificBuildings, true);
         }

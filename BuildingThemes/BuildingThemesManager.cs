@@ -115,6 +115,10 @@ namespace BuildingThemes
             var mergedTheme = new HashSet<string>();
             foreach (var building in themes.SelectMany(theme => theme.buildings))
             {
+                if (!building.include)
+                {
+                    continue;
+                }
                 if (mergedTheme.Add(building.name))
                 {
                     if (BuildingThemesMod.isDebug)
@@ -122,6 +126,7 @@ namespace BuildingThemes
                         UnityEngine.Debug.LogFormat("Building Themes: BuildingThemesManager. Adding building {0} to merged theme.", building.name);
                     }
                 }
+
             }
             return mergedTheme;
         }
