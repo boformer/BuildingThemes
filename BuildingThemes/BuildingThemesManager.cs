@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using ColossalFramework;
+using System;
 
 namespace BuildingThemes
 {
@@ -14,7 +15,7 @@ namespace BuildingThemes
             new Dictionary<uint, HashSet<string>>(128);
 
         private readonly Configuration configuration;
-
+        private static readonly string filename = "BuildingThemes.xml";
 
         public BuildingThemesManager()
         {
@@ -22,7 +23,7 @@ namespace BuildingThemes
             {
                 UnityEngine.Debug.LogFormat("Building Themes: Constructing BuildingThemesManager", Thread.CurrentThread.ManagedThreadId);
             }
-            var filename = "BuildingThemes.xml";
+            
             configuration = Configuration.Deserialize(filename);
             if (configuration == null)
             {
@@ -42,6 +43,29 @@ namespace BuildingThemes
         {
             _districtsThemes.Clear();
             _mergedThemes.Clear();
+        }
+
+        public void AddTheme(Configuration.Theme theme, string modName) 
+        {
+            if (configuration == null || theme == null)
+            {
+                return;
+            }
+
+            var existingTheme = configuration.getTheme(theme.name);
+
+            if (existingTheme != null)
+            {
+                existingTheme.buildings.AddRange(theme.buildings);
+            }
+            else
+            {
+                configuration.themes.Add(theme);
+            }
+
+            Configuration.Serialize(filename, configuration);
+
+            UnityEngine.Debug.LogFormat("Building Themes: Theme {0} added by mod {1}", theme.name, modName);
         }
 
         public void EnableTheme(uint districtIdx, Configuration.Theme theme, bool autoMerge)
