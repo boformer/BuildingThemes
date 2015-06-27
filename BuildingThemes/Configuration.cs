@@ -122,12 +122,16 @@ namespace BuildingThemes
                     foreach (var theme in config.themes)
                     {
                         var newTheme = new Theme(theme.name);
+
                         foreach (var building in theme.buildings.Where(building => !theme.isBuiltIn || !building.isBuiltIn || !building.include))
                         {
                             newTheme.buildings.Add(building);
                         }
 
-                        configCopy.themes.Add(newTheme);
+                        if (!theme.isBuiltIn || newTheme.buildings.Count > 0)
+                        {
+                            configCopy.themes.Add(newTheme);
+                        }
                     }
 
                     xmlSerializer.Serialize(streamWriter, configCopy);

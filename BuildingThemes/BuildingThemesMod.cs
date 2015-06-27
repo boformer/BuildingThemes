@@ -109,6 +109,8 @@ namespace BuildingThemes
                 Debug.Log("Building Themes: Initializing Building Themes Mod...");
             }
             Singleton<BuildingThemesManager>.instance.Reset();
+            Singleton<BuildingThemesManager>.instance.searchBuildingThemeMods();
+
             DetoursHolder.InitTable();
             DetoursHolder.FilteringStrategy = new DefaultFilteringStrategy();//new StubFilteringStrategy();
             //TODO(earalov): save redirected state
