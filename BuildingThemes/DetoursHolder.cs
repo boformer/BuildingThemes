@@ -177,14 +177,15 @@ namespace BuildingThemes
                     "Building Themes: Detoured ZoneBlock.SimulationStep was called. blockID: {0}, position: {1}. current thread: {2}",
                     blockID, zoneBlock.m_position, Thread.CurrentThread.ManagedThreadId);
             }
-            position = zoneBlock.m_position;
 
             /*
+            position = zoneBlock.m_position;
+
             RedirectionHelper.RevertJumpTo(zoneBlockSimulationStepPtr, zoneBlockSimulationStepState);
             zoneBlockSimulationStep.Invoke(zoneBlock, new object[] { blockID });
             RedirectionHelper.PatchJumpTo(zoneBlockSimulationStepPtr, zoneBlockSimulationStepDetourPtr);
             */
-
+            
             ZoneManager instance = Singleton<ZoneManager>.instance;
 
             int rowCount = zoneBlock.RowCount;
@@ -686,19 +687,10 @@ namespace BuildingThemes
             int num28 = 0;
 
             // begin mod
-            int depth_alt;
-            int width_alt;
-
-            // determine the calculated plot with the maximum depth
-            depth_alt = depth_A;
-            width_alt = width_A;
+            int depth_alt = depth_A;
+            int width_alt = width_A;
 
             if (depth_alt > 4) depth_alt = 4;
-
-
-            UnityEngine.Debug.Log("spawnpointRow = " + spawnpointRow);
-            UnityEngine.Debug.Log("num15 + num16 + 1 = " + (num15 + num16 + 1));
-            UnityEngine.Debug.Log("num19 + num20 + 1 = " + (num19 + num20 + 1));
             // end mod
 
             while (num28 < 8) // while (num28 < 6)
@@ -875,24 +867,36 @@ namespace BuildingThemes
                 {
                     ZoneBlock.GetIndustryType(vector6, out subService, out level);
                 }
+
+                // begin mod
+                position = vector6;
+                // end mod
+                if (BuildingThemesMod.isDebug) 
+                { 
+                    UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}",  service, subService, level, width, depth, zoningMode3, num28);
+                }
                 buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, depth, zoningMode3);
-
-
-                if (zoningMode3 != BuildingInfo.ZoningMode.Straight) UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}", 
-                
-                    service, subService, level, width, depth, zoningMode3, num28);
 
                 if (buildingInfo != null)
                 {
                     // begin mod
-                    if (buildingInfo.GetLength() == depth && buildingInfo.GetWidth() == width)
+                    if (buildingInfo.GetLength() != depth)
                     {
-                        UnityEngine.Debug.Log("Success! Prefab found.");
-                        break;
+                        depth = buildingInfo.GetLength();
+
+                        vector6 = m_position + VectorUtils.X_Y(((float)depth * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                     }
                     // end mod
+                    if (BuildingThemesMod.isDebug)
+                    {
+                        UnityEngine.Debug.Log("Success! Prefab found.");
+                    }
+                    break;
                 }
-                UnityEngine.Debug.Log("Failure! No prefab found.");
+                if (BuildingThemesMod.isDebug)
+                {
+                    UnityEngine.Debug.Log("Failure! No prefab found.");
+                }
                 goto IL_DF0;
             }
             if (buildingInfo == null)
@@ -918,8 +922,6 @@ namespace BuildingThemes
             ushort num31;
             if (Singleton<BuildingManager>.instance.CreateBuilding(out num31, ref Singleton<SimulationManager>.instance.m_randomizer, buildingInfo, vector6, num30, depth, Singleton<SimulationManager>.instance.m_currentBuildIndex))
             {
-                UnityEngine.Debug.LogFormat("Building created: {0}", buildingInfo.name);
-                
                 Singleton<SimulationManager>.instance.m_currentBuildIndex += 1u;
                 switch (service)
                 {
@@ -956,7 +958,7 @@ namespace BuildingThemes
                 var result = Singleton<ImmaterialResourceManager>.instance.AddResource(resource, rate, positionArg, radius);
                 RedirectionHelper.PatchJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceDetourPtr);
                 return result;
-
+            
         }
 
 
