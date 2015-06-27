@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading;
 using ColossalFramework;
+using System;
+using ColossalFramework.Plugins;
 
 namespace BuildingThemes
 {
@@ -12,9 +14,30 @@ namespace BuildingThemes
             new Dictionary<uint, HashSet<Configuration.Theme>>(128);
         private readonly Dictionary<uint, HashSet<string>> _mergedThemes =
             new Dictionary<uint, HashSet<string>>(128);
+        private Configuration _configuration;
 
-        private readonly Configuration configuration;
+        private Configuration Configuration 
+        {
+            get {
+                if (_configuration == null) 
+                {
+                    _configuration = Configuration.Deserialize(filename);
 
+                    if (_configuration == null)
+                    {
+                        _configuration = new Configuration();
+                        Configuration.Serialize(filename, Configuration);
+                    }
+
+                    Configuration.addBuiltInEuropeanTheme(_configuration);
+                    Configuration.addBuiltInInternationalTheme(_configuration);
+                }
+
+                return _configuration;
+            }
+        }
+
+        private static readonly string filename = "BuildingThemes.xml";
 
         public BuildingThemesManager()
         {
@@ -22,26 +45,55 @@ namespace BuildingThemes
             {
                 UnityEngine.Debug.LogFormat("Building Themes: Constructing BuildingThemesManager", Thread.CurrentThread.ManagedThreadId);
             }
-            var filename = "BuildingThemes.xml";
-            configuration = Configuration.Deserialize(filename);
-            if (configuration == null)
+        }
+
+        public void searchBuildingThemeMods()
+        {
+            foreach(var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo()) 
             {
-                if (BuildingThemesMod.isDebug)
+                if (!pluginInfo.isEnabled) continue;
+
+                var themeMod = pluginInfo.userModInstance as IBuildingThemeUserMod;
+
+                if (themeMod != null) 
                 {
-                    UnityEngine.Debug.LogFormat("Building Themes: No theme config file discovered. Generating default config");
+                    foreach(var theme in themeMod.Themes)
+                    {
+                        AddModTheme(theme, themeMod.Name);
+                    }
                 }
-                configuration = new Configuration();
-                Configuration.Serialize(filename, configuration);
+            }
+        }
+
+        private void AddModTheme(Configuration.Theme theme, string modName)
+        {
+            if (theme == null)
+            {
+                return;
             }
 
-            Configuration.addBuiltInEuropeanTheme(configuration);
-            Configuration.addBuiltInInternationalTheme(configuration);
+            var existingTheme = Configuration.getTheme(theme.name);
+
+            if (existingTheme != null)
+            {
+                existingTheme.buildings.AddRange(theme.buildings);
+            }
+            else
+            {
+                theme.isBuiltIn = true;
+                Configuration.themes.Add(theme);
+            }
+
+            Configuration.Serialize(filename, Configuration);
+
+            UnityEngine.Debug.LogFormat("Building Themes: Theme {0} added by mod {1}", theme.name, modName);
         }
 
         public void Reset()
         {
             _districtsThemes.Clear();
             _mergedThemes.Clear();
+            _configuration = null;
         }
 
         public void EnableTheme(uint districtIdx, Configuration.Theme theme, bool autoMerge)
@@ -183,12 +235,12 @@ namespace BuildingThemes
 
         public List<Configuration.Theme> GetAllThemes()
         {
-            return configuration.themes;
+            return Configuration.themes;
         }
 
         public Configuration.Theme GetThemeNyName(string themeName)
         {
-            var themes = configuration.themes.Where(theme => theme.name == themeName).ToList();
+            var themes = Configuration.themes.Where(theme => theme.name == themeName).ToList();
             return themes.Count == 0 ? null : themes[0];
         }
     }
