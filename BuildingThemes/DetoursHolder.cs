@@ -880,9 +880,16 @@ namespace BuildingThemes
                 if (buildingInfo != null)
                 {
                     // begin mod
-                    if (buildingInfo.GetLength() != depth)
+                    // If the depth of the found prefab is smaller than the one we were looking for, recalculate the position and make sure that the asset does not waste space
+                    if (buildingInfo.GetWidth() == width && buildingInfo.GetLength() != depth)
                     {
                         depth = buildingInfo.GetLength();
+
+                        vector6 = m_position + VectorUtils.X_Y(((float)depth * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
+                    }
+                    else if (buildingInfo.GetLength() == width && buildingInfo.GetWidth() != depth)
+                    {
+                        depth = buildingInfo.GetWidth();
 
                         vector6 = m_position + VectorUtils.X_Y(((float)depth * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                     }
