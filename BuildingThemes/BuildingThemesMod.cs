@@ -170,15 +170,32 @@ namespace BuildingThemes
 
         public override void OnReleased() 
         {
-            UnityEngine.Debug.LogFormat("Reverting detoured methods...");
-            
-            RedirectionHelper.RevertRedirect(DetoursHolder.getRandomBuildingInfo, DetoursHolder.getRandomBuildingInfoState);
-            RedirectionHelper.RevertJumpTo(DetoursHolder.zoneBlockSimulationStepPtr, DetoursHolder.zoneBlockSimulationStepState);
-            RedirectionHelper.RevertJumpTo(DetoursHolder.resourceManagerAddResourcePtr, DetoursHolder.resourceManagerAddResourceState);
+            UnityEngine.Debug.Log("Building Themes: Reverting detoured methods...");
 
-            // GUI
-            RedirectionHelper.RevertRedirect(PoliciesPanelDetour.refreshPanel, PoliciesPanelDetour.refreshPanelState);
-            RedirectionHelper.RevertRedirect(PoliciesPanelDetour.setParentButton, PoliciesPanelDetour.setParentButtonState);
+            if (DetoursHolder.getRandomBuildingInfo != null) {
+                UnityEngine.Debug.Log("Building Themes: Reverting simulation methods");
+
+                RedirectionHelper.RevertRedirect(DetoursHolder.getRandomBuildingInfo, DetoursHolder.getRandomBuildingInfoState);
+                DetoursHolder.getRandomBuildingInfo = null;
+
+                RedirectionHelper.RevertJumpTo(DetoursHolder.zoneBlockSimulationStepPtr, DetoursHolder.zoneBlockSimulationStepState);
+
+                RedirectionHelper.RevertJumpTo(DetoursHolder.resourceManagerAddResourcePtr, DetoursHolder.resourceManagerAddResourceState);
+                
+            }
+            if (PoliciesPanelDetour.refreshPanel != null) 
+            {
+                UnityEngine.Debug.Log("Building Themes: Reverting GUI methods");
+                
+                // GUI
+                RedirectionHelper.RevertRedirect(PoliciesPanelDetour.refreshPanel, PoliciesPanelDetour.refreshPanelState);
+                PoliciesPanelDetour.refreshPanel = null;
+
+                RedirectionHelper.RevertRedirect(PoliciesPanelDetour.setParentButton, PoliciesPanelDetour.setParentButtonState);
+                PoliciesPanelDetour.setParentButton = null;
+
+            }
+            UnityEngine.Debug.Log("Building Themes: Done!");
         }
 
         private string GetCurrentEnvironment()
