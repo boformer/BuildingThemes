@@ -58,7 +58,6 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="DefaultFilteringStrategy.cs" />
     <Compile Include="DetoursHolder.cs" />
-    <Compile Include="IBuildingThemeUserMod.cs" />
     <Compile Include="IFilteringStrategy.cs" />
     <Compile Include="PoliciesPanelDetour.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -4,6 +4,8 @@ using System.Threading;
 using ColossalFramework;
 using System;
 using ColossalFramework.Plugins;
+using System.IO;
+using UnityEngine;
 
 namespace BuildingThemes
 {
@@ -53,14 +55,22 @@ namespace BuildingThemes
             {
                 if (!pluginInfo.isEnabled) continue;
 
-                var themeMod = pluginInfo.userModInstance as IBuildingThemeUserMod;
+                try {
+                    Configuration config = Configuration.Deserialize(Path.Combine(pluginInfo.modPath, "BuildingThemes.xml"));
 
-                if (themeMod != null) 
-                {
-                    foreach(var theme in themeMod.Themes)
+                    if (config == null) 
                     {
-                        AddModTheme(theme, themeMod.Name);
+                        continue;
+                    } 
+
+                    foreach (var theme in config.themes)
+                    {
+                        AddModTheme(theme, pluginInfo.name);
                     }
+                }
+                catch(Exception e)
+                {
+                    Debug.Log("Error while parsing BuildingThemes.xml of mod " + pluginInfo.name);
                 }
             }
         }
@@ -70,6 +80,11 @@ namespace BuildingThemes
             if (theme == null)
             {
                 return;
+            }
+
+            foreach (var building in theme.buildings) 
+            {
+                building.isBuiltIn = true;
             }
 
             var existingTheme = Configuration.getTheme(theme.name);

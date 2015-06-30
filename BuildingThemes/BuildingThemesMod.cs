@@ -154,6 +154,8 @@ namespace BuildingThemes
 
         public override void OnLevelLoaded(LoadMode mode) 
         {
+            base.OnLevelLoaded(mode);
+            
             // Is it an actual game ?
             //if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
 
