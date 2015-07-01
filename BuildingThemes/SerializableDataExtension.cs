@@ -10,6 +10,7 @@ using UnityEngine;
 
 namespace BuildingThemes
 {
+    // This extension handles the loading and saving of district theme data (which themes are assigned to a district).
     public class SerializableDataExtension : ISerializableDataExtension
     {
         public static string DataId = "BuildingThemes"; //TODO(earalov): maybe support versioning?

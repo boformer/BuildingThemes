@@ -56,15 +56,18 @@
     <Compile Include="BuildingThemesManager.cs" />
     <Compile Include="BuildingThemesMod.cs" />
     <Compile Include="Configuration.cs" />
-    <Compile Include="DefaultFilteringStrategy.cs" />
-    <Compile Include="DetoursHolder.cs" />
-    <Compile Include="IFilteringStrategy.cs" />
-    <Compile Include="PoliciesPanelDetour.cs" />
+    <Compile Include="Filter\DefaultFilteringStrategy.cs" />
+    <Compile Include="Detour\BuildingManagerDetour.cs" />
+    <Compile Include="Detour\ImmaterialResourceManagerDetour.cs" />
+    <Compile Include="Detour\ZoneBlockDetour.cs" />
+    <Compile Include="Filter\IFilteringStrategy.cs" />
+    <Compile Include="Detour\PoliciesPanelDetour.cs" />
+    <Compile Include="LevelUpExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RedirectionHelper.cs" />
+    <Compile Include="Detour\RedirectionHelper.cs" />
     <Compile Include="SerializableDataExtension.cs" />
-    <Compile Include="StubFilteringStrategy.cs" />
-    <Compile Include="ThemePolicyContainer.cs" />
+    <Compile Include="Filter\StubFilteringStrategy.cs" />
+    <Compile Include="GUI\ThemePolicyContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="BuildingThemes.xml">

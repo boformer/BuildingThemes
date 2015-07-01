@@ -1,195 +1,75 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Reflection;
-using System.Threading;
-using ColossalFramework;
+﻿using ColossalFramework;
 using ColossalFramework.Math;
+using System;
+using System.Reflection;
 using UnityEngine;
-using ColossalFramework.UI;
 
-namespace BuildingThemes
+namespace BuildingThemes.Detour
 {
-
-    class DetoursHolder
+    // This detour contains the modified plot calculation algorithm
+    public class ZoneBlockDetour
     {
+        private static bool deployed = false;
 
-        private static Dictionary<ulong, ushort> seedTable = new Dictionary<ulong, ushort>();
-        public static IFilteringStrategy FilteringStrategy;
-
-        public static void InitTable()
-        {
-            seedTable.Clear();
-            for (ushort _seed = 0; _seed <= 65534; ++_seed)
-            {
-                var seed = (ulong)(6364136223846793005L * (long)_seed + 1442695040888963407L);
-                seedTable.Add(seed, _seed);
-            }
-        }
-
-        //we'll use this variable to pass position to GetRandomBuildingInfo method. Or we can just pass District
-        public static Vector3 position;
-
-        public static RedirectCallsState getRandomBuildingInfoState;
-        public static MethodInfo getRandomBuildingInfo;
-
-        public static RedirectCallsState zoneBlockSimulationStepState;
-        public static MethodInfo zoneBlockSimulationStep;
-        public static IntPtr zoneBlockSimulationStepPtr;
-        public static IntPtr zoneBlockSimulationStepDetourPtr;
-        
-        private static MethodInfo refreshAreaBuidlings;
-        private static MethodInfo getAreaIndex;
-
-        public static RedirectCallsState resourceManagerAddResourceState;
-        public static MethodInfo resourceManagerAddResource;
-        public static IntPtr resourceManagerAddResourcePtr;
-        public static IntPtr resourceManagerAddResourceDetourPtr;
-
-        //this is detoured version of BuildingManger#GetRandomBuildingInfo method. Note, that it's an instance method. It's better because this way all registers will be expected to have the same values
-        //as in original methods
-        public BuildingInfo GetRandomBuildingInfo(ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
-        {
-
-            var isRandomizerSimulatorManagers = r.seed == Singleton<SimulationManager>.instance.m_randomizer.seed; //I do it here in case if randomizer methodos mell be called later
-            var randimizerSeed = r.seed; //if they are called seed will change
-            if (BuildingThemesMod.isDebug)
-            {
-                UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo was called. seed: {0} (singleton seed: {1}). service: {2}, subService: {3}," +
-                    "level: {4}, width: {5}, length: {6}, zoningMode: {7}, current thread: {8}\nStack trace: {9}", r.seed, Singleton<SimulationManager>.instance.m_randomizer.seed,
-                    service, subService, level, width, length, zoningMode,
-                                            Thread.CurrentThread.ManagedThreadId, System.Environment.StackTrace);
-            }
-            //this part is the same as in original method
-            var buildingManager = Singleton<BuildingManager>.instance;
-            if (refreshAreaBuidlings == null)
-            {
-                refreshAreaBuidlings = typeof(BuildingManager).GetMethod("RefreshAreaBuildings", BindingFlags.NonPublic | BindingFlags.Instance);
-            }
-            refreshAreaBuidlings.Invoke(buildingManager, new object[] { });
-            var areaBuildings = (FastList<ushort>[])GetInstanceField(typeof(BuildingManager), buildingManager, "m_areaBuildings");
-            if (getAreaIndex == null)
-            {
-                getAreaIndex = typeof(BuildingManager).GetMethod("GetAreaIndex", BindingFlags.NonPublic | BindingFlags.Static);
-            }
-            FastList<ushort> fastList = areaBuildings[(int)getAreaIndex.Invoke(null, new object[] { service, subService, level, width, length, zoningMode })];
-            if (fastList == null)
-            {
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat("Building Themes: Fast list is null. Return null, current thread: {0}",
-                        Thread.CurrentThread.ManagedThreadId);
-                }
-                return (BuildingInfo)null;
-            }
-
-            if (fastList.m_size == 0)
-            {
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat(
-                        "Building Themes: Fast list is empty. Return null, current thread: {0}",
-                        Thread.CurrentThread.ManagedThreadId);
-                }
-                return (BuildingInfo)null;
-            }
-
-            if (isRandomizerSimulatorManagers)
-            {
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat(
-                        "Building Themes: Getting position from static variable. position: {0}, current thread: {1}",
-                        position, Thread.CurrentThread.ManagedThreadId);
-                }
-                FilterList(position, ref fastList);
-            }
-            else
-            {
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat(
-                        "Building Themes: Getting position from seed {0}... current thread: {1}", randimizerSeed,
-                        Thread.CurrentThread.ManagedThreadId);
-                }
-                var buildingId = seedTable[randimizerSeed];
-                var building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
-                var buildingPosition = building.m_position;
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat(
-                        "Building Themes: Getting position from seed {0}. building: {1}, buildingId: {2}, position: {3}, threadId: {4}",
-                        randimizerSeed, building.Info.name, buildingId, buildingPosition,
-                        Thread.CurrentThread.ManagedThreadId);
-                }
-                FilterList(buildingPosition, ref fastList);
-            }
-            if (fastList.m_size == 0)
-            {
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat(
-                        "Building Themes: Filtered list is empty. Return null, current thread: {0}",
-                        Thread.CurrentThread.ManagedThreadId);
-                }
-                return (BuildingInfo)null;
-            }
-            int index = r.Int32((uint)fastList.m_size);
-            var buildingInfo = PrefabCollection<BuildingInfo>.GetPrefab((uint)fastList.m_buffer[index]);
-            return buildingInfo;
-        }
-
-        private static void FilterList(Vector3 position, ref FastList<ushort> list)
-        {
-            //districtIdx==0 probably means 'outside of any district'
-            var districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position);
-
-            if (BuildingThemesMod.isDebug)
-            {
-                UnityEngine.Debug.LogFormat(
-                    "Building Themes: Detoured GetRandomBuildingInfo. districtIdx: {0};current thread: {1}",
-                    districtIdx, Thread.CurrentThread.ManagedThreadId);
-            }
-
-            var newList = new FastList<ushort>();
-            for (var i = 0; i < list.m_size; i++)
-            {
-                var name = PrefabCollection<BuildingInfo>.GetPrefab(list.m_buffer[i]).name;
-                if (FilteringStrategy.DoesBuildingBelongToDistrict(name, districtIdx))
-                {
-                    newList.Add(list.m_buffer[i]);
-                }
-            }
-            list = newList;
-        }
-
+        private static RedirectCallsState _ZoneBlock_SimulationStep_state;
+        private static MethodInfo _ZoneBlock_SimulationStep_original;
+        private static MethodInfo _ZoneBlock_SimulationStep_detour;
 
         private static MethodInfo _CheckBlock;
         private static MethodInfo _IsGoodPlace;
 
-        public void ZoneBlockSimulationStep(ushort blockID)
+        public static void Deploy()
         {
+            if (!deployed)
+            {
+                _ZoneBlock_SimulationStep_original = typeof(ZoneBlock).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
+                _ZoneBlock_SimulationStep_detour = typeof(ZoneBlockDetour).GetMethod("SimulationStep", BindingFlags.Instance | BindingFlags.Public);
+                _ZoneBlock_SimulationStep_state = RedirectionHelper.RedirectCalls(_ZoneBlock_SimulationStep_original, _ZoneBlock_SimulationStep_detour);
+
+                _CheckBlock = typeof(ZoneBlock).GetMethod("CheckBlock", BindingFlags.NonPublic | BindingFlags.Instance);
+                _IsGoodPlace = typeof(ZoneBlock).GetMethod("IsGoodPlace", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                deployed = true;
+
+                Debug.Log("Building Themes: ZoneBlock Methods detoured!");
+            }
+        }
+
+        public static void Revert()
+        {
+            if (deployed)
+            {
+                RedirectionHelper.RevertRedirect(_ZoneBlock_SimulationStep_original, _ZoneBlock_SimulationStep_state);
+                _ZoneBlock_SimulationStep_original = null;
+                _ZoneBlock_SimulationStep_detour = null;
+
+                _CheckBlock = null;
+                _IsGoodPlace = null;
+
+                deployed = false;
+
+                Debug.Log("Building Themes: ZoneBlock Methods restored!");
+            }
+        }
+
+
+        // Detours
+
+        public void SimulationStep(ushort blockID)
+        {
+            // This is the decompiled ZoneBlock.SimulationStep() method
+            // Segments which were changed are marked with "begin mod" and "end mod"
+
             var zoneBlock = Singleton<ZoneManager>.instance.m_blocks.m_buffer[blockID];
+
             if (BuildingThemesMod.isDebug)
             {
                 UnityEngine.Debug.LogFormat(
-                    "Building Themes: Detoured ZoneBlock.SimulationStep was called. blockID: {0}, position: {1}. current thread: {2}",
-                    blockID, zoneBlock.m_position, Thread.CurrentThread.ManagedThreadId);
+                    "Building Themes: Detoured ZoneBlock.SimulationStep was called. blockID: {0}, position: {1}.", blockID, zoneBlock.m_position);
             }
 
-            /*
-            position = zoneBlock.m_position;
-
-            RedirectionHelper.RevertJumpTo(zoneBlockSimulationStepPtr, zoneBlockSimulationStepState);
-            zoneBlockSimulationStep.Invoke(zoneBlock, new object[] { blockID });
-            RedirectionHelper.PatchJumpTo(zoneBlockSimulationStepPtr, zoneBlockSimulationStepDetourPtr);
-            */
-            
-            ZoneManager instance = Singleton<ZoneManager>.instance;
-
+            ZoneManager zoneManager = Singleton<ZoneManager>.instance;
             int rowCount = zoneBlock.RowCount;
-
             float m_angle = zoneBlock.m_angle;
 
             Vector2 xDirection = new Vector2(Mathf.Cos(m_angle), Mathf.Sin(m_angle)) * 8f;
@@ -216,27 +96,27 @@ namespace BuildingThemes
             switch (zone)
             {
                 case ItemClass.Zone.ResidentialLow:
-                    num4 = instance.m_actualResidentialDemand;
+                    num4 = zoneManager.m_actualResidentialDemand;
                     num4 += instance2.m_districts.m_buffer[(int)district].CalculateResidentialLowDemandOffset();
                     break;
                 case ItemClass.Zone.ResidentialHigh:
-                    num4 = instance.m_actualResidentialDemand;
+                    num4 = zoneManager.m_actualResidentialDemand;
                     num4 += instance2.m_districts.m_buffer[(int)district].CalculateResidentialHighDemandOffset();
                     break;
                 case ItemClass.Zone.CommercialLow:
-                    num4 = instance.m_actualCommercialDemand;
+                    num4 = zoneManager.m_actualCommercialDemand;
                     num4 += instance2.m_districts.m_buffer[(int)district].CalculateCommercialLowDemandOffset();
                     break;
                 case ItemClass.Zone.CommercialHigh:
-                    num4 = instance.m_actualCommercialDemand;
+                    num4 = zoneManager.m_actualCommercialDemand;
                     num4 += instance2.m_districts.m_buffer[(int)district].CalculateCommercialHighDemandOffset();
                     break;
                 case ItemClass.Zone.Industrial:
-                    num4 = instance.m_actualWorkplaceDemand;
+                    num4 = zoneManager.m_actualWorkplaceDemand;
                     num4 += instance2.m_districts.m_buffer[(int)district].CalculateIndustrialDemandOffset();
                     break;
                 case ItemClass.Zone.Office:
-                    num4 = instance.m_actualWorkplaceDemand;
+                    num4 = zoneManager.m_actualWorkplaceDemand;
                     num4 += instance2.m_districts.m_buffer[(int)district].CalculateOfficeDemandOffset();
                     break;
                 default:
@@ -244,7 +124,7 @@ namespace BuildingThemes
             }
             Vector2 a = VectorUtils.XZ(m_position);
             Vector2 vector3 = a - 3.5f * xDirection + ((float)spawnpointRow - 3.5f) * zDirection;
-            int[] tmpXBuffer = instance.m_tmpXBuffer;
+            int[] tmpXBuffer = zoneManager.m_tmpXBuffer;
             for (int i = 0; i < 13; i++)
             {
                 tmpXBuffer[i] = 0;
@@ -265,23 +145,19 @@ namespace BuildingThemes
             {
                 for (int k = num5; k <= num7; k++)
                 {
-                    ushort num9 = instance.m_zoneGrid[j * 150 + k];
+                    ushort num9 = zoneManager.m_zoneGrid[j * 150 + k];
                     int num10 = 0;
                     while (num9 != 0)
                     {
-                        Vector3 positionVar = instance.m_blocks.m_buffer[(int)num9].m_position;
-                        float num11 = Mathf.Max(Mathf.Max(vector4.x - 46f - positionVar.x, vector4.y - 46f - positionVar.z), Mathf.Max(positionVar.x - vector5.x - 46f, positionVar.z - vector5.y - 46f));
-                        
+                        Vector3 positionVar = zoneManager.m_blocks.m_buffer[(int)num9].m_position;
+                        float num11 = Mathf.Max(Mathf.Max(vector4.x - 46f - positionVar.x, vector4.y - 46f - positionVar.z), 
+                            Mathf.Max(positionVar.x - vector5.x - 46f, positionVar.z - vector5.y - 46f));
+
                         if (num11 < 0f)
                         {
-                            if (_CheckBlock == null)
-                            {
-                                _CheckBlock = typeof(ZoneBlock).GetMethod("CheckBlock", BindingFlags.NonPublic | BindingFlags.Instance);
-                            }
-                            
-                            _CheckBlock.Invoke(zoneBlock, new object[] {instance.m_blocks.m_buffer[(int)num9], tmpXBuffer, zone, vector3, xDirection, zDirection, quad});
+                            _CheckBlock.Invoke(zoneBlock, new object[] { zoneManager.m_blocks.m_buffer[(int)num9], tmpXBuffer, zone, vector3, xDirection, zDirection, quad });
                         }
-                        num9 = instance.m_blocks.m_buffer[(int)num9].m_nextGridBlock;
+                        num9 = zoneManager.m_blocks.m_buffer[(int)num9].m_nextGridBlock;
                         if (++num10 >= 32768)
                         {
                             CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
@@ -332,25 +208,20 @@ namespace BuildingThemes
                 return;
             }
 
-            if (_IsGoodPlace == null)
-            {
-                _IsGoodPlace = typeof(ZoneBlock).GetMethod("IsGoodPlace", BindingFlags.NonPublic | BindingFlags.Instance);
-            }
-
-            bool flag3 = (bool) _IsGoodPlace.Invoke(zoneBlock, new object[] {vector3});
+            bool flag3 = (bool)_IsGoodPlace.Invoke(zoneBlock, new object[] { vector3 });
             if (Singleton<SimulationManager>.instance.m_randomizer.Int32(100u) >= num4)
             {
                 if (flag3)
                 {
-                    instance.m_goodAreaFound[(int)zone] = 1024;
+                    zoneManager.m_goodAreaFound[(int)zone] = 1024;
                 }
                 return;
             }
-            if (!flag3 && instance.m_goodAreaFound[(int)zone] > -1024)
+            if (!flag3 && zoneManager.m_goodAreaFound[(int)zone] > -1024)
             {
-                if (instance.m_goodAreaFound[(int)zone] == 0)
+                if (zoneManager.m_goodAreaFound[(int)zone] == 0)
                 {
-                    instance.m_goodAreaFound[(int)zone] = -1;
+                    zoneManager.m_goodAreaFound[(int)zone] = -1;
                 }
                 return;
             }
@@ -698,7 +569,7 @@ namespace BuildingThemes
                 switch (num28)
                 {
                     // Corner cases
-                    
+
                     case 0:
                         if (zoningMode != BuildingInfo.ZoningMode.Straight)
                         {
@@ -767,7 +638,7 @@ namespace BuildingThemes
                             if (width_alt == width_A)
                             {
                                 num25_row = num15 + num16 + 1;
-                                
+
                             }
                             else
                             {
@@ -809,7 +680,7 @@ namespace BuildingThemes
                         width_alt = width_A;
                         if (depth_alt > 4) depth_alt = 4;
                         // end mod
-                    
+
                         //int width_B = num20 - num19 + 1;
                         num25_row = num19 + num20 + 1;
                         length = depth_B;
@@ -818,12 +689,12 @@ namespace BuildingThemes
                         goto IL_D6A;
                     // begin mod
                     case 7:
-                       
+
                         if (width_alt > 1)
                         {
                             width_alt--;
                         }
-                        else 
+                        else
                         {
                             break;
                         }
@@ -864,11 +735,13 @@ namespace BuildingThemes
                 }
 
                 // begin mod
-                position = vector6;
+                // Here we pass the position to the BuildingManager.getRandomBuildingInfo method
+                BuildingManagerDetour.position = vector6;
                 // end mod
-                if (BuildingThemesMod.isDebug) 
-                { 
-                    UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}",  service, subService, level, width, length, zoningMode3, num28);
+
+                if (BuildingThemesMod.isDebug)
+                {
+                    UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}", service, subService, level, width, length, zoningMode3, num28);
                 }
                 buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3);
 
@@ -899,7 +772,7 @@ namespace BuildingThemes
                             length = buildingInfo.GetLength();
                         }
                         else
-                        { 
+                        {
                             // Yes? Shrink the plot so all props are in the bounds
                             int newLength = buildingInfo.GetLength() + Mathf.CeilToInt(occupiedExtraSpace / 8);
                             length = Mathf.Min(length, newLength);
@@ -954,51 +827,20 @@ namespace BuildingThemes
                 switch (service)
                 {
                     case ItemClass.Service.Residential:
-                        instance.m_actualResidentialDemand = Mathf.Max(0, instance.m_actualResidentialDemand - 5);
+                        zoneManager.m_actualResidentialDemand = Mathf.Max(0, zoneManager.m_actualResidentialDemand - 5);
                         break;
                     case ItemClass.Service.Commercial:
-                        instance.m_actualCommercialDemand = Mathf.Max(0, instance.m_actualCommercialDemand - 5);
+                        zoneManager.m_actualCommercialDemand = Mathf.Max(0, zoneManager.m_actualCommercialDemand - 5);
                         break;
                     case ItemClass.Service.Industrial:
-                        instance.m_actualWorkplaceDemand = Mathf.Max(0, instance.m_actualWorkplaceDemand - 5);
+                        zoneManager.m_actualWorkplaceDemand = Mathf.Max(0, zoneManager.m_actualWorkplaceDemand - 5);
                         break;
                     case ItemClass.Service.Office:
-                        instance.m_actualWorkplaceDemand = Mathf.Max(0, instance.m_actualWorkplaceDemand - 5);
+                        zoneManager.m_actualWorkplaceDemand = Mathf.Max(0, zoneManager.m_actualWorkplaceDemand - 5);
                         break;
                 }
             }
-            instance.m_goodAreaFound[(int)zone] = 1024;
-        }
-
-        public int ImmaterialResourceManagerAddResource(ImmaterialResourceManager.Resource resource, int rate, Vector3 positionArg, float radius)
-        {
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat(
-                        "Building Themes: Detoured ImmaterialResource.AddResource was called. position: {0}. current thread: {1}",
-                        positionArg, Thread.CurrentThread.ManagedThreadId);
-                }
-                if (resource == ImmaterialResourceManager.Resource.Abandonment)
-                {
-                    position = positionArg;
-                }
-                RedirectionHelper.RevertJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceState);
-                var result = Singleton<ImmaterialResourceManager>.instance.AddResource(resource, rate, positionArg, radius);
-                RedirectionHelper.PatchJumpTo(resourceManagerAddResourcePtr, resourceManagerAddResourceDetourPtr);
-                return result;
-            
-        }
-
-
-
-        
-
-        internal static object GetInstanceField(Type type, object instance, string fieldName)
-        {
-            BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
-                | BindingFlags.Static;
-            FieldInfo field = type.GetField(fieldName, bindFlags);
-            return field.GetValue(instance);
+            zoneManager.m_goodAreaFound[(int)zone] = 1024;
         }
     }
 }

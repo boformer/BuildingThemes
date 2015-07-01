@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using ColossalFramework;
 using System;
 using ColossalFramework.Plugins;
@@ -16,19 +15,22 @@ namespace BuildingThemes
             new Dictionary<uint, HashSet<Configuration.Theme>>(128);
         private readonly Dictionary<uint, HashSet<string>> _mergedThemes =
             new Dictionary<uint, HashSet<string>>(128);
-        private Configuration _configuration;
 
-        private Configuration Configuration 
+
+        private const string userConfigPath = "BuildingThemes.xml";
+        private Configuration _configuration;
+        private Configuration Configuration
         {
-            get {
-                if (_configuration == null) 
+            get
+            {
+                if (_configuration == null)
                 {
-                    _configuration = Configuration.Deserialize(filename);
+                    _configuration = Configuration.Deserialize(userConfigPath);
 
                     if (_configuration == null)
                     {
                         _configuration = new Configuration();
-                        Configuration.Serialize(filename, Configuration);
+                        Configuration.Serialize(userConfigPath, Configuration);
                     }
                 }
 
@@ -36,36 +38,28 @@ namespace BuildingThemes
             }
         }
 
-        private static readonly string filename = "BuildingThemes.xml";
-
-        public BuildingThemesManager()
-        {
-            if (BuildingThemesMod.isDebug)
-            {
-                UnityEngine.Debug.LogFormat("Building Themes: Constructing BuildingThemesManager", Thread.CurrentThread.ManagedThreadId);
-            }
-        }
-
+        private const string modConfigPath = "BuildingThemes.xml";
         public void searchBuildingThemeMods()
         {
-            foreach(var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo()) 
+            foreach (var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo())
             {
                 if (!pluginInfo.isEnabled) continue;
 
-                try {
-                    Configuration config = Configuration.Deserialize(Path.Combine(pluginInfo.modPath, "BuildingThemes.xml"));
+                try
+                {
+                    Configuration config = Configuration.Deserialize(Path.Combine(pluginInfo.modPath, modConfigPath));
 
-                    if (config == null) 
+                    if (config == null)
                     {
                         continue;
-                    } 
+                    }
 
                     foreach (var theme in config.themes)
                     {
                         AddModTheme(theme, pluginInfo.name);
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Debug.Log("Error while parsing BuildingThemes.xml of mod " + pluginInfo.name);
                 }
@@ -79,7 +73,7 @@ namespace BuildingThemes
                 return;
             }
 
-            foreach (var building in theme.buildings) 
+            foreach (var building in theme.buildings)
             {
                 building.isBuiltIn = true;
             }
@@ -88,9 +82,9 @@ namespace BuildingThemes
 
             if (existingTheme != null)
             {
-                foreach (var building in theme.buildings) 
+                foreach (var building in theme.buildings)
                 {
-                    if (!existingTheme.containsBuilding(building.name)) 
+                    if (!existingTheme.containsBuilding(building.name))
                     {
                         existingTheme.buildings.Add(building);
                     }
@@ -102,7 +96,7 @@ namespace BuildingThemes
                 Configuration.themes.Add(theme);
             }
 
-            Configuration.Serialize(filename, Configuration);
+            Configuration.Serialize(userConfigPath, Configuration);
 
             UnityEngine.Debug.LogFormat("Building Themes: Theme {0} added by mod {1}", theme.name, modName);
         }
@@ -214,10 +208,10 @@ namespace BuildingThemes
             return theme ?? (_mergedThemes[districtIdx] = MergeDistrictThemes(districtIdx));
         }
 
-        private HashSet<Configuration.Theme> getDefaultDistrictThemes(uint districtIdx) 
+        private HashSet<Configuration.Theme> getDefaultDistrictThemes(uint districtIdx)
         {
             var theme = new HashSet<Configuration.Theme>();
-            
+
             if (districtIdx == 0)
             {
                 // city-wide default derived from environment (european, sunny, boreal, tropical)
@@ -234,7 +228,7 @@ namespace BuildingThemes
                 }
             }
             else
-            { 
+            {
                 // district theme derived from city-wide theme
 
                 theme.UnionWith(GetDistrictThemes(0, true));
