@@ -88,6 +88,8 @@ namespace BuildingThemes
 
         public static bool isDebug = false;
 
+        private GUI.UIThemeManager themeManager;
+
         public string Name
         {
             get
@@ -157,17 +159,22 @@ namespace BuildingThemes
             base.OnLevelLoaded(mode);
             
             // Is it an actual game ?
-            //if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
+            if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
 
-            // TODO load data (serialized for policies, xml for themes)
+            UIView view = UIView.GetAView();
 
-            // Hook into policies GUI
-            //ToolsModifierControl.policiesPanel.component.eventVisibilityChanged += OnPoliciesPanelVisibilityChanged;
+            themeManager = (GUI.UIThemeManager)view.AddUIComponent(typeof(GUI.UIThemeManager));
         }
 
         public override void OnLevelUnloading()
         {
+            base.OnLevelUnloading();
+
             Singleton<BuildingThemesManager>.instance.Reset();
+
+            if (themeManager == null) return;
+
+            GUI.UIUtils.DestroyDeeply(themeManager);
         }
 
         public override void OnReleased() 
