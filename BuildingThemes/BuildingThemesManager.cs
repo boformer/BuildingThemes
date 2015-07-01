@@ -91,7 +91,13 @@ namespace BuildingThemes
 
             if (existingTheme != null)
             {
-                existingTheme.buildings.AddRange(theme.buildings);
+                foreach (var building in theme.buildings) 
+                {
+                    if (!existingTheme.containsBuilding(building.name)) 
+                    {
+                        existingTheme.buildings.Add(building);
+                    }
+                }
             }
             else
             {
