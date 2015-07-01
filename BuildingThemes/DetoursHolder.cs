@@ -681,7 +681,7 @@ namespace BuildingThemes
             BuildingInfo buildingInfo = null;
             Vector3 vector6 = Vector3.zero;
             int num25_row = 0;
-            int depth = 0;
+            int length = 0;
             int width = 0;
             BuildingInfo.ZoningMode zoningMode3 = BuildingInfo.ZoningMode.Straight;
             int num28 = 0;
@@ -703,7 +703,7 @@ namespace BuildingThemes
                         if (zoningMode != BuildingInfo.ZoningMode.Straight)
                         {
                             num25_row = num15 + num16 + 1;
-                            depth = depth_A;
+                            length = depth_A;
                             width = width_A;
                             zoningMode3 = zoningMode;
                             goto IL_D6A;
@@ -713,7 +713,7 @@ namespace BuildingThemes
                         if (zoningMode2 != BuildingInfo.ZoningMode.Straight)
                         {
                             num25_row = num19 + num20 + 1;
-                            depth = depth_B;
+                            length = depth_B;
                             width = width_B;
                             zoningMode3 = zoningMode2;
                             goto IL_D6A;
@@ -725,7 +725,7 @@ namespace BuildingThemes
                             if (depth_A >= 4)
                             {
                                 num25_row = num15 + num16 + 1;
-                                depth = ((!flag7) ? 2 : 3);
+                                length = ((!flag7) ? 2 : 3);
                                 width = width_A;
                                 zoningMode3 = zoningMode;
                                 goto IL_D6A;
@@ -738,7 +738,7 @@ namespace BuildingThemes
                             if (depth_B >= 4)
                             {
                                 num25_row = num19 + num20 + 1;
-                                depth = ((!flag8) ? 2 : 3);
+                                length = ((!flag8) ? 2 : 3);
                                 width = width_B;
                                 zoningMode3 = zoningMode2;
                                 goto IL_D6A;
@@ -783,7 +783,7 @@ namespace BuildingThemes
 
 
 
-                            depth = depth_alt;
+                            length = depth_alt;
                             width = width_alt;
 
                             zoningMode3 = zoningMode;
@@ -797,7 +797,7 @@ namespace BuildingThemes
                     case 5:
                         //int width_A = num16 - num15 + 1;
                         num25_row = num15 + num16 + 1;
-                        depth = depth_A;
+                        length = depth_A;
                         width = width_A;
                         zoningMode3 = BuildingInfo.ZoningMode.Straight;
                         goto IL_D6A;
@@ -812,7 +812,7 @@ namespace BuildingThemes
                     
                         //int width_B = num20 - num19 + 1;
                         num25_row = num19 + num20 + 1;
-                        depth = depth_B;
+                        length = depth_B;
                         width = width_B;
                         zoningMode3 = BuildingInfo.ZoningMode.Straight;
                         goto IL_D6A;
@@ -822,11 +822,6 @@ namespace BuildingThemes
                         if (width_alt > 1)
                         {
                             width_alt--;
-                        }
-                        else if (depth_alt > 1)
-                        {
-                            depth_alt--;
-                            width_alt = width_A;
                         }
                         else 
                         {
@@ -847,7 +842,7 @@ namespace BuildingThemes
                             num25_row = num15 + num16 + 1;
                         }
 
-                        depth = depth_alt;
+                        length = depth_alt;
                         width = width_alt;
 
                         zoningMode3 = BuildingInfo.ZoningMode.Straight;
@@ -862,7 +857,7 @@ namespace BuildingThemes
                 num28++;
                 continue;
             IL_D6A:
-                vector6 = m_position + VectorUtils.X_Y(((float)depth * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
+                vector6 = m_position + VectorUtils.X_Y(((float)length * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                 if (zone == ItemClass.Zone.Industrial)
                 {
                     ZoneBlock.GetIndustryType(vector6, out subService, out level);
@@ -873,25 +868,51 @@ namespace BuildingThemes
                 // end mod
                 if (BuildingThemesMod.isDebug) 
                 { 
-                    UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}",  service, subService, level, width, depth, zoningMode3, num28);
+                    UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}",  service, subService, level, width, length, zoningMode3, num28);
                 }
-                buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, depth, zoningMode3);
+                buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3);
 
                 if (buildingInfo != null)
                 {
                     // begin mod
-                    // If the depth of the found prefab is smaller than the one we were looking for, recalculate the position and make sure that the asset does not waste space
-                    if (buildingInfo.GetWidth() == width && buildingInfo.GetLength() != depth)
-                    {
-                        depth = buildingInfo.GetLength();
+                    // If the depth of the found prefab is smaller than the one we were looking for, recalculate the size
+                    // This is done by checking the position of every prop
+                    // Plots only get shrinked when no assets are placed on the extra space
 
-                        vector6 = m_position + VectorUtils.X_Y(((float)depth * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
+                    // This is needed for themes which only contain small buildings (e.g. 1x2) 
+                    // because those buildings would occupy more space than needed!
+
+                    if (buildingInfo.GetWidth() == width && buildingInfo.GetLength() != length)
+                    {
+                        // Calculate the z position of the furthest away prop
+                        float biggestPropPosZ = 0;
+                        foreach (var prop in buildingInfo.m_props)
+                        {
+                            biggestPropPosZ = Mathf.Max(biggestPropPosZ, buildingInfo.m_expandFrontYard ? prop.m_position.z : -prop.m_position.z);
+                        }
+
+                        // Check if the furthest away prop is outside of the bounds of the prefab
+                        float occupiedExtraSpace = biggestPropPosZ - buildingInfo.GetLength() * 4;
+                        if (occupiedExtraSpace <= 0)
+                        {
+                            // No? Then shrink the plot to the prefab length so no space is wasted!
+                            length = buildingInfo.GetLength();
+                        }
+                        else
+                        { 
+                            // Yes? Shrink the plot so all props are in the bounds
+                            int newLength = buildingInfo.GetLength() + Mathf.CeilToInt(occupiedExtraSpace / 8);
+                            length = Mathf.Min(length, newLength);
+                        }
+
+                        vector6 = m_position + VectorUtils.X_Y(((float)length * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                     }
-                    else if (buildingInfo.GetLength() == width && buildingInfo.GetWidth() != depth)
-                    {
-                        depth = buildingInfo.GetWidth();
 
-                        vector6 = m_position + VectorUtils.X_Y(((float)depth * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
+                    // This block handles Corner buildings. We always shrink them
+                    else if (buildingInfo.GetLength() == width && buildingInfo.GetWidth() != length)
+                    {
+                        length = buildingInfo.GetWidth();
+                        vector6 = m_position + VectorUtils.X_Y(((float)length * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                     }
                     // end mod
                     if (BuildingThemesMod.isDebug)
@@ -919,15 +940,15 @@ namespace BuildingThemes
             if (zoningMode3 == BuildingInfo.ZoningMode.CornerLeft && buildingInfo.m_zoningMode == BuildingInfo.ZoningMode.CornerRight)
             {
                 num30 -= 1.57079637f;
-                depth = width;
+                length = width;
             }
             else if (zoningMode3 == BuildingInfo.ZoningMode.CornerRight && buildingInfo.m_zoningMode == BuildingInfo.ZoningMode.CornerLeft)
             {
                 num30 += 1.57079637f;
-                depth = width;
+                length = width;
             }
             ushort num31;
-            if (Singleton<BuildingManager>.instance.CreateBuilding(out num31, ref Singleton<SimulationManager>.instance.m_randomizer, buildingInfo, vector6, num30, depth, Singleton<SimulationManager>.instance.m_currentBuildIndex))
+            if (Singleton<BuildingManager>.instance.CreateBuilding(out num31, ref Singleton<SimulationManager>.instance.m_randomizer, buildingInfo, vector6, num30, length, Singleton<SimulationManager>.instance.m_currentBuildIndex))
             {
                 Singleton<SimulationManager>.instance.m_currentBuildIndex += 1u;
                 switch (service)
