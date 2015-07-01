@@ -66,6 +66,11 @@
     <Compile Include="StubFilteringStrategy.cs" />
     <Compile Include="ThemePolicyContainer.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="BuildingThemes.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"

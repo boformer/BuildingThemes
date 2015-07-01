@@ -30,9 +30,6 @@ namespace BuildingThemes
                         _configuration = new Configuration();
                         Configuration.Serialize(filename, Configuration);
                     }
-
-                    Configuration.addBuiltInEuropeanTheme(_configuration);
-                    Configuration.addBuiltInInternationalTheme(_configuration);
                 }
 
                 return _configuration;
