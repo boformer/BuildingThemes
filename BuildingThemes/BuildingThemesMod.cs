@@ -1,5 +1,7 @@
-﻿using ICities;
+﻿using System;
+using ICities;
 using ColossalFramework;
+using ColossalFramework.UI;
 using UnityEngine;
 
 namespace BuildingThemes
@@ -48,6 +50,43 @@ namespace BuildingThemes
             Detour.PoliciesPanelDetour.Revert();
 
             UnityEngine.Debug.Log("Building Themes: Done!");
+        }
+
+        public GameObject gameObject;
+
+        public override void OnLevelLoaded(LoadMode mode)
+        {
+            try
+            {
+                // Is it an actual game ?
+                if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
+
+                // Creating our own gameObect, helps finding the UI in ModTools
+                gameObject = new GameObject("BuildingThemes");
+                gameObject.transform.parent = UIView.GetAView().transform;
+                gameObject.AddComponent<GUI.UIThemeManager>();
+            }
+            catch (Exception e)
+            {
+                // Catching any exception to not block the loading process of other mods
+                Debug.Log("Building Themes: An error has happened during the UI creation.");
+                Debug.LogException(e);
+            }
+        }
+
+        public override void OnLevelUnloading()
+        {
+            try
+            {
+                if(gameObject != null)
+                GameObject.Destroy(gameObject);
+            }
+            catch (Exception e)
+            {
+                // Catching any exception to not block the unloading process of other mods
+                Debug.Log("Building Themes: An error has happened during the UI destruction.");
+                Debug.LogException(e);
+            }
         }
     }
 }
