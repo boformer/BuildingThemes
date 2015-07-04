@@ -42,7 +42,7 @@ namespace BuildingThemes.Detour
 
                 deployed = true;
 
-                Debug.Log("Building Themes: BuildingManager Methods detoured!");
+                Debugger.Log("Building Themes: BuildingManager Methods detoured!");
             }
         }
 
@@ -62,18 +62,21 @@ namespace BuildingThemes.Detour
 
                 deployed = false;
 
-                Debug.Log("Building Themes: BuildingManager Methods restored!");
+                Debugger.Log("Building Themes: BuildingManager Methods restored!");
             }
         }
+
+        public static int debugCounter = 0;
 
 
         // Detour
 
         public BuildingInfo GetRandomBuildingInfo(ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
         {
-            if (BuildingThemesMod.isDebug)
+            if (Debugger.Enabled && debugCounter < 10)
             {
-                UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo was called\nservice: {0}, subService: {1}," +
+                debugCounter++;
+                Debugger.LogFormat("Building Themes: Detoured GetRandomBuildingInfo was called\nservice: {0}, subService: {1}," +
                         "level: {2}, width: {3}, length: {4}, zoningMode: {5}", service, subService, level, width, length, zoningMode);
             }
 
@@ -84,9 +87,9 @@ namespace BuildingThemes.Detour
             FastList<ushort> fastList = areaBuildings[(int)_GetAreaIndex.Invoke(null, new object[] { service, subService, level, width, length, zoningMode })];
             if (fastList == null)
             {
-                if (BuildingThemesMod.isDebug)
+                if (Debugger.Enabled)
                 {
-                    UnityEngine.Debug.LogFormat("Building Themes: Fast list is null. Return null, current thread: {0}",
+                    Debugger.LogFormat("Building Themes: Fast list is null. Return null, current thread: {0}",
                         Thread.CurrentThread.ManagedThreadId);
                 }
                 return (BuildingInfo)null;
@@ -94,9 +97,9 @@ namespace BuildingThemes.Detour
 
             if (fastList.m_size == 0)
             {
-                if (BuildingThemesMod.isDebug)
+                if (Debugger.Enabled)
                 {
-                    UnityEngine.Debug.LogFormat(
+                    Debugger.LogFormat(
                         "Building Themes: Fast list is empty. Return null, current thread: {0}",
                         Thread.CurrentThread.ManagedThreadId);
                 }
@@ -107,9 +110,9 @@ namespace BuildingThemes.Detour
 
             if (fastList.m_size == 0)
             {
-                if (BuildingThemesMod.isDebug)
+                if (Debugger.Enabled)
                 {
-                    UnityEngine.Debug.LogFormat(
+                    Debugger.LogFormat(
                         "Building Themes: Filtered list is empty. Return null, current thread: {0}",
                         Thread.CurrentThread.ManagedThreadId);
                 }
@@ -127,10 +130,10 @@ namespace BuildingThemes.Detour
             //districtIdx==0 probably means 'outside of any district'
             var districtIdx = Singleton<DistrictManager>.instance.GetDistrict(position);
 
-            if (BuildingThemesMod.isDebug)
+            if (Debugger.Enabled)
             {
-                UnityEngine.Debug.LogFormat(
-                    "Building Themes: Detoured GetRandomBuildingInfo. districtIdx: {0};current thread: {1}",
+                Debugger.LogFormat(
+                    "Building Themes: Filtering List for district {0}, current thread: {1}",
                     districtIdx, Thread.CurrentThread.ManagedThreadId);
             }
 

@@ -24,7 +24,7 @@ namespace BuildingThemes.Detour
 
                 deployed = true;
 
-                Debug.Log("Building Themes: ImmaterialResourceManager Methods detoured!");
+                Debugger.Log("Building Themes: ImmaterialResourceManager Methods detoured!");
             }
         }
 
@@ -38,18 +38,20 @@ namespace BuildingThemes.Detour
 
                 deployed = false;
 
-                Debug.Log("Building Themes: ImmaterialResourceManager Methods restored!");
+                Debugger.Log("Building Themes: ImmaterialResourceManager Methods restored!");
             }
         }
 
+        private static int debugCounter = 0;
 
         // Detours
 
         public int AddResource(ImmaterialResourceManager.Resource resource, int rate, Vector3 positionArg, float radius)
         {
-            if (BuildingThemesMod.isDebug)
+            if (Debugger.Enabled && debugCounter < 10)
             {
-                UnityEngine.Debug.Log("Building Themes: Detoured ImmaterialResource.AddResource was called.");
+                debugCounter++;
+                Debugger.Log("Building Themes: Detoured ImmaterialResource.AddResource was called.");
             }
 
             // Catch the position of the abandoned building

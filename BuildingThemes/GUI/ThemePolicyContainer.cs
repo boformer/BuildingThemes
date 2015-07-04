@@ -27,9 +27,9 @@ namespace BuildingThemes.GUI
                     if (Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId, true).Contains(theme) != this.m_Check.isChecked)
                     {
                         this.m_Check.isChecked = !this.m_Check.isChecked;
-                        if (BuildingThemesMod.isDebug)
+                        if (Debugger.Enabled)
                         {
-                            UnityEngine.Debug.LogFormat("Building Themes: ThemePolicyContainer. Chacnging theme {0} checkbox for district {1} to state: {2}",
+                            Debugger.LogFormat("Building Themes: ThemePolicyContainer. Chacnging theme {0} checkbox for district {1} to state: {2}",
                                 theme.name, districtId, this.m_Check.isChecked);
                         }
                     }

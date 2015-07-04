@@ -31,7 +31,7 @@ namespace BuildingThemes.Detour
 
                 deployed = true;
 
-                Debug.Log("Building Themes: ZoneBlock Methods detoured!");
+                Debugger.Log("Building Themes: ZoneBlock Methods detoured!");
             }
         }
 
@@ -48,10 +48,11 @@ namespace BuildingThemes.Detour
 
                 deployed = false;
 
-                Debug.Log("Building Themes: ZoneBlock Methods restored!");
+                Debugger.Log("Building Themes: ZoneBlock Methods restored!");
             }
         }
 
+        private static int debugCount = 0;
 
         // Detours
 
@@ -62,10 +63,10 @@ namespace BuildingThemes.Detour
 
             var zoneBlock = Singleton<ZoneManager>.instance.m_blocks.m_buffer[blockID];
 
-            if (BuildingThemesMod.isDebug)
+            if (Debugger.Enabled && debugCount < 10)
             {
-                UnityEngine.Debug.LogFormat(
-                    "Building Themes: Detoured ZoneBlock.SimulationStep was called. blockID: {0}, position: {1}.", blockID, zoneBlock.m_position);
+                debugCount++;
+                Debugger.LogFormat("Building Themes: Detoured ZoneBlock.SimulationStep was called. blockID: {0}, position: {1}.", blockID, zoneBlock.m_position);
             }
 
             ZoneManager zoneManager = Singleton<ZoneManager>.instance;
@@ -739,10 +740,6 @@ namespace BuildingThemes.Detour
                 BuildingManagerDetour.position = vector6;
                 // end mod
 
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}", service, subService, level, width, length, zoningMode3, num28);
-                }
                 buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3);
 
                 if (buildingInfo != null)
@@ -788,20 +785,24 @@ namespace BuildingThemes.Detour
                         vector6 = m_position + VectorUtils.X_Y(((float)length * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                     }
                     // end mod
-                    if (BuildingThemesMod.isDebug)
+                    if (Debugger.Enabled)
                     {
-                        UnityEngine.Debug.Log("Success! Prefab found.");
+                        Debugger.LogFormat("Found prefab: {5} - {0}, {1}, {2}, {3} x {4}", service, subService, level, width, length, buildingInfo.name);
                     }
                     break;
                 }
-                if (BuildingThemesMod.isDebug)
+                if (Debugger.Enabled)
                 {
-                    UnityEngine.Debug.Log("Failure! No prefab found.");
+                    
                 }
                 goto IL_DF0;
             }
             if (buildingInfo == null)
             {
+                if (Debugger.Enabled)
+                {
+                    Debugger.LogFormat("No prefab found: {0}, {1}, {2}, {3} x {4}", service, subService, level, width, length);
+                }
                 return;
             }
             float num29 = Singleton<TerrainManager>.instance.WaterLevel(VectorUtils.XZ(vector6));

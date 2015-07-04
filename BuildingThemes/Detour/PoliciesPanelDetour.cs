@@ -33,7 +33,7 @@ namespace BuildingThemes.Detour
 
                 deployed = true;
 
-                Debug.Log("Building Themes: PoliciesPanel Methods detoured!");
+                Debugger.Log("Building Themes: PoliciesPanel Methods detoured!");
             }
         }
 
@@ -51,7 +51,7 @@ namespace BuildingThemes.Detour
 
                 deployed = false;
 
-                Debug.Log("Building Themes: PoliciesPanel Methods restored!");
+                Debugger.Log("Building Themes: PoliciesPanel Methods restored!");
             }
         }
 

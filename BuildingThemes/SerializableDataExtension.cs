@@ -47,6 +47,11 @@ namespace BuildingThemes
 
         public void OnLoadData()
         {
+            if (Debugger.Enabled)
+            {
+                Debugger.Log("Building Themes: SerializableDataExtension.OnLoadData was called.");
+            }
+            
             byte[] data = SerializableData.LoadData(DataId);
 
             if (data == null)
@@ -64,6 +69,7 @@ namespace BuildingThemes
 
         private static void OnLoadDataTimed(System.Object source, ElapsedEventArgs e)
         {
+          
             byte[] data = SerializableData.LoadData(DataId);
 
             UniqueId = 0u;
@@ -91,12 +97,17 @@ namespace BuildingThemes
                 
                 foreach (var themeName in district.themes)
                 {
-                    var theme = buildingThemesManager.GetThemeNyName(themeName);
+                    var theme = buildingThemesManager.GetThemeByName(themeName);
                     if (theme == null)
                     {
                         continue;
                     }
                     themes.Add(theme);
+                }
+
+                if (Debugger.Enabled)
+                {
+                    Debugger.LogFormat("Building Themes: Loading: {0} themes enabled for district {1}", themes.Count, district.id);
                 }
 
                 buildingThemesManager.SetThemes(district.id, themes, true);
@@ -105,7 +116,12 @@ namespace BuildingThemes
 
         public void OnSaveData()
         {
-
+            if (Debugger.Enabled) 
+            {
+                Debugger.Log("Building Themes: SerializableDataExtension.OnSaveData was called.");
+                Debugger.Log("ON_SAVE_DATA");
+            }
+            
             var data = new FastList<byte>();
 
             GenerateUniqueId();
@@ -143,10 +159,19 @@ namespace BuildingThemes
                     id = i,
                     themes = themesNames
                 });
-
+                if (Debugger.Enabled)
+                {
+                    Debugger.LogFormat("Building Themes: Saving: {0} themes enabled for district {1}", themes.Count, i);
+                }
             }
 
             DistrictsConfiguration.Serialize(filepath, configuration);
+            if (Debugger.Enabled)
+            {
+                Debugger.LogFormat("Building Themes: Serialization done.");
+                Debugger.AppendThemeList();
+                Debugger.Save();
+            }
         }
     }
 
