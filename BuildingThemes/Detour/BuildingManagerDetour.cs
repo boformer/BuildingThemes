@@ -23,7 +23,6 @@ namespace BuildingThemes.Detour
         // we'll use this variable to pass the building position to GetRandomBuildingInfo method
         public static Vector3 position;
 
-        private static Dictionary<ulong, ushort> seedTable = new Dictionary<ulong, ushort>();
         private static Filter.IFilteringStrategy FilteringStrategy;
 
 
@@ -40,21 +39,10 @@ namespace BuildingThemes.Detour
                 _m_areaBuildings = typeof(BuildingManager).GetField("m_areaBuildings", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
                 FilteringStrategy = new Filter.DefaultFilteringStrategy();
-                InitTable();
 
                 deployed = true;
 
                 Debug.Log("Building Themes: BuildingManager Methods detoured!");
-            }
-        }
-
-        private static void InitTable()
-        {
-            seedTable.Clear();
-            for (ushort _seed = 0; _seed <= 65534; ++_seed)
-            {
-                var seed = (ulong)(6364136223846793005L * (long)_seed + 1442695040888963407L);
-                seedTable.Add(seed, _seed);
             }
         }
 
@@ -71,7 +59,6 @@ namespace BuildingThemes.Detour
                 _m_areaBuildings = null;
 
                 FilteringStrategy = null;
-                seedTable.Clear();
 
                 deployed = false;
 
@@ -84,16 +71,10 @@ namespace BuildingThemes.Detour
 
         public BuildingInfo GetRandomBuildingInfo(ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
         {
-
-            var isRandomizerSimulatorManagers = r.seed == Singleton<SimulationManager>.instance.m_randomizer.seed; //I do it here in case if randomizer methodos mell be called later
-            var randimizerSeed = r.seed; //if they are called seed will change
-
             if (BuildingThemesMod.isDebug)
             {
-                UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo was called. seed: {0} (singleton seed: {1}). service: {2}, subService: {3}," +
-                    "level: {4}, width: {5}, length: {6}, zoningMode: {7}, current thread: {8}\nStack trace: {9}", r.seed, Singleton<SimulationManager>.instance.m_randomizer.seed,
-                    service, subService, level, width, length, zoningMode,
-                                            Thread.CurrentThread.ManagedThreadId, System.Environment.StackTrace);
+                UnityEngine.Debug.LogFormat("Building Themes: Detoured GetRandomBuildingInfo was called\nservice: {0}, subService: {1}," +
+                        "level: {2}, width: {3}, length: {4}, zoningMode: {5}", service, subService, level, width, length, zoningMode);
             }
 
             //this part is the same as in original method
@@ -122,36 +103,8 @@ namespace BuildingThemes.Detour
                 return (BuildingInfo)null;
             }
 
-            if (isRandomizerSimulatorManagers)
-            {
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat(
-                        "Building Themes: Getting position from static variable. position: {0}, current thread: {1}",
-                        position, Thread.CurrentThread.ManagedThreadId);
-                }
-                FilterList(position, ref fastList);
-            }
-            else
-            {
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat(
-                        "Building Themes: Getting position from seed {0}... current thread: {1}", randimizerSeed,
-                        Thread.CurrentThread.ManagedThreadId);
-                }
-                var buildingId = seedTable[randimizerSeed];
-                var building = Singleton<BuildingManager>.instance.m_buildings.m_buffer[buildingId];
-                var buildingPosition = building.m_position;
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat(
-                        "Building Themes: Getting position from seed {0}. building: {1}, buildingId: {2}, position: {3}, threadId: {4}",
-                        randimizerSeed, building.Info.name, buildingId, buildingPosition,
-                        Thread.CurrentThread.ManagedThreadId);
-                }
-                FilterList(buildingPosition, ref fastList);
-            }
+            FilterList(position, ref fastList);
+
             if (fastList.m_size == 0)
             {
                 if (BuildingThemesMod.isDebug)
@@ -167,6 +120,8 @@ namespace BuildingThemes.Detour
             return buildingInfo;
         }
 
+        private static FastList<ushort> filteredList = new FastList<ushort>();
+
         private static void FilterList(Vector3 position, ref FastList<ushort> list)
         {
             //districtIdx==0 probably means 'outside of any district'
@@ -179,16 +134,17 @@ namespace BuildingThemes.Detour
                     districtIdx, Thread.CurrentThread.ManagedThreadId);
             }
 
-            var newList = new FastList<ushort>();
+            filteredList.Clear();
+
             for (var i = 0; i < list.m_size; i++)
             {
                 var name = PrefabCollection<BuildingInfo>.GetPrefab(list.m_buffer[i]).name;
                 if (FilteringStrategy.DoesBuildingBelongToDistrict(name, districtIdx))
                 {
-                    newList.Add(list.m_buffer[i]);
+                    filteredList.Add(list.m_buffer[i]);
                 }
             }
-            list = newList;
+            list = filteredList;
         }
     }
 }

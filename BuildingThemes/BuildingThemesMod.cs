@@ -29,6 +29,10 @@ namespace BuildingThemes
             Detour.BuildingManagerDetour.Deploy();
             Detour.ZoneBlockDetour.Deploy();
             Detour.ImmaterialResourceManagerDetour.Deploy();
+            Detour.BuildingAIDetour<ResidentialBuildingAI>.Deploy();
+            Detour.BuildingAIDetour<CommercialBuildingAI>.Deploy();
+            Detour.BuildingAIDetour<IndustrialBuildingAI>.Deploy();
+            Detour.BuildingAIDetour<OfficeBuildingAI>.Deploy();
             Detour.PoliciesPanelDetour.Deploy();
 
             Debug.Log("Building Themes: Mod successfully intialized.");
@@ -45,6 +49,10 @@ namespace BuildingThemes
             Detour.BuildingManagerDetour.Revert();
             Detour.ZoneBlockDetour.Revert();
             Detour.ImmaterialResourceManagerDetour.Revert();
+            Detour.BuildingAIDetour<ResidentialBuildingAI>.Revert();
+            Detour.BuildingAIDetour<CommercialBuildingAI>.Revert();
+            Detour.BuildingAIDetour<IndustrialBuildingAI>.Revert();
+            Detour.BuildingAIDetour<OfficeBuildingAI>.Revert();
             Detour.PoliciesPanelDetour.Revert();
 
             UnityEngine.Debug.Log("Building Themes: Done!");

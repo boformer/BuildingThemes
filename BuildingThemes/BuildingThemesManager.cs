@@ -62,6 +62,7 @@ namespace BuildingThemes
                 catch (Exception e)
                 {
                     Debug.Log("Error while parsing BuildingThemes.xml of mod " + pluginInfo.name);
+                    Debug.Log(e.ToString());
                 }
             }
         }
