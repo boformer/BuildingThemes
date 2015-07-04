@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace BuildingThemes.Detour
 {
-    public class BuildingAIDetour<A> where A : PrivateBuildingAI
+    public class PrivateBuildingAIDetour<A> where A : PrivateBuildingAI
     {
         private static bool deployed = false;
 
@@ -19,7 +19,7 @@ namespace BuildingThemes.Detour
             if (!deployed)
             {
                 _GetUpgradeInfo_original = typeof(A).GetMethod("GetUpgradeInfo", BindingFlags.Instance | BindingFlags.Public);
-                _GetUpgradeInfo_detour = typeof(BuildingAIDetour<A>).GetMethod("GetUpgradeInfo", BindingFlags.Instance | BindingFlags.Public);
+                _GetUpgradeInfo_detour = typeof(PrivateBuildingAIDetour<A>).GetMethod("GetUpgradeInfo", BindingFlags.Instance | BindingFlags.Public);
                 _GetUpgradeInfo_state = RedirectionHelper.RedirectCalls(_GetUpgradeInfo_original, _GetUpgradeInfo_detour);
 
                 deployed = true;

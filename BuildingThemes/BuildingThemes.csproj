@@ -56,7 +56,7 @@
     <Compile Include="BuildingThemesManager.cs" />
     <Compile Include="BuildingThemesMod.cs" />
     <Compile Include="Configuration.cs" />
-    <Compile Include="Detour\BuildingAIDetour.cs" />
+    <Compile Include="Detour\PrivateBuildingAIDetour.cs" />
     <Compile Include="Detour\ImmaterialResourceManagerDetour.cs" />
     <Compile Include="Filter\DefaultFilteringStrategy.cs" />
     <Compile Include="Detour\BuildingManagerDetour.cs" />
