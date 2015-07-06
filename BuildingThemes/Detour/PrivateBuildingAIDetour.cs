@@ -44,11 +44,6 @@ namespace BuildingThemes.Detour
 
         public virtual BuildingInfo GetUpgradeInfo(ushort buildingID, ref Building data)
         {
-            if (Debugger.Enabled)
-            {
-                Debugger.LogFormat("Building Themes: Detoured {0}.GetUpgradeInfo was called.", typeof(A).Name);
-            }
-            
             BuildingManagerDetour.position = data.m_position;
 
             BuildingInfo info = data.Info;
