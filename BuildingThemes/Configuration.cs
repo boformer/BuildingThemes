@@ -106,7 +106,7 @@ namespace BuildingThemes
             }
             catch (Exception e)
             {
-                Debug.Log("Couldn't load configuration (XML malformed?)");
+                Debugger.Log("Couldn't load configuration (XML malformed?)");
                 throw e;
             }
         }
@@ -139,7 +139,7 @@ namespace BuildingThemes
             }
             catch (Exception e)
             {
-                Debug.Log("Couldn't create configuration file at \"" + Directory.GetCurrentDirectory() + "\"");
+                Debugger.Log("Couldn't create configuration file at \"" + Directory.GetCurrentDirectory() + "\"");
                 throw e;
             }
         }

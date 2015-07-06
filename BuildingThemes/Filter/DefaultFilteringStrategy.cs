@@ -1,6 +1,6 @@
 ﻿using ColossalFramework;
 
-namespace BuildingThemes
+namespace BuildingThemes.Filter
 {
     public class DefaultFilteringStrategy : IFilteringStrategy
     {

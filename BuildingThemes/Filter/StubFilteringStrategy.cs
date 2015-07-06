@@ -1,4 +1,4 @@
-﻿namespace BuildingThemes
+﻿namespace BuildingThemes.Filter
 {
     public class StubFilteringStrategy : IFilteringStrategy
     {
