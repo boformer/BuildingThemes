@@ -19,19 +19,17 @@ namespace BuildingThemes
         public void OnSettingsUI(UIHelperBase helper)
         {
             UIHelperBase group = helper.AddGroup("Building Themes");
-            group.AddCheckbox("Generate Debug Output", false, delegate(bool c) { Debugger.Enabled = c; });
+            group.AddCheckbox("Generate Debug Output", Debugger.Enabled, delegate(bool c) { Debugger.Enabled = c; });
         }
 
         public override void OnCreated(ILoading loading)
         {
             base.OnCreated(loading);
 
-            Debugger.Reset();
+            Debugger.Initialize();
 
             Debugger.Log("ON_CREATED");
-
             Debugger.AppendModList();
-
             Debugger.Log("Building Themes: Initializing Mod...");
 
             Singleton<BuildingThemesManager>.instance.Reset();
@@ -72,8 +70,6 @@ namespace BuildingThemes
 
             Debugger.AppendModList();
             Debugger.AppendThemeList();
-
-            Debugger.Save();
         }
 
         public override void OnLevelUnloading()
@@ -81,8 +77,6 @@ namespace BuildingThemes
             base.OnLevelUnloading();
 
             Debugger.Log("ON_LEVEL_UNLOADING");
-
-            Debugger.Save();
         }
 
         public override void OnReleased()
@@ -113,7 +107,7 @@ namespace BuildingThemes
 
             Debugger.Log("Building Themes: Done!");
 
-            Debugger.Save();
+            Debugger.Deinitialize();
         }
     }
 }

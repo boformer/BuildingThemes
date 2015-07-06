@@ -14,57 +14,61 @@ namespace BuildingThemes
     {
         private const string logFilePath = "BuildingThemes_log.txt";
 
-        private static bool justStarted = true;
-        private static List<string> log = new List<string>(); 
-        
-        public static bool Enabled { get; set; }
+        private static bool initialized = false;
+        private static Logger logger = null;
 
-        public static void Reset()
-        {
-            lock (log) 
-            { 
-                log.Clear();
-            }
-
-            if (Enabled && justStarted)
+        private static bool _enabled = false;
+        public static bool Enabled 
+        { 
+            get 
             {
-                File.Delete(logFilePath);
-                justStarted = false;
+                return _enabled;
+            } 
+            set 
+            {
+                if (value != _enabled) 
+                {
+                    if (_enabled = value)
+                    {
+                        Initialize();
+                    }
+                    else
+                    {
+                        Deinitialize();
+                    }
+                }
+            } 
+        }
+
+        public static void Initialize()
+        {
+            Deinitialize();
+            
+            if (Enabled) 
+            {
+                logger = new Logger(logFilePath);
+                initialized = true;
             }
         }
 
-        public static void Save() 
+        public static void Deinitialize()
         {
-            if (Enabled)
+            if (initialized)
             {
-                if (justStarted)
+                if (logger != null)
                 {
-                    File.Delete(logFilePath);
-                    justStarted = false;
+                    logger.Dispose();
+                    logger = null;
                 }
-                
-                lock (log)
-                {
-                    using (StreamWriter w = File.AppendText(logFilePath))
-                    {
-                        foreach (var message in log)
-                        {
-                            w.WriteLine(message);
-                        }
-                    }
-                    log.Clear();
-                }
+                initialized = false;
             }
         }
 
         public static void Log(string message)
         {
-            if (Enabled)
+            if (initialized && Enabled)
             {
-                lock (log)
-                {
-                    log.Add(message);
-                }
+                logger.Log(message);
                 Debug.Log(message);
             }
         }
@@ -76,15 +80,14 @@ namespace BuildingThemes
 
         public static void LogException(Exception e)
         {
-            Log("ERROR: " + e.Message);
-            Log(e.StackTrace);
+            Log("ERROR: " + e.Message + "\n" + e.StackTrace);
         }
 
         public static void AppendModList()
         {
-            if (Enabled)
+            if (initialized && Enabled)
             {
-                Log("Enabled Plugins:");
+                string message = "Enabled Plugins:\n";
                 
                 foreach (var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo())
                 {
@@ -92,20 +95,92 @@ namespace BuildingThemes
                     {
                         IUserMod mod = (IUserMod)pluginInfo.userModInstance;
 
-                        LogFormat("# {0}", mod.Name);
+                        message += String.Format("# {0}\n", mod.Name);
                     }
                 }
+
+                logger.Log(message);
             }
         }
 
-        internal static void AppendThemeList()
+        public static void AppendThemeList()
         {
-            if (Debugger.Enabled)
+            if (initialized && Enabled)
             {
-                Debugger.Log("Loaded Themes:");
+                string message = "Loaded Themes:";
+
                 foreach (var theme in Singleton<BuildingThemesManager>.instance.GetAllThemes())
                 {
-                    LogFormat("# {0}", theme.name);
+                    message += String.Format("# {0}\n", theme.name);
+                }
+
+                logger.Log(message);
+            }
+        }
+
+        public sealed class Logger : IDisposable
+        {
+            private delegate void WriteMessage(string message);
+            private readonly object Locker = new object();
+            private readonly StreamWriter Writer;
+            private bool Disposed;
+
+            public Logger(string logFileName)
+            {
+                Writer = new StreamWriter(logFileName, true);
+            }
+
+            ~Logger()
+            {
+                Dispose(false);
+            }
+
+            public void Log(string message)
+            {
+                WriteMessage action = this.MessageWriter;
+                action.BeginInvoke(message, MessageWriteComplete, action);
+            }
+
+            public void Dispose()
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+
+            private void MessageWriteComplete(IAsyncResult iar)
+            {
+                ((WriteMessage)iar.AsyncState).EndInvoke(iar);
+            }
+
+            private void Dispose(bool disposing)
+            {
+                lock (Locker)
+                {
+                    if (Disposed)
+                    {
+                        return;
+                    }
+
+                    if (disposing)
+                    {
+                        if (Writer != null)
+                        {
+                            Writer.Dispose();
+                        }
+                    }
+
+                    Disposed = true;
+                }
+            }
+
+            private void MessageWriter(string message)
+            {
+                lock (Locker)
+                {
+                    if (!Disposed && (Writer != null))
+                    {
+                        Writer.WriteLine(message);
+                    }
                 }
             }
         }

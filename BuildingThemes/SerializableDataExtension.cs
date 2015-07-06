@@ -170,7 +170,6 @@ namespace BuildingThemes
             {
                 Debugger.LogFormat("Building Themes: Serialization done.");
                 Debugger.AppendThemeList();
-                Debugger.Save();
             }
         }
     }
