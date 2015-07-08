@@ -142,6 +142,8 @@ namespace BuildingThemes
             var themesManager = Singleton<BuildingThemesManager>.instance;
             for (uint i = 0; i < 128; i++)
             {
+                if (!themesManager.IsThemeManagementEnabled(i)) continue;
+                
                 var themes = themesManager.GetDistrictThemes(i, false);
                 if (themes == null)
                 {

@@ -27,13 +27,19 @@ namespace BuildingThemes.GUI
                     if (Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId, true).Contains(theme) != this.m_Check.isChecked)
                     {
                         this.m_Check.isChecked = !this.m_Check.isChecked;
+
                         if (Debugger.Enabled)
                         {
                             Debugger.LogFormat("Building Themes: ThemePolicyContainer. Chacnging theme {0} checkbox for district {1} to state: {2}",
                                 theme.name, districtId, this.m_Check.isChecked);
                         }
                     }
-                    this.m_Button.state = ((!this.m_Check.isEnabled) ? UIButton.ButtonState.Disabled : ((!this.m_Check.isChecked) ? UIButton.ButtonState.Normal : UIButton.ButtonState.Focused));
+
+                    this.m_Check.isEnabled = BuildingThemesManager.instance.IsThemeManagementEnabled(districtId);
+
+                    this.m_Button.state = (!this.m_Check.isChecked) ? UIButton.ButtonState.Normal : UIButton.ButtonState.Focused;
+                
+                    this.m_Button.opacity = (!this.m_Check.isEnabled) ? 0.5f : 1f;
                 }
             }
         }
