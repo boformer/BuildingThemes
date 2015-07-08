@@ -59,15 +59,12 @@
     <Compile Include="Debugger.cs" />
     <Compile Include="Detour\PrivateBuildingAIDetour.cs" />
     <Compile Include="Detour\ImmaterialResourceManagerDetour.cs" />
-    <Compile Include="Filter\DefaultFilteringStrategy.cs" />
     <Compile Include="Detour\BuildingManagerDetour.cs" />
     <Compile Include="Detour\ZoneBlockDetour.cs" />
-    <Compile Include="Filter\IFilteringStrategy.cs" />
     <Compile Include="Detour\PoliciesPanelDetour.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Detour\RedirectionHelper.cs" />
     <Compile Include="SerializableDataExtension.cs" />
-    <Compile Include="Filter\StubFilteringStrategy.cs" />
     <Compile Include="GUI\ThemePolicyContainer.cs" />
   </ItemGroup>
   <ItemGroup>
