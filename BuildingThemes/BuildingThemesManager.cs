@@ -4,7 +4,6 @@ using ColossalFramework;
 using System;
 using ColossalFramework.Plugins;
 using System.IO;
-using UnityEngine;
 using System.Reflection;
 
 namespace BuildingThemes
@@ -22,7 +21,7 @@ namespace BuildingThemes
         
         private const string userConfigPath = "BuildingThemes.xml";
         private Configuration _configuration;
-        private Configuration Configuration
+        internal Configuration Configuration
         {
             get
             {
@@ -38,12 +37,17 @@ namespace BuildingThemes
                     if (_configuration == null)
                     {
                         _configuration = new Configuration();
-                        Configuration.Serialize(userConfigPath, Configuration);
+                        SaveConfig();
                     }
                 }
 
                 return _configuration;
             }
+        }
+
+        internal void SaveConfig()
+        {
+            if(_configuration != null) Configuration.Serialize(userConfigPath, _configuration);
         }
 
         private const string modConfigPath = "BuildingThemes.xml";
@@ -105,7 +109,7 @@ namespace BuildingThemes
                 Configuration.themes.Add(theme);
             }
 
-            Configuration.Serialize(userConfigPath, Configuration);
+            SaveConfig();
 
             Debugger.LogFormat("Building Themes: Theme {0} added by mod {1}", theme.name, modName);
         }

@@ -44,6 +44,8 @@ namespace BuildingThemes.Detour
 
         public virtual BuildingInfo GetUpgradeInfo(ushort buildingID, ref Building data)
         {
+            // This method is very fragile, no logging here!
+            
             BuildingManagerDetour.position = data.m_position;
             BuildingManagerDetour.upgrade = true;
             BuildingManagerDetour.infoIndex = data.m_infoIndex;

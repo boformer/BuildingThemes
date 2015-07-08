@@ -1,8 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Threading;
 using UnityEngine;
 
 namespace BuildingThemes.Detour
