@@ -181,7 +181,7 @@ namespace BuildingThemes
 
             for (int i = 0; i < 2720; i++)
             {
-                _districtAreaBuildings[districtIdx, i] = FilterList(districtIdx, m_areaBuildings[i]);
+                _districtAreaBuildings[districtIdx, i] = FilterList(districtIdx, m_areaBuildings[i], GetDistrictThemes(districtIdx, true));
             }
         }
 
@@ -190,9 +190,12 @@ namespace BuildingThemes
             return _districtAreaBuildings[districtId, areaIndex];
         }
 
-        private FastList<ushort> FilterList(uint districtIdx, FastList<ushort> fastList)
+        private FastList<ushort> FilterList(uint districtIdx, FastList<ushort> fastList, HashSet<Configuration.Theme> themes)
         {
             if (fastList == null || fastList.m_size == 0) return null;
+
+            // no theme enabled?
+            if (themes.Count == 0) return fastList;
 
             FastList<ushort> filteredList = new FastList<ushort>();
 
@@ -200,11 +203,11 @@ namespace BuildingThemes
             {
                 ushort prefabId = fastList.m_buffer[i];
 
-                BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetLoaded(prefabId);
+                var prefab = PrefabCollection<BuildingInfo>.GetLoaded(prefabId);
 
                 if(prefab == null) continue;
 
-                foreach (var theme in GetDistrictThemes(districtIdx, true)) 
+                foreach (var theme in themes) 
                 {
                     if (theme.containsBuilding(prefab.name)) 
                     {
@@ -214,7 +217,7 @@ namespace BuildingThemes
                 }
             }
 
-            if (filteredList.m_size == null) return null;
+            if (filteredList.m_size == 0) return null;
 
             return filteredList;
         }
