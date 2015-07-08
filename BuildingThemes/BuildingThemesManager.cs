@@ -203,7 +203,7 @@ namespace BuildingThemes
             {
                 ushort prefabId = fastList.m_buffer[i];
 
-                var prefab = PrefabCollection<BuildingInfo>.GetLoaded(prefabId);
+                var prefab = PrefabCollection<BuildingInfo>.GetPrefab(prefabId);
 
                 if(prefab == null) continue;
 
