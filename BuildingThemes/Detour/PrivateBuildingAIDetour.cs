@@ -44,19 +44,18 @@ namespace BuildingThemes.Detour
         {
             // This method is very fragile, no logging here!
 
-            // Pass the position of the building that is upgrading
-            BuildingManagerDetour.position = data.m_position;
-
-            // Also indicate that this is an upgrade. Pass the current prefab info index
-            BuildingManagerDetour.upgrade = true;
-            BuildingManagerDetour.infoIndex = data.m_infoIndex;
-
             BuildingInfo info = data.Info;
 
             Randomizer randomizer = new Randomizer((int)buildingID);
             ItemClass.Level level = info.m_class.m_level + 1;
+
+            /*
             return Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref randomizer, info.m_class.m_service,
                 info.m_class.m_subService, level, data.Width, data.Length, info.m_zoningMode);
+            */
+
+            return BuildingManagerDetour.GetRandomBuildingInfo_Upgrade(data.m_position, data.m_infoIndex, 
+                ref randomizer, info.m_class.m_service, info.m_class.m_subService, level, data.Width, data.Length, info.m_zoningMode)
         }
     }
 }
