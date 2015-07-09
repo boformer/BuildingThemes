@@ -75,6 +75,12 @@ namespace BuildingThemes
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
 
+            [XmlAttribute("min-level"), DefaultValue(-1)]
+            public int minLevel;
+
+            [XmlAttribute("max-level"), DefaultValue(-1)]
+            public int maxLevel;
+
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;
 
