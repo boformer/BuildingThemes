@@ -15,7 +15,6 @@ namespace BuildingThemes
         private const string logFilePath = "BuildingThemes_log.txt";
 
         private static bool initialized = false;
-        private static Logger logger = null;
 
         private static bool _enabled = false;
         public static bool Enabled 
@@ -46,7 +45,6 @@ namespace BuildingThemes
             
             if (Enabled) 
             {
-                logger = new Logger(logFilePath);
                 initialized = true;
             }
         }
@@ -55,11 +53,6 @@ namespace BuildingThemes
         {
             if (initialized)
             {
-                if (logger != null)
-                {
-                    logger.Dispose();
-                    logger = null;
-                }
                 initialized = false;
             }
         }
@@ -68,7 +61,6 @@ namespace BuildingThemes
         {
             if (initialized && Enabled)
             {
-                logger.Log(message);
                 Debug.Log(message);
             }
         }
@@ -80,109 +72,36 @@ namespace BuildingThemes
 
         public static void LogException(Exception e)
         {
-            Log("ERROR: " + e.Message + "\n" + e.StackTrace);
+            Debug.Log("ERROR: " + e.Message + "\n" + e.StackTrace);
         }
 
         public static void AppendModList()
         {
-            if (initialized && Enabled)
-            {
-                string message = "Enabled Plugins:\n";
+            string message = "Enabled Plugins:\n";
                 
-                foreach (var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo())
+            foreach (var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo())
+            {
+                if (pluginInfo.isEnabled)
                 {
-                    if (pluginInfo.isEnabled)
-                    {
-                        IUserMod mod = (IUserMod)pluginInfo.userModInstance;
+                    IUserMod mod = (IUserMod)pluginInfo.userModInstance;
 
-                        message += String.Format("# {0}\n", mod.Name);
-                    }
+                    message += String.Format("# {0}\n", mod.Name);
                 }
-
-                logger.Log(message);
             }
+
+            Debug.Log(message);
         }
 
         public static void AppendThemeList()
         {
-            if (initialized && Enabled)
+            string message = "Loaded Themes:\n";
+
+            foreach (var theme in Singleton<BuildingThemesManager>.instance.GetAllThemes())
             {
-                string message = "Loaded Themes:";
-
-                foreach (var theme in Singleton<BuildingThemesManager>.instance.GetAllThemes())
-                {
-                    message += String.Format("# {0}\n", theme.name);
-                }
-
-                logger.Log(message);
-            }
-        }
-
-        public sealed class Logger : IDisposable
-        {
-            private delegate void WriteMessage(string message);
-            private readonly object Locker = new object();
-            private readonly StreamWriter Writer;
-            private bool Disposed;
-
-            public Logger(string logFileName)
-            {
-                Writer = new StreamWriter(logFileName, true);
+                message += String.Format("# {0}\n", theme.name);
             }
 
-            ~Logger()
-            {
-                Dispose(false);
-            }
-
-            public void Log(string message)
-            {
-                WriteMessage action = this.MessageWriter;
-                action.BeginInvoke(message, MessageWriteComplete, action);
-            }
-
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            private void MessageWriteComplete(IAsyncResult iar)
-            {
-                ((WriteMessage)iar.AsyncState).EndInvoke(iar);
-            }
-
-            private void Dispose(bool disposing)
-            {
-                lock (Locker)
-                {
-                    if (Disposed)
-                    {
-                        return;
-                    }
-
-                    if (disposing)
-                    {
-                        if (Writer != null)
-                        {
-                            Writer.Dispose();
-                        }
-                    }
-
-                    Disposed = true;
-                }
-            }
-
-            private void MessageWriter(string message)
-            {
-                lock (Locker)
-                {
-                    if (!Disposed && (Writer != null))
-                    {
-                        Writer.WriteLine(message);
-                    }
-                }
-            }
+            Debug.Log(message);
         }
     }
 }
