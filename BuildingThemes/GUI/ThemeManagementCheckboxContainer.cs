@@ -22,8 +22,7 @@ namespace BuildingThemes.GUI
             {
                 lock (m_Check)
                 {
-                    ushort districtId = (ushort)ToolsModifierControl.policiesPanel.targetDistrict;
-                    var theme = (Configuration.Theme)m_Check.objectUserData;
+                    var districtId = ToolsModifierControl.policiesPanel.targetDistrict;
 
                     bool managed = BuildingThemesManager.instance.IsThemeManagementEnabled(districtId);
 

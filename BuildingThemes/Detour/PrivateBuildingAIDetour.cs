@@ -54,8 +54,8 @@ namespace BuildingThemes.Detour
                 info.m_class.m_subService, level, data.Width, data.Length, info.m_zoningMode);
             */
 
-            return BuildingManagerDetour.GetRandomBuildingInfo_Upgrade(data.m_position, data.m_infoIndex, 
-                ref randomizer, info.m_class.m_service, info.m_class.m_subService, level, data.Width, data.Length, info.m_zoningMode)
+            return BuildingManagerDetour.GetRandomBuildingInfo_Upgrade(data.m_position, data.m_infoIndex,
+                ref randomizer, info.m_class.m_service, info.m_class.m_subService, level, data.Width, data.Length, info.m_zoningMode);
         }
     }
 }

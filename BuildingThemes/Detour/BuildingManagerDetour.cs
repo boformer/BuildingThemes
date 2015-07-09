@@ -66,10 +66,8 @@ namespace BuildingThemes.Detour
         {
             Debug.Log("GetRandomBuildingInfo_Downgrade called!");
 
-            var buildingManager = Singleton<BuildingManager>.instance;
-
             var areaIndex = GetAreaIndex(service, subService, level, width, length, zoningMode);
-            var districtId = (int)Singleton<DistrictManager>.instance.GetDistrict(position);
+            var districtId = Singleton<DistrictManager>.instance.GetDistrict(position);
 
             // list of possible prefabs
             var fastList = Singleton<BuildingThemesManager>.instance.GetAreaBuildings(districtId, areaIndex);
@@ -91,10 +89,8 @@ namespace BuildingThemes.Detour
         {
             Debug.Log("GetRandomBuildingInfo_Spawn called!");
 
-            var buildingManager = Singleton<BuildingManager>.instance;
-
             var areaIndex = GetAreaIndex(service, subService, level, width, length, zoningMode);
-            var districtId = (int)Singleton<DistrictManager>.instance.GetDistrict(position);
+            var districtId = Singleton<DistrictManager>.instance.GetDistrict(position);
 
             // list of possible prefabs
             var fastList = Singleton<BuildingThemesManager>.instance.GetAreaBuildings(districtId, areaIndex);
@@ -116,10 +112,16 @@ namespace BuildingThemes.Detour
         {
             // This method is very fragile, no logging here!
             
-            var buildingManager = Singleton<BuildingManager>.instance;
+            var districtId = Singleton<DistrictManager>.instance.GetDistrict(position);
+
+            // See if there is a special upgraded building
+            var buildingInfo = BuildingThemesManager.instance.GetConfiguredUpgradedBuildingInfo(infoIndex, districtId);
+            if (buildingInfo != null) 
+            {
+                return buildingInfo;
+            }
 
             var areaIndex = GetAreaIndex(service, subService, level, width, length, zoningMode);
-            var districtId = (int)Singleton<DistrictManager>.instance.GetDistrict(position);
 
             // list of possible prefabs
             var fastList = Singleton<BuildingThemesManager>.instance.GetAreaBuildings(districtId, areaIndex);
@@ -131,7 +133,7 @@ namespace BuildingThemes.Detour
 
             // select a random prefab from the list
             int index = r.Int32((uint)fastList.m_size);
-            var buildingInfo = PrefabCollection<BuildingInfo>.GetPrefab((uint)fastList.m_buffer[index]);
+            buildingInfo = PrefabCollection<BuildingInfo>.GetPrefab((uint)fastList.m_buffer[index]);
 
             return buildingInfo;
         }

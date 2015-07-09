@@ -110,7 +110,7 @@ namespace BuildingThemes
                     Debugger.LogFormat("Building Themes: Loading: {0} themes enabled for district {1}", themes.Count, district.id);
                 }
 
-                buildingThemesManager.SetThemes(district.id, themes, true);
+                buildingThemesManager.SetThemes(district.id, themes);
             }
         }
 
@@ -140,7 +140,7 @@ namespace BuildingThemes
             var configuration = new DistrictsConfiguration();
 
             var themesManager = Singleton<BuildingThemesManager>.instance;
-            for (uint i = 0; i < 128; i++)
+            for (byte i = 0; i < 128; i++)
             {
                 if (!themesManager.IsThemeManagementEnabled(i)) continue;
                 
@@ -181,7 +181,7 @@ namespace BuildingThemes
 
         public class District
         {
-            public uint id;
+            public byte id;
             public string[] themes;
         }
 
