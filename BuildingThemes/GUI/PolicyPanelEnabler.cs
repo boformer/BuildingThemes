@@ -7,6 +7,7 @@ using System.Timers;
 
 namespace BuildingThemes.GUI
 {
+    // Enables the policy panel from the beginning
     public static class PolicyPanelEnabler
     {
         public static bool Unlock 

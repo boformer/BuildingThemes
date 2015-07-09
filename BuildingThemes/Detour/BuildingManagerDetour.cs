@@ -21,6 +21,7 @@ namespace BuildingThemes.Detour
         // we'll use this variable to pass the building position to GetRandomBuildingInfo method
         public static Vector3 position;
 
+        // this variables are used to indicate that the building is upgrading
         public static bool upgrade = false;
         public static ushort infoIndex;
 
@@ -65,56 +66,52 @@ namespace BuildingThemes.Detour
 
         public BuildingInfo GetRandomBuildingInfo(ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
         {
-            //this part is the same as in original method
             var buildingManager = Singleton<BuildingManager>.instance;
 
             var areaIndex = GetAreaIndex(service, subService, level, width, length, zoningMode);
             var districtId = (int)Singleton<DistrictManager>.instance.GetDistrict(position);
 
+            // list of possible prefabs
             var fastList = Singleton<BuildingThemesManager>.instance.GetAreaBuildings(districtId, areaIndex);
 
-            if (fastList == null)
+            if (fastList == null || fastList.m_size == 0)
             {
                 return (BuildingInfo)null;
             }
 
-            if (fastList.m_size == 0)
-            {
-                return (BuildingInfo)null;
-            }
-
+            // select a random prefab from the list
             int index = r.Int32((uint)fastList.m_size);
             var buildingInfo = PrefabCollection<BuildingInfo>.GetPrefab((uint)fastList.m_buffer[index]);
+
             return buildingInfo;
         }
 
+        // This is just a copy of the method in BuildingManager for easy access
         private static int GetAreaIndex(ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
         {
-            int num;
+            int areaIndex;
             if (subService != ItemClass.SubService.None)
             {
-                num = 8 + subService - ItemClass.SubService.ResidentialLow;
+                areaIndex = 8 + subService - ItemClass.SubService.ResidentialLow;
             }
             else
             {
-                num = service - ItemClass.Service.Residential;
+                areaIndex = service - ItemClass.Service.Residential;
             }
-            num = (int)(num * 5 + level);
+            areaIndex = (int)(areaIndex * 5 + level);
             if (zoningMode == BuildingInfo.ZoningMode.CornerRight)
             {
-                num = num * 4 + length - 1;
-                num = num * 4 + width - 1;
-                num = num * 2 + 1;
+                areaIndex = areaIndex * 4 + length - 1;
+                areaIndex = areaIndex * 4 + width - 1;
+                areaIndex = areaIndex * 2 + 1;
             }
             else
             {
-                num = num * 4 + width - 1;
-                num = num * 4 + length - 1;
-                num = (int)(num * 2 + zoningMode);
+                areaIndex = areaIndex * 4 + width - 1;
+                areaIndex = areaIndex * 4 + length - 1;
+                areaIndex = (int)(areaIndex * 2 + zoningMode);
             }
-            return num;
+            return areaIndex;
         }
-
-
     }
 }

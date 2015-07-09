@@ -31,7 +31,6 @@ namespace BuildingThemes
             Debugger.Initialize();
 
             Debugger.Log("ON_CREATED");
-            Debugger.AppendModList();
             Debugger.Log("Building Themes: Initializing Mod...");
 
             PolicyPanelEnabler.Register();

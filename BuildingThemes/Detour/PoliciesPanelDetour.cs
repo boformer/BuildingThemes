@@ -127,11 +127,12 @@ namespace BuildingThemes.Detour
             // Add the theme buttons
             RefreshThemesContainer();
 
+            // Add a checkbox to "Enable Theme Management for this district"
             UICheckBox enableThemeManagementCheckBox = CreateCheckBox(container);
             enableThemeManagementCheckBox.gameObject.AddComponent<ThemeManagementCheckboxContainer>();
             enableThemeManagementCheckBox.text = "Enable Theme Management for this district";
             enableThemeManagementCheckBox.isChecked = false;
-            
+
             enableThemeManagementCheckBox.eventCheckChanged += delegate(UIComponent component, bool isChecked)
             {
                 lock (component)

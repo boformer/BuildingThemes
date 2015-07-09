@@ -1,8 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
-using System;
 using System.Reflection;
-using UnityEngine;
 
 namespace BuildingThemes.Detour
 {
@@ -35,7 +33,7 @@ namespace BuildingThemes.Detour
                 RedirectionHelper.RevertRedirect(_GetUpgradeInfo_original, _GetUpgradeInfo_state);
                 _GetUpgradeInfo_original = null;
                 _GetUpgradeInfo_detour = null;
-                
+
                 deployed = false;
 
                 Debugger.LogFormat("Building Themes: {0} Methods restored!", typeof(A).Name);
@@ -45,8 +43,11 @@ namespace BuildingThemes.Detour
         public virtual BuildingInfo GetUpgradeInfo(ushort buildingID, ref Building data)
         {
             // This method is very fragile, no logging here!
-            
+
+            // Pass the position of the building that is upgrading
             BuildingManagerDetour.position = data.m_position;
+
+            // Also indicate that this is an upgrade. Pass the current prefab info index
             BuildingManagerDetour.upgrade = true;
             BuildingManagerDetour.infoIndex = data.m_infoIndex;
 

@@ -151,7 +151,7 @@ namespace BuildingThemes.Detour
                     while (num9 != 0)
                     {
                         Vector3 positionVar = zoneManager.m_blocks.m_buffer[(int)num9].m_position;
-                        float num11 = Mathf.Max(Mathf.Max(vector4.x - 46f - positionVar.x, vector4.y - 46f - positionVar.z), 
+                        float num11 = Mathf.Max(Mathf.Max(vector4.x - 46f - positionVar.x, vector4.y - 46f - positionVar.z),
                             Mathf.Max(positionVar.x - vector5.x - 46f, positionVar.z - vector5.y - 46f));
 
                         if (num11 < 0f)
@@ -559,10 +559,8 @@ namespace BuildingThemes.Detour
             int num28 = 0;
 
             // begin mod
-            int depth_alt = depth_A;
+            int depth_alt = Mathf.Min(depth_A, 4);
             int width_alt = width_A;
-
-            if (depth_alt > 4) depth_alt = 4;
             // end mod
 
             while (num28 < 8) // while (num28 < 6)
@@ -635,7 +633,6 @@ namespace BuildingThemes.Detour
                                 break;
                             }
 
-                            //TODO play with this
                             if (width_alt == width_A)
                             {
                                 num25_row = num15 + num16 + 1;
@@ -653,8 +650,6 @@ namespace BuildingThemes.Detour
                                 }
                             }
 
-
-
                             length = depth_alt;
                             width = width_alt;
 
@@ -667,7 +662,6 @@ namespace BuildingThemes.Detour
                     // end mod
                     // Straight cases
                     case 5:
-                        //int width_A = num16 - num15 + 1;
                         num25_row = num15 + num16 + 1;
                         length = depth_A;
                         width = width_A;
@@ -676,10 +670,10 @@ namespace BuildingThemes.Detour
                     case 6:
                         // begin mod
 
-                        // again for straight cases
-                        depth_alt = depth_A;
+                        // reset variables
+                        depth_alt = Mathf.Min(depth_A, 4);
                         width_alt = width_A;
-                        if (depth_alt > 4) depth_alt = 4;
+
                         // end mod
 
                         //int width_B = num20 - num19 + 1;
@@ -700,7 +694,6 @@ namespace BuildingThemes.Detour
                             break;
                         }
 
-                        //TODO play with this
                         if (width_alt == width_A)
                         {
                             num25_row = num15 + num16 + 1;
@@ -736,9 +729,11 @@ namespace BuildingThemes.Detour
                 }
 
                 // begin mod
+
                 // Here we pass the position to the BuildingManager.getRandomBuildingInfo method
                 BuildingManagerDetour.position = vector6;
                 BuildingManagerDetour.upgrade = false;
+
                 // end mod
 
                 buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3);
@@ -746,6 +741,7 @@ namespace BuildingThemes.Detour
                 if (buildingInfo != null)
                 {
                     // begin mod
+
                     // If the depth of the found prefab is smaller than the one we were looking for, recalculate the size
                     // This is done by checking the position of every prop
                     // Plots only get shrinked when no assets are placed on the extra space
@@ -785,7 +781,9 @@ namespace BuildingThemes.Detour
                         length = buildingInfo.GetWidth();
                         vector6 = m_position + VectorUtils.X_Y(((float)length * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                     }
+
                     // end mod
+
                     if (Debugger.Enabled)
                     {
                         Debugger.LogFormat("Found prefab: {5} - {0}, {1}, {2}, {3} x {4}", service, subService, level, width, length, buildingInfo.name);
@@ -794,7 +792,7 @@ namespace BuildingThemes.Detour
                 }
                 if (Debugger.Enabled)
                 {
-                    
+
                 }
                 goto IL_DF0;
             }
