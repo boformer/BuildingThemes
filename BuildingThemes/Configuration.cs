@@ -11,6 +11,8 @@ namespace BuildingThemes
 {
     public class Configuration
     {
+        public bool UnlockPolicyPanel = true;
+        
         [XmlArray(ElementName = "Themes")]
         [XmlArrayItem(ElementName = "Theme")]
         public List<Theme> themes = new List<Theme>();
@@ -119,6 +121,9 @@ namespace BuildingThemes
                 using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(filename))
                 {
                     var configCopy = new Configuration();
+
+                    configCopy.UnlockPolicyPanel = config.UnlockPolicyPanel;
+
                     foreach (var theme in config.themes)
                     {
                         var newTheme = new Theme(theme.name);
