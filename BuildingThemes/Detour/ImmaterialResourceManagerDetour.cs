@@ -58,6 +58,7 @@ namespace BuildingThemes.Detour
             if (resource == ImmaterialResourceManager.Resource.Abandonment)
             {
                 BuildingManagerDetour.position = positionArg;
+                BuildingManagerDetour.upgrade = false;
             }
 
             // Call the original method

@@ -1,8 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Threading;
 using UnityEngine;
 
 namespace BuildingThemes.Detour
@@ -23,6 +21,8 @@ namespace BuildingThemes.Detour
         // we'll use this variable to pass the building position to GetRandomBuildingInfo method
         public static Vector3 position;
 
+        public static bool upgrade = false;
+        public static ushort infoIndex;
 
         public static void Deploy()
         {
@@ -60,46 +60,26 @@ namespace BuildingThemes.Detour
             }
         }
 
-        public static int debugCounter = 0;
-
 
         // Detour
 
         public BuildingInfo GetRandomBuildingInfo(ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
         {
-            if (Debugger.Enabled && debugCounter < 10)
-            {
-                debugCounter++;
-                Debugger.LogFormat("Building Themes: Detoured GetRandomBuildingInfo was called\nservice: {0}, subService: {1}," +
-                        "level: {2}, width: {3}, length: {4}, zoningMode: {5}", service, subService, level, width, length, zoningMode);
-            }
-
             //this part is the same as in original method
             var buildingManager = Singleton<BuildingManager>.instance;
 
             var areaIndex = GetAreaIndex(service, subService, level, width, length, zoningMode);
             var districtId = (int)Singleton<DistrictManager>.instance.GetDistrict(position);
 
-            var fastList = Singleton<BuildingThemesManager>.instance.getAreaBuildings(districtId, areaIndex);
+            var fastList = Singleton<BuildingThemesManager>.instance.GetAreaBuildings(districtId, areaIndex);
 
             if (fastList == null)
             {
-                if (Debugger.Enabled)
-                {
-                    Debugger.LogFormat("Building Themes: Fast list is null. Return null, current thread: {0}",
-                        Thread.CurrentThread.ManagedThreadId);
-                }
                 return (BuildingInfo)null;
             }
 
             if (fastList.m_size == 0)
             {
-                if (Debugger.Enabled)
-                {
-                    Debugger.LogFormat(
-                        "Building Themes: Fast list is empty. Return null, current thread: {0}",
-                        Thread.CurrentThread.ManagedThreadId);
-                }
                 return (BuildingInfo)null;
             }
 
@@ -134,5 +114,7 @@ namespace BuildingThemes.Detour
             }
             return num;
         }
+
+
     }
 }

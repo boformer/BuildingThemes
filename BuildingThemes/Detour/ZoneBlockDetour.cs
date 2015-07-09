@@ -738,6 +738,7 @@ namespace BuildingThemes.Detour
                 // begin mod
                 // Here we pass the position to the BuildingManager.getRandomBuildingInfo method
                 BuildingManagerDetour.position = vector6;
+                BuildingManagerDetour.upgrade = false;
                 // end mod
 
                 buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3);

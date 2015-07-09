@@ -44,9 +44,14 @@ namespace BuildingThemes.Detour
 
         public virtual BuildingInfo GetUpgradeInfo(ushort buildingID, ref Building data)
         {
+            // This method is very fragile, no logging here!
+            
             BuildingManagerDetour.position = data.m_position;
+            BuildingManagerDetour.upgrade = true;
+            BuildingManagerDetour.infoIndex = data.m_infoIndex;
 
             BuildingInfo info = data.Info;
+
             Randomizer randomizer = new Randomizer((int)buildingID);
             ItemClass.Level level = info.m_class.m_level + 1;
             return Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref randomizer, info.m_class.m_service,

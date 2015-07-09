@@ -126,6 +126,22 @@ namespace BuildingThemes.Detour
 
             // Add the theme buttons
             RefreshThemesContainer();
+
+            UICheckBox enableThemeManagementCheckBox = CreateCheckBox(container);
+            enableThemeManagementCheckBox.gameObject.AddComponent<ThemeManagementCheckboxContainer>();
+            enableThemeManagementCheckBox.text = "Enable Theme Management for this district";
+            enableThemeManagementCheckBox.isChecked = false;
+            
+            enableThemeManagementCheckBox.eventCheckChanged += delegate(UIComponent component, bool isChecked)
+            {
+                lock (component)
+                {
+                    var districtId1 = (uint)ToolsModifierControl.policiesPanel.targetDistrict;
+
+                    Singleton<BuildingThemesManager>.instance.ToggleThemeManagement(districtId1, isChecked);
+                }
+
+            };
         }
 
         // This method has to be called when the theme list was modified!
@@ -243,6 +259,32 @@ namespace BuildingThemes.Detour
             ((UISprite)policyCheckBox.checkedBoxObject).spriteName = "ToggleBaseFocused";
             policyCheckBox.checkedBoxObject.size = new Vector2(16f, 16f);
             policyCheckBox.checkedBoxObject.relativePosition = Vector3.zero;
+        }
+
+        public static UICheckBox CreateCheckBox(UIComponent parent)
+        {
+            UICheckBox checkBox = (UICheckBox)parent.AddUIComponent<UICheckBox>();
+
+            checkBox.width = 364f;
+            checkBox.height = 20f;
+            checkBox.clipChildren = true;
+
+            UISprite sprite = checkBox.AddUIComponent<UISprite>();
+            sprite.spriteName = "ToggleBase";
+            sprite.size = new Vector2(16f, 16f);
+            sprite.relativePosition = Vector3.zero;
+
+            checkBox.checkedBoxObject = sprite.AddUIComponent<UISprite>();
+            ((UISprite)checkBox.checkedBoxObject).spriteName = "ToggleBaseFocused";
+            checkBox.checkedBoxObject.size = new Vector2(16f, 16f);
+            checkBox.checkedBoxObject.relativePosition = Vector3.zero;
+
+            checkBox.label = checkBox.AddUIComponent<UILabel>();
+            checkBox.label.text = " ";
+            checkBox.label.textScale = 0.9f;
+            checkBox.label.relativePosition = new Vector3(22f, 2f);
+
+            return checkBox;
         }
     }
 }

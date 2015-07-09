@@ -2,6 +2,7 @@
 using ColossalFramework;
 using UnityEngine;
 using System;
+using BuildingThemes.GUI;
 
 namespace BuildingThemes
 {
@@ -19,6 +20,7 @@ namespace BuildingThemes
         public void OnSettingsUI(UIHelperBase helper)
         {
             UIHelperBase group = helper.AddGroup("Building Themes");
+            group.AddCheckbox("Unlock Policies Panel From Start", PolicyPanelEnabler.Unlock, delegate(bool c) { PolicyPanelEnabler.Unlock = c; });
             group.AddCheckbox("Generate Debug Output", Debugger.Enabled, delegate(bool c) { Debugger.Enabled = c; });
         }
 
@@ -31,6 +33,8 @@ namespace BuildingThemes
             Debugger.Log("ON_CREATED");
             Debugger.AppendModList();
             Debugger.Log("Building Themes: Initializing Mod...");
+
+            PolicyPanelEnabler.Register();
 
             Singleton<BuildingThemesManager>.instance.Reset();
             Singleton<BuildingThemesManager>.instance.searchBuildingThemeMods();
@@ -70,6 +74,8 @@ namespace BuildingThemes
 
             Debugger.AppendModList();
             Debugger.AppendThemeList();
+
+            PolicyPanelEnabler.UnlockPolicyToolbarButton();
         }
 
         public override void OnLevelUnloading()
@@ -104,6 +110,8 @@ namespace BuildingThemes
             { 
                 Debugger.LogException(e); 
             }
+
+            PolicyPanelEnabler.Unregister();
 
             Debugger.Log("Building Themes: Done!");
 
