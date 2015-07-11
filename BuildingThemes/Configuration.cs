@@ -57,6 +57,15 @@ namespace BuildingThemes
                 return false;
             }
 
+            public Building getBuilding(string name)
+            {
+                foreach (Building building in buildings)
+                {
+                    if (building.name == name) return building;
+                }
+                return null;
+            }
+
             public Theme(string name)
             {
                 this.name = name;

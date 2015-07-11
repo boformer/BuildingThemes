@@ -66,7 +66,7 @@ namespace BuildingThemes.Detour
         {
             Debug.Log("GetRandomBuildingInfo_Downgrade called!");
 
-            var areaIndex = GetAreaIndex(service, subService, level, width, length, zoningMode);
+            var areaIndex = BuildingThemesManager.GetAreaIndex(service, subService, level, width, length, zoningMode);
             var districtId = Singleton<DistrictManager>.instance.GetDistrict(position);
 
             // list of possible prefabs
@@ -89,7 +89,7 @@ namespace BuildingThemes.Detour
         {
             Debug.Log("GetRandomBuildingInfo_Spawn called!");
 
-            var areaIndex = GetAreaIndex(service, subService, level, width, length, zoningMode);
+            var areaIndex = BuildingThemesManager.GetAreaIndex(service, subService, level, width, length, zoningMode);
             var districtId = Singleton<DistrictManager>.instance.GetDistrict(position);
 
             // list of possible prefabs
@@ -108,20 +108,20 @@ namespace BuildingThemes.Detour
         }
 
         // Called every frame on building upgrade
-        public static BuildingInfo GetRandomBuildingInfo_Upgrade(Vector3 position, ushort infoIndex, ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
+        public static BuildingInfo GetRandomBuildingInfo_Upgrade(Vector3 position, ushort prefabIndex, ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
         {
             // This method is very fragile, no logging here!
             
             var districtId = Singleton<DistrictManager>.instance.GetDistrict(position);
 
             // See if there is a special upgraded building
-            var buildingInfo = BuildingThemesManager.instance.GetConfiguredUpgradedBuildingInfo(infoIndex, districtId);
+            var buildingInfo = BuildingThemesManager.instance.GetUpgradeBuildingInfo(prefabIndex, districtId);
             if (buildingInfo != null) 
             {
                 return buildingInfo;
             }
 
-            var areaIndex = GetAreaIndex(service, subService, level, width, length, zoningMode);
+            var areaIndex = BuildingThemesManager.GetAreaIndex(service, subService, level, width, length, zoningMode);
 
             // list of possible prefabs
             var fastList = Singleton<BuildingThemesManager>.instance.GetAreaBuildings(districtId, areaIndex);
@@ -136,34 +136,6 @@ namespace BuildingThemes.Detour
             buildingInfo = PrefabCollection<BuildingInfo>.GetPrefab((uint)fastList.m_buffer[index]);
 
             return buildingInfo;
-        }
-
-        // This is just a copy of the method in BuildingManager for easy access
-        private static int GetAreaIndex(ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
-        {
-            int areaIndex;
-            if (subService != ItemClass.SubService.None)
-            {
-                areaIndex = 8 + subService - ItemClass.SubService.ResidentialLow;
-            }
-            else
-            {
-                areaIndex = service - ItemClass.Service.Residential;
-            }
-            areaIndex = (int)(areaIndex * 5 + level);
-            if (zoningMode == BuildingInfo.ZoningMode.CornerRight)
-            {
-                areaIndex = areaIndex * 4 + length - 1;
-                areaIndex = areaIndex * 4 + width - 1;
-                areaIndex = areaIndex * 2 + 1;
-            }
-            else
-            {
-                areaIndex = areaIndex * 4 + width - 1;
-                areaIndex = areaIndex * 4 + length - 1;
-                areaIndex = (int)(areaIndex * 2 + zoningMode);
-            }
-            return areaIndex;
         }
     }
 }
