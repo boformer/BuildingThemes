@@ -4,20 +4,28 @@ using ColossalFramework;
 using System;
 using ColossalFramework.Plugins;
 using System.IO;
-using System.Reflection;
 
 namespace BuildingThemes
 {
     public class BuildingThemesManager : Singleton<BuildingThemesManager>
     {
+        private readonly DistrictThemeInfo[] districtThemeInfos = new DistrictThemeInfo[128];
 
-        private readonly Dictionary<uint, HashSet<Configuration.Theme>> _districtsThemes =
-            new Dictionary<uint, HashSet<Configuration.Theme>>(128);
+        private readonly FastList<ushort>[] m_areaBuildings = new FastList<ushort>[2720];
+        private bool m_areaBuildingsDirty = true;
 
-        // similar to BuildingManager.m_areaBuildings, but separate for every district
+        private class DistrictThemeInfo
+        {
+            public bool blacklistMode = false;
+            
+            public readonly HashSet<Configuration.Theme> themes = new HashSet<Configuration.Theme>();
 
-        private readonly bool[] _districtThemesEnabled = new bool[128];
-        private readonly FastList<ushort>[,] _districtAreaBuildings = new FastList<ushort>[128, 2720];
+            // similar to BuildingManager.m_areaBuildings, but separate for every district
+            public readonly FastList<ushort>[] areaBuildings = new FastList<ushort>[2720];
+
+            // building upgrade mapping (prefabLevel1 --> prefabLevel2) for realistic building upgrades
+            public readonly Dictionary<ushort, ushort> upgradeBuildings = new Dictionary<ushort, ushort>();
+        }
         
         private const string userConfigPath = "BuildingThemes.xml";
         private Configuration _configuration;
@@ -52,21 +60,18 @@ namespace BuildingThemes
 
         public void Reset()
         {
-            _districtsThemes.Clear();
+            for (int d = 0; d < districtThemeInfos.Length; d++) 
+            {
+                districtThemeInfos[d] = null;
+            }
+
+            for (int i = 0; i < m_areaBuildings.Length; i++)
+            {
+                m_areaBuildings[i] = null;
+            }
+
             _configuration = null;
-
-            for (int i = 0; i < _districtAreaBuildings.GetLength(0); i++)
-            {
-                for (int j = 0; j < _districtAreaBuildings.GetLength(1); j++)
-                {
-                    _districtAreaBuildings[i, j] = null;
-                }
-            }
-
-            for (int k = 0; k < _districtThemesEnabled.Length; k++)
-            {
-                _districtThemesEnabled[k] = false;
-            }
+            m_areaBuildingsDirty = true;
         }
 
         private const string modConfigPath = "BuildingThemes.xml";
@@ -133,86 +138,114 @@ namespace BuildingThemes
             Debugger.LogFormat("Building Themes: Theme {0} added by mod {1}", theme.name, modName);
         }
 
-
-        public void EnableTheme(uint districtIdx, Configuration.Theme theme, bool autoMerge)
+        public void EnableTheme(byte districtId, Configuration.Theme theme)
         {
-            if (!_districtThemesEnabled[districtIdx]) return;
+            if (!IsThemeManagementEnabled(districtId)) return;
             
             if (Debugger.Enabled)
             {
-                Debugger.LogFormat("Building Themes: BuildingThemesManager. Enabling theme {0} for district {1}. auto merge: {2}",
-                    theme.name, districtIdx, autoMerge);
+                Debugger.LogFormat("Building Themes: BuildingThemesManager. Enabling theme {0} for district {1}.", theme.name, districtId);
             }
+            var themes = GetDistrictThemes(districtId, true);
+
+            if (!districtThemeInfos[districtId].themes.Add(theme))
+            {
+                if (Debugger.Enabled)
+                {
+                    Debugger.LogFormat("Building Themes: BuildingThemesManager. Theme {0} was already enabled for district {1}.", theme.name, districtId);
+                }
+                return;
+            }
+
+            CompileDistrictThemes(districtId);
+        }
+
+        public void DisableTheme(byte districtId, Configuration.Theme theme)
+        {
+            if (!IsThemeManagementEnabled(districtId)) return;
+            
+            if (Debugger.Enabled)
+            {
+                Debugger.LogFormat("Building Themes: BuildingThemesManager. Disabling theme {0} for district {1}.", theme.name, districtId);
+            }
+
+            if (!districtThemeInfos[districtId].themes.Remove(theme))
+            {
+                if (Debugger.Enabled)
+                {
+                    Debugger.LogFormat("Building Themes: BuildingThemesManager. Theme {0} was already disabled for district {1}.", theme.name, districtId);
+                }
+                return;
+            }
+
+            CompileDistrictThemes(districtId);
+        }
+
+        public void setThemeInfo(byte districtId, HashSet<Configuration.Theme> themes, bool blacklistMode)
+        {
+            var info = districtThemeInfos[districtId];
+
+            if (info == null)
+            {
+                info = new DistrictThemeInfo();
+                districtThemeInfos[districtId] = info;
+            }
+            else
+            {
+                info.themes.Clear();
+            }
+
+            info.blacklistMode = blacklistMode;
+
+            // Add the themes to the district theme info
+            info.themes.UnionWith(themes);
+
+            CompileDistrictThemes(districtId);
+        }
+
+        //TODO move this method to DistrictThemeInfo class?
+        public void CompileDistrictThemes(byte districtId) 
+        {
+            var info = districtThemeInfos[districtId];
+
+            if (info == null) return;
+            
+            RefreshAreaBuildings();
+
             HashSet<Configuration.Theme> themes;
-            themes = GetDistrictThemes(districtIdx, true);
 
-            if (!themes.Add(theme))
+            if (info.blacklistMode)
             {
-                if (Debugger.Enabled)
-                {
-                    Debugger.LogFormat("Building Themes: BuildingThemesManager. Theme {0} was already enabled for district {1}.",
-                        theme.name, districtIdx);
-                }
-                return;
+                themes = new HashSet<Configuration.Theme>(GetAllThemes());
+                themes.ExceptWith(info.themes);
             }
-            SetThemes(districtIdx, themes, autoMerge);
-        }
-
-        public void DisableTheme(uint districtIdx, string themeName, bool autoMerge)
-        {
-            if (!_districtThemesEnabled[districtIdx]) return;
-            
-            if (Debugger.Enabled)
+            else
             {
-                Debugger.LogFormat("Building Themes: BuildingThemesManager. Disabling theme {0} for district {1}. auto merge: {2}",
-                themeName, districtIdx, autoMerge);
+                themes = info.themes;
             }
-            var themes = GetDistrictThemes(districtIdx, true);
-            if (themes.RemoveWhere(theme => theme.name.Equals(themeName)) <= 0)
-            {
-                if (Debugger.Enabled)
-                {
-                    Debugger.LogFormat("Building Themes: BuildingThemesManager. Theme {0} was already disabled for district {1}.",
-                        themeName, districtIdx);
-                }
-                return;
+            if (Debugger.Enabled) 
+            { 
+                Debugger.LogFormat("Compiling theme data for district {0}. Themes Set Size: {1}", districtId, themes.Count);
             }
-            SetThemes(districtIdx, themes, autoMerge);
-        }
-
-        public void SetThemes(uint districtIdx, HashSet<Configuration.Theme> themes, bool autoMerge)
-        {
-            _districtsThemes[districtIdx] = new HashSet<Configuration.Theme>(themes);
-            _districtThemesEnabled[districtIdx] = true;
-            if (autoMerge)
-            {
-                MergeDistrictThemes(districtIdx);
-            }
-        }
-
-        public void MergeDistrictThemes(uint districtIdx)
-        {
-            var buildingManager = Singleton<BuildingManager>.instance;
-            typeof(BuildingManager).GetMethod("RefreshAreaBuildings", BindingFlags.NonPublic | BindingFlags.Instance)
-                .Invoke(buildingManager, new object[] { });
-            var AreaBuildings = (FastList<ushort>[])typeof(BuildingManager)
-                .GetField("m_areaBuildings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(buildingManager);
-            
+            // Now filter the list for this district
             for (int i = 0; i < 2720; i++)
             {
-                
-                _districtAreaBuildings[districtIdx, i] = FilterList(districtIdx, AreaBuildings[i], GetDistrictThemes(districtIdx, true));
+                info.areaBuildings[i] = FilterList(districtId, m_areaBuildings[i], themes, info.blacklistMode);
             }
+
+            // TODO compile upgrade mapping!
         }
 
-        private FastList<ushort> FilterList(uint districtIdx, FastList<ushort> fastList, HashSet<Configuration.Theme> themes)
+        private FastList<ushort> FilterList(uint districtIdx, FastList<ushort> fastList, HashSet<Configuration.Theme> themes, bool blacklistMode)
         {
+            // If blacklistMode is true, the themes set contains the themes which are NOT enabled
+            
             if (fastList == null || fastList.m_size == 0) return null;
 
-            // no theme enabled?
+            // no theme enabled? (or disabled in blacklist mode)
             if (themes.Count == 0) return fastList;
 
-            FastList<ushort> filteredList = new FastList<ushort>();
+            var filteredList = new FastList<ushort>();
 
             for (int i = 0; i < fastList.m_size; i++)
             {
@@ -222,13 +255,27 @@ namespace BuildingThemes
 
                 if (prefab == null) continue;
 
+                bool foundInTheme = false;
+
                 foreach (var theme in themes)
                 {
-                    if (theme.containsBuilding(prefab.name))
+                    var building = theme.getBuilding(prefab.name);
+
+                    if (building != null && building.include)
                     {
-                        filteredList.Add(prefabId);
+                        foundInTheme = true;
                         break;
                     }
+                }
+
+                if (foundInTheme != blacklistMode) 
+                {
+                    if (Debugger.Enabled)
+                    {
+                        Debugger.LogFormat("Added {0} to compiled theme!", prefab.name);
+                    }
+
+                    filteredList.Add(prefabId);
                 }
             }
 
@@ -237,37 +284,241 @@ namespace BuildingThemes
             return filteredList;
         }
 
-        public void ToggleThemeManagement(uint districtIdx, bool enabled)
+        public void ToggleThemeManagement(byte districtId, bool enabled)
         {
-            if (enabled == _districtThemesEnabled[districtIdx]) return;
+            if (enabled == IsThemeManagementEnabled(districtId)) return;
 
             if (enabled)
             {
-                SetThemes(districtIdx, GetDistrictThemes(0, true), true);
+                setThemeInfo(districtId, getDefaultThemes(districtId), IsBlacklistModeEnabled(0));
             }
             else
             {
-                _districtThemesEnabled[districtIdx] = false;
-                _districtsThemes[districtIdx] = null;
-
-                for (int i = 0; i < 2720; i++)
-                {
-                    _districtAreaBuildings[districtIdx, i] = null;
-                }
+                districtThemeInfos[districtId] = null;
             }
         }
 
-        public bool IsThemeManagementEnabled(uint districtIdx)
+        public bool IsThemeManagementEnabled(byte districtId)
         {
-            return _districtThemesEnabled[districtIdx];
+            return districtThemeInfos[districtId] != null;
         }
 
-        public FastList<ushort> GetAreaBuildings(int districtId, int areaIndex) 
+        public void ToggleBlacklistMode(byte districtId, bool enabled)
         {
-            // Theme management enabled in district? return custom fastlist for district
-            if (_districtThemesEnabled[districtId])
+            if (!IsThemeManagementEnabled(districtId) || enabled == IsBlacklistModeEnabled(districtId)) return;
+
+            districtThemeInfos[districtId].blacklistMode = enabled;
+            CompileDistrictThemes(districtId);
+        }
+
+        public bool IsBlacklistModeEnabled(byte districtId)
+        {
+            var info = districtThemeInfos[districtId];
+
+            if(info != null)
             {
-                return _districtAreaBuildings[districtId, areaIndex];
+                return info.blacklistMode;
+            }
+            else if(districtId != 0) 
+            {
+                return IsBlacklistModeEnabled(0);
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public BuildingInfo GetUpgradeBuildingInfo(ushort prefabIndex, byte districtId)
+        {
+            var info = districtThemeInfos[districtId];
+
+            if (info == null)
+            {
+                return null;
+            }
+
+            ushort upgradePrefabIndex;
+            if (!info.upgradeBuildings.TryGetValue(prefabIndex, out upgradePrefabIndex))
+            {
+                return null;
+            }
+            
+            return PrefabCollection<BuildingInfo>.GetPrefab(upgradePrefabIndex);
+        }
+
+	    private void RefreshAreaBuildings()
+	    {
+		    if (this.m_areaBuildingsDirty)
+		    {
+			    int num = this.m_areaBuildings.Length;
+			    for (int i = 0; i < num; i++)
+			    {
+				    this.m_areaBuildings[i] = null;
+			    }
+			    int num2 = PrefabCollection<BuildingInfo>.PrefabCount();
+			    for (int j = 0; j < num2; j++)
+			    {
+				    BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab((uint)j);
+				    if (prefab != null && prefab.m_class.m_service != ItemClass.Service.None && prefab.m_placementStyle == ItemClass.Placement.Automatic && prefab.m_class.m_service <= ItemClass.Service.Office)
+				    {
+					    if (prefab.m_cellWidth < 1 || prefab.m_cellWidth > 4)
+					    {
+						    string text = PrefabCollection<BuildingInfo>.PrefabName((uint)j);
+						    CODebugBase<LogChannel>.Error(LogChannel.Core, string.Concat(new object[]
+						    {
+							    "Invalid width (",
+							    text,
+							    "): ",
+							    prefab.m_cellWidth
+						    }));
+					    }
+					    else if (prefab.m_cellLength < 1 || prefab.m_cellLength > 4)
+					    {
+						    string text2 = PrefabCollection<BuildingInfo>.PrefabName((uint)j);
+						    CODebugBase<LogChannel>.Error(LogChannel.Core, string.Concat(new object[]
+						    {
+							    "Invalid length (",
+							    text2,
+							    "): ",
+							    prefab.m_cellLength
+						    }));
+					    }
+					    else
+					    {
+						    int areaIndex = GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
+						    if (this.m_areaBuildings[areaIndex] == null)
+						    {
+							    this.m_areaBuildings[areaIndex] = new FastList<ushort>();
+						    }
+						    this.m_areaBuildings[areaIndex].Add((ushort)j);
+					    }
+				    }
+			    }
+			    int num3 = 17;
+			    for (int k = 0; k < num3; k++)
+			    {
+				    for (int l = 0; l < 5; l++)
+				    {
+					    for (int m = 0; m < 4; m++)
+					    {
+						    for (int n = 1; n < 4; n++)
+						    {
+							    int num4 = k;
+							    num4 = num4 * 5 + l;
+							    num4 = num4 * 4 + m;
+							    num4 = num4 * 4 + n;
+							    num4 *= 2;
+							    FastList<ushort> fastList = this.m_areaBuildings[num4];
+							    FastList<ushort> fastList2 = this.m_areaBuildings[num4 - 2];
+							    if (fastList2 != null)
+							    {
+								    if (fastList == null)
+								    {
+									    this.m_areaBuildings[num4] = fastList2;
+								    }
+								    else
+								    {
+									    for (int num5 = 0; num5 < fastList2.m_size; num5++)
+									    {
+										    fastList.Add(fastList2.m_buffer[num5]);
+									    }
+								    }
+							    }
+						    }
+					    }
+				    }
+			    }
+			    for (int num6 = 0; num6 < num2; num6++)
+			    {
+				    BuildingInfo prefab2 = PrefabCollection<BuildingInfo>.GetPrefab((uint)num6);
+				    if (prefab2 != null && prefab2.m_class.m_service != ItemClass.Service.None && prefab2.m_placementStyle == ItemClass.Placement.Automatic && prefab2.m_class.m_service <= ItemClass.Service.Office)
+				    {
+					    if (prefab2.m_cellWidth >= 1 && prefab2.m_cellWidth <= 4)
+					    {
+						    if (prefab2.m_cellLength >= 1 && prefab2.m_cellLength <= 4)
+						    {
+							    ItemClass.Level level = ItemClass.Level.Level1;
+							    if (prefab2.m_class.m_service == ItemClass.Service.Residential)
+							    {
+								    level = ItemClass.Level.Level5;
+							    }
+							    else if (prefab2.m_class.m_service == ItemClass.Service.Commercial)
+							    {
+								    level = ItemClass.Level.Level3;
+							    }
+							    else if (prefab2.m_class.m_service == ItemClass.Service.Industrial)
+							    {
+								    if (prefab2.m_class.m_subService == ItemClass.SubService.IndustrialGeneric)
+								    {
+									    level = ItemClass.Level.Level3;
+								    }
+							    }
+							    else if (prefab2.m_class.m_service == ItemClass.Service.Office)
+							    {
+								    level = ItemClass.Level.Level3;
+							    }
+							    if (prefab2.m_class.m_level < level)
+							    {
+								    int areaIndex2 = GetAreaIndex(prefab2.m_class.m_service, prefab2.m_class.m_subService, prefab2.m_class.m_level + 1, prefab2.m_cellWidth, prefab2.m_cellLength, prefab2.m_zoningMode);
+								    if (this.m_areaBuildings[areaIndex2] == null)
+								    {
+									    string str = PrefabCollection<BuildingInfo>.PrefabName((uint)num6);
+									    CODebugBase<LogChannel>.Warn(LogChannel.Core, "Building cannot upgrade to next level: " + str);
+								    }
+							    }
+							    if (prefab2.m_class.m_level > ItemClass.Level.Level1)
+							    {
+								    int areaIndex3 = GetAreaIndex(prefab2.m_class.m_service, prefab2.m_class.m_subService, prefab2.m_class.m_level - 1, prefab2.m_cellWidth, prefab2.m_cellLength, prefab2.m_zoningMode);
+								    if (this.m_areaBuildings[areaIndex3] == null)
+								    {
+									    string str2 = PrefabCollection<BuildingInfo>.PrefabName((uint)num6);
+									    CODebugBase<LogChannel>.Warn(LogChannel.Core, "There is no building that would upgrade to: " + str2);
+								    }
+							    }
+						    }
+					    }
+				    }
+			    }
+			    this.m_areaBuildingsDirty = false;
+		    }
+        }
+
+        public static int GetAreaIndex(ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
+        {
+            int areaIndex;
+            if (subService != ItemClass.SubService.None)
+            {
+                areaIndex = 8 + subService - ItemClass.SubService.ResidentialLow;
+            }
+            else
+            {
+                areaIndex = service - ItemClass.Service.Residential;
+            }
+            areaIndex = (int)(areaIndex * 5 + level);
+            if (zoningMode == BuildingInfo.ZoningMode.CornerRight)
+            {
+                areaIndex = areaIndex * 4 + length - 1;
+                areaIndex = areaIndex * 4 + width - 1;
+                areaIndex = areaIndex * 2 + 1;
+            }
+            else
+            {
+                areaIndex = areaIndex * 4 + width - 1;
+                areaIndex = areaIndex * 4 + length - 1;
+                areaIndex = (int)(areaIndex * 2 + zoningMode);
+            }
+            return areaIndex;
+        }
+
+        public FastList<ushort> GetAreaBuildings(byte districtId, int areaIndex) 
+        {
+            var info = districtThemeInfos[districtId];
+            
+            // Theme management enabled in district? return custom fastlist for district
+            if (info != null)
+            {
+                return info.areaBuildings[areaIndex];
             }
             // Theme management not enabled in district? return fastlist for city-wide "district"
             else if (districtId != 0)
@@ -277,17 +528,12 @@ namespace BuildingThemes
             // Theme management not enabled in city-wide district? return fastlist of the game
             else
             {
-                var buildingManager = Singleton<BuildingManager>.instance;
-                var AreaBuildings = (FastList<ushort>[])typeof(BuildingManager)
-                    .GetField("m_areaBuildings", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(buildingManager);
-                
-                return AreaBuildings[areaIndex];
+                RefreshAreaBuildings();
+                return m_areaBuildings[areaIndex];
             }
         }
 
-
-
-        private HashSet<Configuration.Theme> getDefaultDistrictThemes(uint districtIdx)
+        private HashSet<Configuration.Theme> getDefaultThemes(uint districtIdx)
         {
             var theme = new HashSet<Configuration.Theme>();
 
@@ -330,17 +576,15 @@ namespace BuildingThemes
             return theme;
         }
 
-        public HashSet<Configuration.Theme> GetDistrictThemes(uint districtIdx, bool initializeIfNull)
+        public HashSet<Configuration.Theme> GetDistrictThemes(byte districtId, bool initializeIfNull)
         {
-            if (_districtThemesEnabled[districtIdx])
+            if (IsThemeManagementEnabled(districtId))
             {
-                HashSet<Configuration.Theme> themes;
-                _districtsThemes.TryGetValue(districtIdx, out themes);
-                return themes ?? (initializeIfNull ? _districtsThemes[districtIdx] = getDefaultDistrictThemes(districtIdx) : null);
+                return districtThemeInfos[districtId].themes;
             }
             else
             {
-                return getDefaultDistrictThemes(districtIdx);
+                return initializeIfNull ? getDefaultThemes(districtId) : null;
             }
         }
 

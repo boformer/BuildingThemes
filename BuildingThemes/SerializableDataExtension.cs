@@ -110,7 +110,7 @@ namespace BuildingThemes
                     Debugger.LogFormat("Building Themes: Loading: {0} themes enabled for district {1}", themes.Count, district.id);
                 }
 
-                buildingThemesManager.SetThemes(district.id, themes, true);
+                buildingThemesManager.setThemeInfo(district.id, themes, district.blacklistMode);
             }
         }
 
@@ -140,7 +140,7 @@ namespace BuildingThemes
             var configuration = new DistrictsConfiguration();
 
             var themesManager = Singleton<BuildingThemesManager>.instance;
-            for (uint i = 0; i < 128; i++)
+            for (byte i = 0; i < 128; i++)
             {
                 if (!themesManager.IsThemeManagementEnabled(i)) continue;
                 
@@ -159,6 +159,7 @@ namespace BuildingThemes
                 configuration.Districts.Add(new DistrictsConfiguration.District()
                 {
                     id = i,
+                    blacklistMode = themesManager.IsBlacklistModeEnabled(i),
                     themes = themesNames
                 });
                 if (Debugger.Enabled)
@@ -167,7 +168,8 @@ namespace BuildingThemes
                 }
             }
 
-            DistrictsConfiguration.Serialize(filepath, configuration);
+            if (configuration.Districts.Count > 0) DistrictsConfiguration.Serialize(filepath, configuration);
+            
             if (Debugger.Enabled)
             {
                 Debugger.LogFormat("Building Themes: Serialization done.");
@@ -181,7 +183,8 @@ namespace BuildingThemes
 
         public class District
         {
-            public uint id;
+            public byte id;
+            public bool blacklistMode = false;
             public string[] themes;
         }
 

@@ -22,7 +22,7 @@ namespace BuildingThemes.GUI
             {
                 lock (m_Check)
                 {
-                    ushort districtId = (ushort)ToolsModifierControl.policiesPanel.targetDistrict;
+                    var districtId = ToolsModifierControl.policiesPanel.targetDistrict;
                     var theme = (Configuration.Theme)m_Check.objectUserData;
                     if (Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId, true).Contains(theme) != this.m_Check.isChecked)
                     {

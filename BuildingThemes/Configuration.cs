@@ -57,6 +57,15 @@ namespace BuildingThemes
                 return false;
             }
 
+            public Building getBuilding(string name)
+            {
+                foreach (Building building in buildings)
+                {
+                    if (building.name == name) return building;
+                }
+                return null;
+            }
+
             public Theme(string name)
             {
                 this.name = name;
@@ -74,6 +83,12 @@ namespace BuildingThemes
 
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
+
+            [XmlAttribute("min-level"), DefaultValue(-1)]
+            public int minLevel = -1;
+
+            [XmlAttribute("max-level"), DefaultValue(-1)]
+            public int maxLevel = -1;
 
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;

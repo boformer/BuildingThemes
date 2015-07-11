@@ -127,8 +127,27 @@ namespace BuildingThemes.Detour
             // Add the theme buttons
             RefreshThemesContainer();
 
+            // Add a checkbox to toggle "Blacklist Mode"
+            UICheckBox blacklistModeCheckBox = CreateCheckBox(container);
+            blacklistModeCheckBox.name = "Blacklist Mode Checkbox";
+            blacklistModeCheckBox.gameObject.AddComponent<BlacklistModeCheckboxContainer>();
+            blacklistModeCheckBox.text = "Allow buildings which are not in any theme";
+            blacklistModeCheckBox.isChecked = false;
+
+            blacklistModeCheckBox.eventCheckChanged += delegate(UIComponent component, bool isChecked)
+            {
+                lock (component)
+                {
+                    var districtId1 = ToolsModifierControl.policiesPanel.targetDistrict;
+
+                    Singleton<BuildingThemesManager>.instance.ToggleBlacklistMode(districtId1, isChecked);
+                }
+
+            };
+
             // Add a checkbox to "Enable Theme Management for this district"
             UICheckBox enableThemeManagementCheckBox = CreateCheckBox(container);
+            enableThemeManagementCheckBox.name = "Theme Management Checkbox";
             enableThemeManagementCheckBox.gameObject.AddComponent<ThemeManagementCheckboxContainer>();
             enableThemeManagementCheckBox.text = "Enable Theme Management for this district";
             enableThemeManagementCheckBox.isChecked = false;
@@ -137,12 +156,14 @@ namespace BuildingThemes.Detour
             {
                 lock (component)
                 {
-                    var districtId1 = (uint)ToolsModifierControl.policiesPanel.targetDistrict;
+                    var districtId1 = ToolsModifierControl.policiesPanel.targetDistrict;
 
                     Singleton<BuildingThemesManager>.instance.ToggleThemeManagement(districtId1, isChecked);
                 }
 
             };
+
+
         }
 
         // This method has to be called when the theme list was modified!
@@ -225,7 +246,7 @@ namespace BuildingThemes.Detour
             policyCheckBox.objectUserData = theme;
 
             // Check if theme is enabled in selected district and set the checkbox
-            var districtId = (ushort)ToolsModifierControl.policiesPanel.targetDistrict;
+            var districtId = ToolsModifierControl.policiesPanel.targetDistrict;
             var districtThemes = Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId, true);
             policyCheckBox.isChecked = districtThemes.Contains(theme);
 
@@ -234,15 +255,15 @@ namespace BuildingThemes.Detour
             {
                 lock (component)
                 {
-                    var districtId1 = (uint)ToolsModifierControl.policiesPanel.targetDistrict;
+                    var districtId1 = ToolsModifierControl.policiesPanel.targetDistrict;
 
                     if (isChecked)
                     {
-                        Singleton<BuildingThemesManager>.instance.EnableTheme(districtId1, theme, true);
+                        Singleton<BuildingThemesManager>.instance.EnableTheme(districtId1, theme);
                     }
                     else
                     {
-                        Singleton<BuildingThemesManager>.instance.DisableTheme(districtId1, theme.name, true);
+                        Singleton<BuildingThemesManager>.instance.DisableTheme(districtId1, theme);
                     }
                 }
 
