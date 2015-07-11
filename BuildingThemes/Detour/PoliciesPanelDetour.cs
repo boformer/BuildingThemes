@@ -127,8 +127,27 @@ namespace BuildingThemes.Detour
             // Add the theme buttons
             RefreshThemesContainer();
 
+            // Add a checkbox to toggle "Blacklist Mode"
+            UICheckBox blacklistModeCheckBox = CreateCheckBox(container);
+            blacklistModeCheckBox.name = "Blacklist Mode Checkbox";
+            blacklistModeCheckBox.gameObject.AddComponent<BlacklistModeCheckboxContainer>();
+            blacklistModeCheckBox.text = "Allow buildings which are not in any theme";
+            blacklistModeCheckBox.isChecked = false;
+
+            blacklistModeCheckBox.eventCheckChanged += delegate(UIComponent component, bool isChecked)
+            {
+                lock (component)
+                {
+                    var districtId1 = ToolsModifierControl.policiesPanel.targetDistrict;
+
+                    Singleton<BuildingThemesManager>.instance.ToggleBlacklistMode(districtId1, isChecked);
+                }
+
+            };
+
             // Add a checkbox to "Enable Theme Management for this district"
             UICheckBox enableThemeManagementCheckBox = CreateCheckBox(container);
+            enableThemeManagementCheckBox.name = "Theme Management Checkbox";
             enableThemeManagementCheckBox.gameObject.AddComponent<ThemeManagementCheckboxContainer>();
             enableThemeManagementCheckBox.text = "Enable Theme Management for this district";
             enableThemeManagementCheckBox.isChecked = false;
@@ -143,6 +162,8 @@ namespace BuildingThemes.Detour
                 }
 
             };
+
+
         }
 
         // This method has to be called when the theme list was modified!

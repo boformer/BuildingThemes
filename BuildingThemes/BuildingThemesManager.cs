@@ -4,7 +4,6 @@ using ColossalFramework;
 using System;
 using ColossalFramework.Plugins;
 using System.IO;
-using System.Reflection;
 
 namespace BuildingThemes
 {
@@ -17,6 +16,8 @@ namespace BuildingThemes
 
         private class DistrictThemeInfo
         {
+            public bool blacklistMode = false;
+            
             public readonly HashSet<Configuration.Theme> themes = new HashSet<Configuration.Theme>();
 
             // similar to BuildingManager.m_areaBuildings, but separate for every district
@@ -180,7 +181,7 @@ namespace BuildingThemes
             CompileDistrictThemes(districtId);
         }
 
-        public void SetThemes(byte districtId, HashSet<Configuration.Theme> themes)
+        public void setThemeInfo(byte districtId, HashSet<Configuration.Theme> themes, bool blacklistMode)
         {
             var info = districtThemeInfos[districtId];
 
@@ -193,6 +194,8 @@ namespace BuildingThemes
             {
                 info.themes.Clear();
             }
+
+            info.blacklistMode = blacklistMode;
 
             // Add the themes to the district theme info
             info.themes.UnionWith(themes);
@@ -207,24 +210,39 @@ namespace BuildingThemes
 
             if (info == null) return;
             
-            // Refresh and get BuildingManager.m_areaBuildings
-            var buildingManager = BuildingManager.instance;
             RefreshAreaBuildings();
 
+            HashSet<Configuration.Theme> themes;
+
+            if (info.blacklistMode)
+            {
+                themes = new HashSet<Configuration.Theme>(GetAllThemes());
+                themes.ExceptWith(info.themes);
+            }
+            else
+            {
+                themes = info.themes;
+            }
+            if (Debugger.Enabled) 
+            { 
+                Debugger.LogFormat("Compiling theme data for district {0}. Themes Set Size: {1}", districtId, themes.Count);
+            }
             // Now filter the list for this district
             for (int i = 0; i < 2720; i++)
             {
-                info.areaBuildings[i] = FilterList(districtId, m_areaBuildings[i], GetDistrictThemes(districtId, true));
+                info.areaBuildings[i] = FilterList(districtId, m_areaBuildings[i], themes, info.blacklistMode);
             }
 
             // TODO compile upgrade mapping!
         }
 
-        private FastList<ushort> FilterList(uint districtIdx, FastList<ushort> fastList, HashSet<Configuration.Theme> themes)
+        private FastList<ushort> FilterList(uint districtIdx, FastList<ushort> fastList, HashSet<Configuration.Theme> themes, bool blacklistMode)
         {
+            // If blacklistMode is true, the themes set contains the themes which are NOT enabled
+            
             if (fastList == null || fastList.m_size == 0) return null;
 
-            // no theme enabled?
+            // no theme enabled? (or disabled in blacklist mode)
             if (themes.Count == 0) return fastList;
 
             var filteredList = new FastList<ushort>();
@@ -237,13 +255,27 @@ namespace BuildingThemes
 
                 if (prefab == null) continue;
 
+                bool foundInTheme = false;
+
                 foreach (var theme in themes)
                 {
-                    if (theme.containsBuilding(prefab.name))
+                    var building = theme.getBuilding(prefab.name);
+
+                    if (building != null && building.include)
                     {
-                        filteredList.Add(prefabId);
+                        foundInTheme = true;
                         break;
                     }
+                }
+
+                if (foundInTheme != blacklistMode) 
+                {
+                    if (Debugger.Enabled)
+                    {
+                        Debugger.LogFormat("Added {0} to compiled theme!", prefab.name);
+                    }
+
+                    filteredList.Add(prefabId);
                 }
             }
 
@@ -258,7 +290,7 @@ namespace BuildingThemes
 
             if (enabled)
             {
-                SetThemes(districtId, getDefaultThemes(districtId));
+                setThemeInfo(districtId, getDefaultThemes(districtId), IsBlacklistModeEnabled(0));
             }
             else
             {
@@ -269,6 +301,32 @@ namespace BuildingThemes
         public bool IsThemeManagementEnabled(byte districtId)
         {
             return districtThemeInfos[districtId] != null;
+        }
+
+        public void ToggleBlacklistMode(byte districtId, bool enabled)
+        {
+            if (!IsThemeManagementEnabled(districtId) || enabled == IsBlacklistModeEnabled(districtId)) return;
+
+            districtThemeInfos[districtId].blacklistMode = enabled;
+            CompileDistrictThemes(districtId);
+        }
+
+        public bool IsBlacklistModeEnabled(byte districtId)
+        {
+            var info = districtThemeInfos[districtId];
+
+            if(info != null)
+            {
+                return info.blacklistMode;
+            }
+            else if(districtId != 0) 
+            {
+                return IsBlacklistModeEnabled(0);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public BuildingInfo GetUpgradeBuildingInfo(ushort prefabIndex, byte districtId)
@@ -470,6 +528,7 @@ namespace BuildingThemes
             // Theme management not enabled in city-wide district? return fastlist of the game
             else
             {
+                RefreshAreaBuildings();
                 return m_areaBuildings[areaIndex];
             }
         }
