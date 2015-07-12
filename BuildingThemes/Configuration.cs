@@ -98,6 +98,9 @@ namespace BuildingThemes
             [XmlAttribute("max-level"), DefaultValue(-1)]
             public int maxLevel = -1;
 
+            [XmlAttribute("upgrade"), DefaultValue(null)]
+            public string upgrade = null;
+
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;
 
@@ -152,7 +155,7 @@ namespace BuildingThemes
                     {
                         var newTheme = new Theme(theme.name);
 
-                        foreach (var building in theme.buildings.Where(building => !theme.isBuiltIn || !building.isBuiltIn || !building.include))
+                        foreach (var building in theme.buildings.Where(building => !building.isBuiltIn || !building.include))
                         {
                             newTheme.buildings.Add(building);
                         }

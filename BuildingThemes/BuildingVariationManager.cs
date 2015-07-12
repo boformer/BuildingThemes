@@ -66,6 +66,12 @@ namespace BuildingThemes
                         building.notInLevelRange = true;
                     }
 
+                    if (building.upgrade != null && maxLevel < maxAllowedLevel) 
+                    {
+                        prefabsByLevel[maxLevel] = building.upgrade;
+                    }
+
+
                     for (int l = minLevel; l <= maxLevel; l++)
                     {
                         var level = (ItemClass.Level)(l - 1);
