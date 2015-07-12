@@ -4,6 +4,7 @@ using ColossalFramework;
 using System;
 using ColossalFramework.Plugins;
 using System.IO;
+using UnityEngine;
 
 namespace BuildingThemes
 {
@@ -211,28 +212,27 @@ namespace BuildingThemes
 
             if (info == null) return;
 
-            HashSet<Configuration.Theme> themes;
+            HashSet<Configuration.Theme> enabledThemes = info.themes;
+            HashSet<Configuration.Theme> blacklistedThemes = null;
 
             if (info.blacklistMode)
             {
-                themes = new HashSet<Configuration.Theme>(GetAllThemes());
-                themes.ExceptWith(info.themes);
-            }
-            else
-            {
-                themes = info.themes;
-            }
-            if (Debugger.Enabled) 
-            { 
-                Debugger.LogFormat("Compiling theme data for district {0}. Themes Set Size: {1}", districtId, themes.Count);
+                blacklistedThemes = new HashSet<Configuration.Theme>(GetAllThemes());
+                blacklistedThemes.ExceptWith(info.themes);
             }
 
-            // Create custom areaVBuildings fastlist array for this district
-            RefreshAreaBuildings(info.areaBuildings, themes, info.blacklistMode, true);
+            if (Debugger.Enabled) 
+            { 
+                Debugger.LogFormat("Compiling theme data for district {0}. Enabled Themes: {1}, Blacklist Themes: {2}", 
+                    districtId, enabledThemes.Count, blacklistedThemes == null ? 0 : blacklistedThemes.Count);
+            }
+
+            // Create custom areaBuildings fastlist array for this district
+            RefreshAreaBuildings(info.areaBuildings, enabledThemes, blacklistedThemes, true);
 
             // Create upgrade mapping
             info.upgradeBuildings.Clear();
-            foreach (var theme in themes)
+            foreach (var theme in enabledThemes)
             {
                 foreach (var upgradeMapping in theme.upgrades) 
                 {
@@ -315,7 +315,7 @@ namespace BuildingThemes
             return PrefabCollection<BuildingInfo>.GetPrefab(upgradePrefabIndex);
         }
 
-	    private void RefreshAreaBuildings(FastList<ushort>[] m_areaBuildings, HashSet<Configuration.Theme> themes, bool blacklistMode, bool includeVariations)
+        private void RefreshAreaBuildings(FastList<ushort>[] m_areaBuildings, HashSet<Configuration.Theme> enabledThemes, HashSet<Configuration.Theme> blacklistedThemes, bool includeVariations)
 	    {
 			int areaBuildingsLength = m_areaBuildings.Length;
 			for (int i = 0; i < areaBuildingsLength; i++)
@@ -337,39 +337,64 @@ namespace BuildingThemes
 						// mod begin
                         if (!includeVariations && BuildingVariationManager.instance.IsVariation(prefab.name)) continue;
                         
-                        bool foundInTheme = false;
+                        uint spawnRateSum = 0;
+                        uint hits = 0;
 
-                        if (themes == null || themes.Count == 0)
+                        if (enabledThemes != null && enabledThemes.Count > 0)
                         {
-                            foundInTheme = !blacklistMode;
-                        }
-                        else
-                        {
-                            foreach (var theme in themes)
+                            foreach (var theme in enabledThemes)
                             {
                                 var building = theme.getBuilding(prefab.name);
 
                                 if (building != null && building.include && !building.notInLevelRange)
                                 {
-                                    foundInTheme = true;
+                                    hits++;
+                                    // limit spawn rate to 50
+                                    spawnRateSum += building.spawnRate > 50 ? 50 : building.spawnRate;
                                     break;
                                 }
                             }
                         }
-
-                        if (foundInTheme == blacklistMode)
+                        else
                         {
-                            continue;
+                            spawnRateSum = 1;
+                            hits = 1;
+                        }
+
+                        if (hits == 0 && blacklistedThemes != null) 
+                        {
+                            bool onBlacklist = false;
+                            
+                            foreach (var theme in blacklistedThemes)
+                            {
+                                var building = theme.getBuilding(prefab.name);
+
+                                if (building != null && building.include && !building.notInLevelRange)
+                                {
+                                    onBlacklist = true;
+                                    break;
+                                }
+                            }
+
+                            if (onBlacklist) continue;
                         }
                         // mod end
-                        
                         
                         int areaIndex = GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
 						if (m_areaBuildings[areaIndex] == null)
 						{
 							m_areaBuildings[areaIndex] = new FastList<ushort>();
 						}
-						m_areaBuildings[areaIndex].Add((ushort)j);
+
+                        // mod begin
+                        uint spawnRate = spawnRateSum / hits;
+                        for (uint s = 0; s < spawnRate; s++)
+                        {
+                        // mod end
+                            m_areaBuildings[areaIndex].Add((ushort)j);
+                        // mod begin
+                        }
+                        // mod end
 					}
 				}
 			}
@@ -455,7 +480,7 @@ namespace BuildingThemes
             {
                 if (m_areaBuildingsDirty) 
                 {
-                    RefreshAreaBuildings(m_areaBuildings, null, false, false);
+                    RefreshAreaBuildings(m_areaBuildings, null, null, false);
                     m_areaBuildingsDirty = false;
                 }
                 return m_areaBuildings[areaIndex];

@@ -101,6 +101,9 @@ namespace BuildingThemes
             [XmlAttribute("upgrade"), DefaultValue(null)]
             public string upgrade = null;
 
+            [XmlAttribute("spawn-rate"), DefaultValue(5)]
+            public uint spawnRate = 5;
+
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;
 
