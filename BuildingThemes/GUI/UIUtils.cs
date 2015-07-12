@@ -11,7 +11,7 @@ namespace BuildingThemes.GUI
 
         public static UIButton CreateButton(UIComponent parent)
         {
-            UIButton button = (UIButton)parent.AddUIComponent<UIButton>();
+            UIButton button = parent.AddUIComponent<UIButton>();
 
             button.size = new Vector2(90f, 30f);
             button.textScale = 0.9f;
@@ -25,7 +25,7 @@ namespace BuildingThemes.GUI
 
         public static UICheckBox CreateCheckBox(UIComponent parent)
         {
-            UICheckBox checkBox = (UICheckBox)parent.AddUIComponent<UICheckBox>();
+            UICheckBox checkBox = parent.AddUIComponent<UICheckBox>();
 
             checkBox.width = 300f;
             checkBox.height = 20f;
@@ -45,6 +45,37 @@ namespace BuildingThemes.GUI
             checkBox.label.text = " ";
             checkBox.label.textScale = 0.9f;
             checkBox.label.relativePosition = new Vector3(22f, 2f);
+
+            return checkBox;
+        }
+
+        public static UICheckBox CreateIconToggle(UIComponent parent, string atlas, string checkedSrpite, string uncheckedSripte)
+        {
+            UICheckBox checkBox = parent.AddUIComponent<UICheckBox>();
+
+            checkBox.width = 35f;
+            checkBox.height = 35f;
+            checkBox.clipChildren = true;
+
+            UIPanel panel = checkBox.AddUIComponent<UIPanel>();
+            panel.backgroundSprite = "IconPolicyBaseRect";
+            panel.size = checkBox.size;
+            panel.relativePosition = Vector3.zero;
+
+            checkBox.eventMouseEnter += (c, p) => { panel.backgroundSprite = "IconPolicyBaseRectHovered"; };
+            checkBox.eventMouseLeave += (c, p) => { panel.backgroundSprite = "IconPolicyBaseRect"; };
+
+            UISprite sprite = panel.AddUIComponent<UISprite>();
+            sprite.atlas = GetAtlas(atlas);
+            sprite.spriteName = uncheckedSripte;
+            sprite.size = checkBox.size;
+            sprite.relativePosition = Vector3.zero;
+
+            checkBox.checkedBoxObject = sprite.AddUIComponent<UISprite>();
+            ((UISprite)checkBox.checkedBoxObject).atlas = sprite.atlas;
+            ((UISprite)checkBox.checkedBoxObject).spriteName = checkedSrpite;
+            checkBox.checkedBoxObject.size = checkBox.size;
+            checkBox.checkedBoxObject.relativePosition = Vector3.zero;
 
             return checkBox;
         }
@@ -69,6 +100,57 @@ namespace BuildingThemes.GUI
             return textField;
         }
 
+        public static UIDropDown CreateDropDown(UIComponent parent)
+        {
+            UIDropDown dropDown = parent.AddUIComponent<UIDropDown>();
+            dropDown.size = new Vector2(90f, 30f);
+            dropDown.listBackground = "GenericPanelLight";
+            dropDown.itemHeight = 30;
+            dropDown.itemHover = "ListItemHover";
+            dropDown.itemHighlight = "ListItemHighlight";
+            dropDown.normalBgSprite = "ButtonMenu";
+            dropDown.disabledBgSprite = "ButtonMenuDisabled";
+            dropDown.hoveredBgSprite = "ButtonMenuHovered";
+            dropDown.focusedBgSprite = "ButtonMenu";
+            dropDown.listWidth = 90;
+            dropDown.listHeight = 500;
+            dropDown.foregroundSpriteMode = UIForegroundSpriteMode.Stretch;
+            dropDown.popupColor = new Color32(45, 52, 61, 255);
+            dropDown.popupTextColor = new Color32(170, 170, 170, 255);
+            dropDown.zOrder = 1;
+            dropDown.textScale = 0.8f;
+            dropDown.verticalAlignment = UIVerticalAlignment.Middle;
+            dropDown.horizontalAlignment = UIHorizontalAlignment.Left;
+            dropDown.selectedIndex = 0;
+            dropDown.textFieldPadding = new RectOffset(8, 0, 8, 0);
+            dropDown.itemPadding = new RectOffset(14, 0, 8, 0);
+
+            UIButton button = dropDown.AddUIComponent<UIButton>();
+            dropDown.triggerButton = button;
+            button.text = "";
+            button.size = dropDown.size;
+            button.relativePosition = new Vector3(0f, 0f);
+            button.textVerticalAlignment = UIVerticalAlignment.Middle;
+            button.textHorizontalAlignment = UIHorizontalAlignment.Left;
+            button.normalFgSprite = "IconDownArrow";
+            button.hoveredFgSprite = "IconDownArrowHovered";
+            button.pressedFgSprite = "IconDownArrowPressed";
+            button.focusedFgSprite = "IconDownArrowFocused";
+            button.disabledFgSprite = "IconDownArrowDisabled";
+            button.foregroundSpriteMode = UIForegroundSpriteMode.Fill;
+            button.horizontalAlignment = UIHorizontalAlignment.Right;
+            button.verticalAlignment = UIVerticalAlignment.Middle;
+            button.zOrder = 0;
+            button.textScale = 0.8f;
+
+            dropDown.eventSizeChanged += new PropertyChangedEventHandler<Vector2>((c, t) =>
+            {
+                button.size = t; dropDown.listWidth = (int)t.x;
+            });
+
+            return dropDown;
+        }
+
         public static void ResizeIcon(UISprite icon, Vector2 maxSize)
         {
             if (icon.height == 0) return;
@@ -88,22 +170,20 @@ namespace BuildingThemes.GUI
             }
         }
 
-        public static void DestroyDeeply(UIComponent component)
+        public static UITextureAtlas[] s_atlases;
+
+        public static UITextureAtlas GetAtlas(string name)
         {
-            if (component == null) return;
+            if (s_atlases == null)
+                s_atlases = Resources.FindObjectsOfTypeAll(typeof(UITextureAtlas)) as UITextureAtlas[];
 
-            UIComponent[] children = component.GetComponentsInChildren<UIComponent>();
-
-            if (children != null && children.Length > 0)
+            for (int i = 0; i < s_atlases.Length; i++)
             {
-                for (int i = 0; i < children.Length; i++)
-                {
-                    if (children[i].parent == component)
-                        DestroyDeeply(children[i]);
-                }
+                if (s_atlases[i].name == name)
+                    return s_atlases[i];
             }
 
-            GameObject.Destroy(component);
+            return UIView.GetAView().defaultAtlas;
         }
     }
 }

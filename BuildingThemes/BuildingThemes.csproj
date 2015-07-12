@@ -62,7 +62,10 @@
     <Compile Include="Detour\ZoneBlockDetour.cs" />
     <Compile Include="Filter\IFilteringStrategy.cs" />
     <Compile Include="Detour\PoliciesPanelDetour.cs" />
+    <Compile Include="GUI\PreviewRenderer.cs" />
     <Compile Include="GUI\UIFastList.cs" />
+    <Compile Include="GUI\UIBuildingItem.cs" />
+    <Compile Include="GUI\UIBuildingFilter.cs" />
     <Compile Include="GUI\UIThemeItem.cs" />
     <Compile Include="GUI\UIThemeManager.cs" />
     <Compile Include="GUI\UITitleBar.cs" />
@@ -79,6 +82,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "%25LOCALAPPDATA%25\Colossal Order\Cities_Skylines\Addons\Mods\$(SolutionName)"
