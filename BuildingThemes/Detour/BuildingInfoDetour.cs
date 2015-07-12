@@ -58,7 +58,7 @@ namespace BuildingThemes.Detour
 
             if (growable) 
             {
-                var prefabVariations = Singleton<BuildingVariationManager>.instance.createVariations(this).Values.ToArray<BuildingInfo>();
+                var prefabVariations = Singleton<BuildingVariationManager>.instance.CreateVariations(this).Values.ToArray<BuildingInfo>();
 
                 if (prefabVariations.Length > 0) 
                 { 

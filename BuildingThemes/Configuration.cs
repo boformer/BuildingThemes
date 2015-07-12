@@ -12,6 +12,8 @@ namespace BuildingThemes
     public class Configuration
     {
         public bool UnlockPolicyPanel = true;
+
+        public bool CreateBuildingDuplicates = true;
         
         [XmlArray(ElementName = "Themes")]
         [XmlArrayItem(ElementName = "Theme")]
@@ -33,6 +35,9 @@ namespace BuildingThemes
 
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
+
+            [XmlIgnoreAttribute]
+            public Dictionary<string, string> upgrades = new Dictionary<string, string>();
 
             [XmlArray(ElementName = "Buildings")]
             [XmlArrayItem(ElementName = "Building")]
@@ -83,6 +88,9 @@ namespace BuildingThemes
 
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
+
+            [XmlIgnoreAttribute]
+            public bool notInLevelRange = false;
 
             [XmlAttribute("min-level"), DefaultValue(-1)]
             public int minLevel = -1;
@@ -138,6 +146,7 @@ namespace BuildingThemes
                     var configCopy = new Configuration();
 
                     configCopy.UnlockPolicyPanel = config.UnlockPolicyPanel;
+                    configCopy.CreateBuildingDuplicates = config.CreateBuildingDuplicates;
 
                     foreach (var theme in config.themes)
                     {
