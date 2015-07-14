@@ -1,16 +1,19 @@
 ﻿using UnityEngine;
 using ColossalFramework.UI;
 
+using System.Reflection;
+
 namespace BuildingThemes.GUI
 {
     public class UIBuildingFilter : UIPanel
     {
         public UICheckBox[] zoningToggles;
         public UIDropDown levelFilter;
-        public UIDropDown sizeFilter;
+        public UIDropDown sizeFilterX;
+        public UIDropDown sizeFilterY;
         public UITextField nameFilter;
 
-        public enum Zones
+        public enum Zone
         {
             ResidentialLow = 0,
             ResidentialHigh,
@@ -24,28 +27,45 @@ namespace BuildingThemes.GUI
             Office
         }
 
-        public enum Levels
+        public bool IsZoneSelected(Zone zone)
         {
-            All = 0,
-            L1,
-            L2,
-            L3,
-            L4,
-            L5
+            return zoningToggles[(int)zone].isChecked;
         }
 
-        public enum Sizes
+        public bool IsAllZoneSelected()
         {
-            All = 0,
-            S1x1,
-            S2x2,
-            S2x3,
-            S3x2,
-            S3x3,
-            S3x4,
-            S4x3,
-            S4x4
+            return zoningToggles[(int)Zone.ResidentialLow].isChecked &&
+                zoningToggles[(int)Zone.ResidentialHigh].isChecked &&
+                zoningToggles[(int)Zone.CommercialLow].isChecked &&
+                zoningToggles[(int)Zone.CommercialHigh].isChecked &&
+                zoningToggles[(int)Zone.Industrial].isChecked &&
+                zoningToggles[(int)Zone.Farming].isChecked &&
+                zoningToggles[(int)Zone.Forestry].isChecked &&
+                zoningToggles[(int)Zone.Oil].isChecked &&
+                zoningToggles[(int)Zone.Ore].isChecked &&
+                zoningToggles[(int)Zone.Office].isChecked;
         }
+
+        public ItemClass.Level buildingLevel
+        {
+            get { return (ItemClass.Level)(levelFilter.selectedIndex - 1); }
+        }
+
+        public Vector2 buildingSize
+        {
+            get
+            {
+                if (sizeFilterX.selectedIndex == 0) return Vector2.zero;
+                return new Vector2(sizeFilterX.selectedIndex, sizeFilterY.selectedIndex + 1);
+            }
+        }
+
+        public string buildingName
+        {
+            get { return nameFilter.text.Trim(); }
+        }
+
+        public event PropertyChangedEventHandler<int> eventFilteringChanged;
 
         public override void Start()
         {
@@ -53,32 +73,49 @@ namespace BuildingThemes.GUI
 
             // Zoning
             zoningToggles = new UICheckBox[10];
-            zoningToggles[(int)Zones.ResidentialLow]    = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningResidentialLow", "ZoningResidentialLowDisabled");
-            zoningToggles[(int)Zones.ResidentialHigh]   = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningResidentialHigh", "ZoningResidentialHighDisabled");
-            zoningToggles[(int)Zones.CommercialLow]     = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningCommercialLow", "ZoningCommercialLowDisabled");
-            zoningToggles[(int)Zones.CommercialHigh]    = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningCommercialHigh", "ZoningCommercialHighDisabled");
-            zoningToggles[(int)Zones.Industrial]        = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningIndustrial", "ZoningIndustrialDisabled");
-            zoningToggles[(int)Zones.Farming]           = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyFarming", "IconPolicyFarmingDisabled");
-            zoningToggles[(int)Zones.Forestry]          = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyForest", "IconPolicyForestDisabled");
-            zoningToggles[(int)Zones.Oil]               = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyOil", "IconPolicyOilDisabled");
-            zoningToggles[(int)Zones.Ore]               = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyOre", "IconPolicyOreDisabled");
-            zoningToggles[(int)Zones.Office]            = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningOffice", "ZoningOfficeDisabled");
+            zoningToggles[(int)Zone.ResidentialLow]    = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningResidentialLow", "ZoningResidentialLowDisabled");
+            zoningToggles[(int)Zone.ResidentialHigh]   = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningResidentialHigh", "ZoningResidentialHighDisabled");
+            zoningToggles[(int)Zone.CommercialLow]     = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningCommercialLow", "ZoningCommercialLowDisabled");
+            zoningToggles[(int)Zone.CommercialHigh]    = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningCommercialHigh", "ZoningCommercialHighDisabled");
+            zoningToggles[(int)Zone.Industrial]        = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningIndustrial", "ZoningIndustrialDisabled");
+            zoningToggles[(int)Zone.Farming]           = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyFarming", "IconPolicyFarmingDisabled");
+            zoningToggles[(int)Zone.Forestry]          = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyForest", "IconPolicyForestDisabled");
+            zoningToggles[(int)Zone.Oil]               = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyOil", "IconPolicyOilDisabled");
+            zoningToggles[(int)Zone.Ore]               = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyOre", "IconPolicyOreDisabled");
+            zoningToggles[(int)Zone.Office]            = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningOffice", "ZoningOfficeDisabled");
 
             for (int i = 0; i < 10; i++)
             {
                 zoningToggles[i].relativePosition = new Vector3(40 * i, 0);
                 zoningToggles[i].isChecked = true;
+                zoningToggles[i].readOnly = true;
+                zoningToggles[i].checkedBoxObject.isInteractive = false; // Don't eat my double click event please
+
+                zoningToggles[i].eventClick += (c, p) =>
+                {
+                     ((UICheckBox)c).isChecked = !((UICheckBox)c).isChecked;
+                    eventFilteringChanged(this, 0);
+                };
+
+                zoningToggles[i].eventDoubleClick += (c, p) =>
+                {
+                    for (int j = 0; j < 10; j++) 
+                        zoningToggles[j].isChecked = false;
+                    ((UICheckBox)c).isChecked = true;
+
+                    eventFilteringChanged(this, 0);
+                };
             }
 
             // Level
             UILabel levelLabel = AddUIComponent<UILabel>();
             levelLabel.textScale = 0.8f;
             levelLabel.padding = new RectOffset(0, 0, 8, 0);
-            levelLabel.relativePosition = new Vector3(405, 5);
             levelLabel.text = "Level: ";
+            levelLabel.relativePosition = new Vector3(405, 5);
 
             levelFilter = UIUtils.CreateDropDown(this);
-            levelFilter.width = 60;
+            levelFilter.width = 55;
             levelFilter.AddItem("All");
             levelFilter.AddItem("1");
             levelFilter.AddItem("2");
@@ -88,39 +125,76 @@ namespace BuildingThemes.GUI
             levelFilter.selectedIndex = 0;
             levelFilter.relativePosition = new Vector3(445, 5);
 
+            levelFilter.eventSelectedIndexChanged += (c, i) => eventFilteringChanged(this, 1);
+
             // Size
             UILabel sizeLabel = AddUIComponent<UILabel>();
             sizeLabel.textScale = 0.8f;
             sizeLabel.padding = new RectOffset(0, 0, 8, 0);
-            sizeLabel.relativePosition = new Vector3(515, 5);
             sizeLabel.text = "Size: ";
+            sizeLabel.relativePosition = new Vector3(510, 5);
 
-            sizeFilter = UIUtils.CreateDropDown(this);
-            sizeFilter.width = 60;
-            sizeFilter.AddItem("All");
-            sizeFilter.AddItem("1x1");
-            sizeFilter.AddItem("2x2");
-            sizeFilter.AddItem("2x3");
-            sizeFilter.AddItem("3x2");
-            sizeFilter.AddItem("3x3");
-            sizeFilter.AddItem("3x4");
-            sizeFilter.AddItem("4x3");
-            sizeFilter.AddItem("4x4");
-            sizeFilter.selectedIndex = 0;
-            sizeFilter.relativePosition = new Vector3(550, 5);
+            sizeFilterX = UIUtils.CreateDropDown(this);
+            sizeFilterX.width = 55;
+            sizeFilterX.AddItem("All");
+            sizeFilterX.AddItem("1");
+            sizeFilterX.AddItem("2");
+            sizeFilterX.AddItem("3");
+            sizeFilterX.AddItem("4");
+            sizeFilterX.selectedIndex = 0;
+            sizeFilterX.relativePosition = new Vector3(545, 5);
+
+            UILabel XLabel = AddUIComponent<UILabel>();
+            XLabel.textScale = 0.8f;
+            XLabel.padding = new RectOffset(0, 0, 8, 0);
+            XLabel.text = "X";
+            XLabel.isVisible = false;
+            XLabel.relativePosition = new Vector3(595, 5);
+
+            sizeFilterY = UIUtils.CreateDropDown(this);
+            sizeFilterY.width = 45;
+            sizeFilterY.AddItem("1");
+            sizeFilterY.AddItem("2");
+            sizeFilterY.AddItem("3");
+            sizeFilterY.AddItem("4");
+            sizeFilterY.selectedIndex = 0;
+            sizeFilterY.isVisible = false;
+            sizeFilterY.relativePosition = new Vector3(610, 5);
+
+            sizeFilterX.eventSelectedIndexChanged += (c, i) =>
+            {
+                if (i == 0)
+                {
+                    sizeFilterX.width = 55;
+                    XLabel.isVisible = false;
+                    sizeFilterY.isVisible = false;
+                }
+                else
+                {
+                    sizeFilterX.width = 45;
+                    XLabel.isVisible = true;
+                    sizeFilterY.isVisible = true;
+                }
+
+                eventFilteringChanged(this, 2);
+            };
+
+            sizeFilterY.eventSelectedIndexChanged += (c, i) => eventFilteringChanged(this, 2);
 
             // Name filter
             UILabel nameLabel = AddUIComponent<UILabel>();
             nameLabel.textScale = 0.8f;
             nameLabel.padding = new RectOffset(0, 0, 8, 0);
-            nameLabel.relativePosition = new Vector3(620, 5);
+            nameLabel.relativePosition = new Vector3(665, 5);
             nameLabel.text = "Name: ";
 
             nameFilter = UIUtils.CreateTextField(this);
-            nameFilter.width = width - 665;
+            nameFilter.width = width - 715;
             nameFilter.height = 30;
             nameFilter.padding = new RectOffset(6, 6, 6, 6);
             nameFilter.relativePosition = new Vector3(width - nameFilter.width, 5);
+
+            nameFilter.eventTextChanged += (c, s) => eventFilteringChanged(this, 3);
         }
     }
 }

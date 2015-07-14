@@ -71,13 +71,13 @@ namespace BuildingThemes.GUI
         protected override void OnMouseEnter(UIMouseEventParameter p)
         {
             base.OnMouseEnter(p);
-            GetUIView().FindUIComponent<UIThemeManager>("BuildingThemes").UpdatePreview(m_building.prefab);
+            if (enabled) GetUIView().FindUIComponent<UIThemeManager>("BuildingThemes").UpdatePreview(m_building.prefab);
         }
 
         protected override void OnMouseWheel(UIMouseEventParameter p)
         {
             base.OnMouseWheel(p);
-            GetUIView().FindUIComponent<UIThemeManager>("BuildingThemes").UpdatePreview(m_building.prefab);
+            if (enabled) GetUIView().FindUIComponent<UIThemeManager>("BuildingThemes").UpdatePreview(m_building.prefab);
         }
 
         #region IUIFastListRow implementation

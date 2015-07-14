@@ -18,7 +18,7 @@ namespace BuildingThemes.GUI
         private PreviewRenderer m_previewRenderer;
 
         #region Constant values
-        private const float LEFT_WIDTH = 200;
+        private const float LEFT_WIDTH = 250;
         private const float MIDDLE_WIDTH = 400;
         private const float RIGHT_WIDTH = 250;
         private const float HEIGHT = 500;
@@ -51,6 +51,15 @@ namespace BuildingThemes.GUI
             m_filter.width = width - SPACING * 2;
             m_filter.height = 40;
             m_filter.relativePosition = new Vector3(SPACING, TITLE_HEIGHT);
+
+            m_filter.eventFilteringChanged += (c, i) =>
+            {
+                if (m_themeSelection != null && m_themeSelection.selectedIndex != -1)
+                {
+                    Configuration.Theme theme = m_themeSelection.rowsData[m_themeSelection.selectedIndex] as Configuration.Theme;
+                    m_buildingSelection.rowsData = GetBuildingItemList(theme);
+                }
+            };
 
             // Panels
             UIPanel left = AddUIComponent<UIPanel>();
@@ -89,9 +98,6 @@ namespace BuildingThemes.GUI
                 Configuration.Theme theme = m_themeSelection.rowsData[i] as Configuration.Theme;
 
                 m_buildingSelection.rowsData = GetBuildingItemList(theme);
-
-                Array.Sort(m_themeSelection.rowsData.m_buffer as Configuration.Theme[], ThemeCompare);
-
                 m_buildingSelection.DisplayAt(0);
             };
 
@@ -159,6 +165,9 @@ namespace BuildingThemes.GUI
 
         private FastList<object> GetBuildingItemList(Configuration.Theme theme)
         {
+            if (theme == null) return null;
+
+            // List of all growables prefabs
             if (m_buildingDictionary == null)
             {
                 m_buildingDictionary = new Dictionary<string, BuildingItem>();
@@ -175,34 +184,83 @@ namespace BuildingThemes.GUI
             }
             else
             {
+                // Reset building association
                 foreach(BuildingItem item in m_buildingDictionary.Values)
                     item.building = null;
             }
 
+            // Combine growables with buildings in configuration
             FastList<object> list = new FastList<object>();
             list.m_buffer = m_buildingDictionary.Values.ToArray();
             list.m_size = list.m_buffer.Length;
-
 
             Configuration.Building[] buildings = theme.buildings.ToArray();
             for(int i=0; i< buildings.Length; i++)
             {
                 if(m_buildingDictionary.ContainsKey(buildings[i].name))
                 {
+                    // Associate building with prefab
                     BuildingItem item = m_buildingDictionary[buildings[i].name];
                     item.building = buildings[i];
                 }
                 else
                 {
+                    // Prefab not found, adding building without prefab
                     BuildingItem item = new BuildingItem();
                     item.building = buildings[i];
                     list.Add(item);
                 }
             }
 
-            // TODO : Filtering
+            // Filtering
+            if (m_filter.buildingLevel == ItemClass.Level.None && m_filter.buildingSize == Vector2.zero && m_filter.buildingName.IsNullOrWhiteSpace() && m_filter.IsAllZoneSelected())
+            {
+                /*list.Trim();
+                Array.Sort(list.m_buffer as BuildingItem[], BuildingCompare);*/
+                return list;
+            }
 
-            return list;
+            FastList<object> filtered = new FastList<object>();
+            for (int i = 0; i < list.m_size; i++)
+            {
+                BuildingItem item = (BuildingItem)list.m_buffer[i];
+                bool prefabExists = item.prefab != null;
+
+                // Level
+                if (m_filter.buildingLevel != ItemClass.Level.None && !(prefabExists && item.prefab.m_class.m_level == m_filter.buildingLevel)) continue;
+
+                // size
+                Vector2 buildingSize = m_filter.buildingSize;
+                if (m_filter.buildingSize != Vector2.zero && !(prefabExists && item.prefab.m_cellWidth == buildingSize.x && item.prefab.m_cellLength == buildingSize.y)) continue;
+
+                // zone
+                bool inZone = false;
+                if(prefabExists)
+                {
+                    ItemClass itemClass = item.prefab.m_class;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.ResidentialLow) && itemClass.m_subService == ItemClass.SubService.ResidentialLow) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.ResidentialHigh) && itemClass.m_subService == ItemClass.SubService.ResidentialHigh) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.CommercialLow) && itemClass.m_subService == ItemClass.SubService.CommercialLow) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.CommercialHigh) && itemClass.m_subService == ItemClass.SubService.CommercialHigh) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Industrial) && itemClass.m_subService == ItemClass.SubService.IndustrialGeneric) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Farming) && itemClass.m_subService == ItemClass.SubService.IndustrialFarming) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Forestry) && itemClass.m_subService == ItemClass.SubService.IndustrialForestry) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Oil) && itemClass.m_subService == ItemClass.SubService.IndustrialOil) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Ore) && itemClass.m_subService == ItemClass.SubService.IndustrialOre) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Office) && itemClass.m_service == ItemClass.Service.Office) inZone = true;
+                }
+
+                if (!inZone && !m_filter.IsAllZoneSelected()) continue;
+
+                // Name
+                if (!m_filter.buildingName.IsNullOrWhiteSpace() && !item.name.ToLower().Contains(m_filter.buildingName.ToLower())) continue;
+
+                filtered.Add(item);
+            }
+
+            /*filtered.Trim();
+            Array.Sort(filtered.m_buffer as BuildingItem[], BuildingCompare);*/
+            return filtered;
         }
 
         private void RotateCamera(UIComponent c, UIMouseEventParameter p)
@@ -211,7 +269,7 @@ namespace BuildingThemes.GUI
             m_previewRenderer.Render();
         }
 
-        #region Filtering/Sorting
+        #region Sorting
         private static int ThemeCompare(Configuration.Theme a, Configuration.Theme b)
         {
             // Sort by name
