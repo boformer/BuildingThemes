@@ -31,7 +31,7 @@ namespace BuildingThemes.Detour
 
                 deployed = true;
 
-                Debug.Log("Building Themes: ZoneBlock Methods detoured!");
+                Debugger.Log("Building Themes: ZoneBlock Methods detoured!");
             }
         }
 
@@ -48,10 +48,11 @@ namespace BuildingThemes.Detour
 
                 deployed = false;
 
-                Debug.Log("Building Themes: ZoneBlock Methods restored!");
+                Debugger.Log("Building Themes: ZoneBlock Methods restored!");
             }
         }
 
+        private static int debugCount = 0;
 
         // Detours
 
@@ -62,10 +63,10 @@ namespace BuildingThemes.Detour
 
             var zoneBlock = Singleton<ZoneManager>.instance.m_blocks.m_buffer[blockID];
 
-            if (BuildingThemesMod.isDebug)
+            if (Debugger.Enabled && debugCount < 10)
             {
-                UnityEngine.Debug.LogFormat(
-                    "Building Themes: Detoured ZoneBlock.SimulationStep was called. blockID: {0}, position: {1}.", blockID, zoneBlock.m_position);
+                debugCount++;
+                Debugger.LogFormat("Building Themes: Detoured ZoneBlock.SimulationStep was called. blockID: {0}, position: {1}.", blockID, zoneBlock.m_position);
             }
 
             ZoneManager zoneManager = Singleton<ZoneManager>.instance;
@@ -150,7 +151,7 @@ namespace BuildingThemes.Detour
                     while (num9 != 0)
                     {
                         Vector3 positionVar = zoneManager.m_blocks.m_buffer[(int)num9].m_position;
-                        float num11 = Mathf.Max(Mathf.Max(vector4.x - 46f - positionVar.x, vector4.y - 46f - positionVar.z), 
+                        float num11 = Mathf.Max(Mathf.Max(vector4.x - 46f - positionVar.x, vector4.y - 46f - positionVar.z),
                             Mathf.Max(positionVar.x - vector5.x - 46f, positionVar.z - vector5.y - 46f));
 
                         if (num11 < 0f)
@@ -558,10 +559,8 @@ namespace BuildingThemes.Detour
             int num28 = 0;
 
             // begin mod
-            int depth_alt = depth_A;
+            int depth_alt = Mathf.Min(depth_A, 4);
             int width_alt = width_A;
-
-            if (depth_alt > 4) depth_alt = 4;
             // end mod
 
             while (num28 < 8) // while (num28 < 6)
@@ -634,7 +633,6 @@ namespace BuildingThemes.Detour
                                 break;
                             }
 
-                            //TODO play with this
                             if (width_alt == width_A)
                             {
                                 num25_row = num15 + num16 + 1;
@@ -652,8 +650,6 @@ namespace BuildingThemes.Detour
                                 }
                             }
 
-
-
                             length = depth_alt;
                             width = width_alt;
 
@@ -666,7 +662,6 @@ namespace BuildingThemes.Detour
                     // end mod
                     // Straight cases
                     case 5:
-                        //int width_A = num16 - num15 + 1;
                         num25_row = num15 + num16 + 1;
                         length = depth_A;
                         width = width_A;
@@ -675,10 +670,10 @@ namespace BuildingThemes.Detour
                     case 6:
                         // begin mod
 
-                        // again for straight cases
-                        depth_alt = depth_A;
+                        // reset variables
+                        depth_alt = Mathf.Min(depth_A, 4);
                         width_alt = width_A;
-                        if (depth_alt > 4) depth_alt = 4;
+
                         // end mod
 
                         //int width_B = num20 - num19 + 1;
@@ -699,7 +694,6 @@ namespace BuildingThemes.Detour
                             break;
                         }
 
-                        //TODO play with this
                         if (width_alt == width_A)
                         {
                             num25_row = num15 + num16 + 1;
@@ -735,19 +729,17 @@ namespace BuildingThemes.Detour
                 }
 
                 // begin mod
-                // Here we pass the position to the BuildingManager.getRandomBuildingInfo method
-                BuildingManagerDetour.position = vector6;
-                // end mod
 
-                if (BuildingThemesMod.isDebug)
-                {
-                    UnityEngine.Debug.LogFormat("Searching prefab ({6}). {0}, {1}, {2}, footprint: {3} x {4}, mode: {5}", service, subService, level, width, length, zoningMode3, num28);
-                }
-                buildingInfo = Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3);
+                // Here we are calling a custom getRandomBuildingInfo method
+
+                buildingInfo = BuildingManagerDetour.GetRandomBuildingInfo_Spawn(vector6, ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3);
+
+                // end mod
 
                 if (buildingInfo != null)
                 {
                     // begin mod
+
                     // If the depth of the found prefab is smaller than the one we were looking for, recalculate the size
                     // This is done by checking the position of every prop
                     // Plots only get shrinked when no assets are placed on the extra space
@@ -787,21 +779,27 @@ namespace BuildingThemes.Detour
                         length = buildingInfo.GetWidth();
                         vector6 = m_position + VectorUtils.X_Y(((float)length * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                     }
+
                     // end mod
-                    if (BuildingThemesMod.isDebug)
+
+                    if (Debugger.Enabled)
                     {
-                        UnityEngine.Debug.Log("Success! Prefab found.");
+                        Debugger.LogFormat("Found prefab: {5} - {0}, {1}, {2}, {3} x {4}", service, subService, level, width, length, buildingInfo.name);
                     }
                     break;
                 }
-                if (BuildingThemesMod.isDebug)
+                if (Debugger.Enabled)
                 {
-                    UnityEngine.Debug.Log("Failure! No prefab found.");
+
                 }
                 goto IL_DF0;
             }
             if (buildingInfo == null)
             {
+                if (Debugger.Enabled)
+                {
+                    Debugger.LogFormat("No prefab found: {0}, {1}, {2}, {3} x {4}", service, subService, level, width, length);
+                }
                 return;
             }
             float num29 = Singleton<TerrainManager>.instance.WaterLevel(VectorUtils.XZ(vector6));

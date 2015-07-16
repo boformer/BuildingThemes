@@ -15,6 +15,7 @@ namespace BuildingThemes.GUI
         private UIFastList m_themeSelection;
         private UIFastList m_buildingSelection;
         private UITextureSprite m_preview;
+        private UISprite m_noPreview;
         private PreviewRenderer m_previewRenderer;
 
         #region Constant values
@@ -25,6 +26,40 @@ namespace BuildingThemes.GUI
         private const float SPACING = 5;
         private const float TITLE_HEIGHT = 40;
         #endregion
+
+        private static GameObject _gameObject;
+
+        public static void Initialize()
+        {
+            try
+            {
+                // Creating our own gameObect, helps finding the UI in ModTools
+                _gameObject = new GameObject("BuildingThemes");
+                _gameObject.transform.parent = UIView.GetAView().transform;
+                _gameObject.AddComponent<GUI.UIThemeManager>();
+            }
+            catch (Exception e)
+            {
+                // Catching any exception to not block the loading process of other mods
+                Debugger.Log("Building Themes: An error has happened during the UI creation.");
+                Debugger.LogException(e);
+            }
+        }
+
+        public static void Destroy()
+        {
+            try
+            {
+                if (_gameObject != null)
+                    GameObject.Destroy(_gameObject);
+            }
+            catch (Exception e)
+            {
+                // Catching any exception to not block the unloading process of other mods
+                Debugger.Log("Building Themes: An error has happened during the UI destruction.");
+                Debugger.LogException(e);
+            }
+        }
 
         public override void Start()
         {
@@ -124,6 +159,10 @@ namespace BuildingThemes.GUI
             m_preview.size = previewPanel.size;
             m_preview.relativePosition = Vector3.zero;
 
+            m_noPreview = previewPanel.AddUIComponent<UISprite>();
+            m_noPreview.spriteName = "Niet";
+            m_noPreview.relativePosition = new Vector3((previewPanel.width - m_noPreview.spriteInfo.width) / 2, (previewPanel.height - m_noPreview.spriteInfo.height) / 2);
+
             m_previewRenderer = gameObject.AddComponent<PreviewRenderer>();
             m_previewRenderer.size = m_preview.size * 2; // Twice the size for anti-aliasing
 
@@ -154,10 +193,13 @@ namespace BuildingThemes.GUI
                 m_previewRenderer.material = prefab.m_material;
                 m_previewRenderer.Render();
                 m_preview.texture = m_previewRenderer.texture;
+
+                m_noPreview.isVisible = false;
             }
             else
             {
                 m_preview.texture = null;
+                m_noPreview.isVisible = true;
             }
         }
 
@@ -185,19 +227,17 @@ namespace BuildingThemes.GUI
             else
             {
                 // Reset building association
-                foreach(BuildingItem item in m_buildingDictionary.Values)
+                foreach (BuildingItem item in m_buildingDictionary.Values)
                     item.building = null;
             }
 
             // Combine growables with buildings in configuration
-            FastList<object> list = new FastList<object>();
-            list.m_buffer = m_buildingDictionary.Values.ToArray();
-            list.m_size = list.m_buffer.Length;
+            List<BuildingItem> list = m_buildingDictionary.Values.ToList<BuildingItem>();
 
             Configuration.Building[] buildings = theme.buildings.ToArray();
-            for(int i=0; i< buildings.Length; i++)
+            for (int i = 0; i < buildings.Length; i++)
             {
-                if(m_buildingDictionary.ContainsKey(buildings[i].name))
+                if (m_buildingDictionary.ContainsKey(buildings[i].name))
                 {
                     // Associate building with prefab
                     BuildingItem item = m_buildingDictionary[buildings[i].name];
@@ -212,18 +252,33 @@ namespace BuildingThemes.GUI
                 }
             }
 
-            // Filtering
-            if (m_filter.buildingLevel == ItemClass.Level.None && m_filter.buildingSize == Vector2.zero && m_filter.buildingName.IsNullOrWhiteSpace() && m_filter.IsAllZoneSelected())
-            {
-                /*list.Trim();
-                Array.Sort(list.m_buffer as BuildingItem[], BuildingCompare);*/
-                return list;
-            }
+            bool shouldFilter = m_filter.buildingLevel != ItemClass.Level.None || m_filter.buildingSize != Vector2.zero || !m_filter.buildingName.IsNullOrWhiteSpace() || !m_filter.IsAllZoneSelected();
 
-            FastList<object> filtered = new FastList<object>();
-            for (int i = 0; i < list.m_size; i++)
+            // Filtering
+            if (shouldFilter) list = Filter(list);
+
+            list.Sort(BuildingCompare);
+
+            FastList<object> fastList = new FastList<object>();
+            fastList.m_buffer = list.ToArray();
+            fastList.m_size = list.Count;
+
+            return fastList;
+        }
+
+        private void RotateCamera(UIComponent c, UIMouseEventParameter p)
+        {
+            m_previewRenderer.cameraRotation -= p.moveDelta.x / m_preview.width * 360f;
+            m_previewRenderer.Render();
+        }
+
+        #region Filtering/Sorting
+        private List<BuildingItem> Filter(List<BuildingItem> list)
+        {
+            List<BuildingItem> filtered = new List<BuildingItem>();
+            for (int i = 0; i < list.Count; i++)
             {
-                BuildingItem item = (BuildingItem)list.m_buffer[i];
+                BuildingItem item = (BuildingItem)list[i];
                 bool prefabExists = item.prefab != null;
 
                 // Level
@@ -235,7 +290,7 @@ namespace BuildingThemes.GUI
 
                 // zone
                 bool inZone = false;
-                if(prefabExists)
+                if (prefabExists)
                 {
                     ItemClass itemClass = item.prefab.m_class;
                     if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.ResidentialLow) && itemClass.m_subService == ItemClass.SubService.ResidentialLow) inZone = true;
@@ -258,18 +313,9 @@ namespace BuildingThemes.GUI
                 filtered.Add(item);
             }
 
-            /*filtered.Trim();
-            Array.Sort(filtered.m_buffer as BuildingItem[], BuildingCompare);*/
             return filtered;
         }
 
-        private void RotateCamera(UIComponent c, UIMouseEventParameter p)
-        {
-            m_previewRenderer.cameraRotation -= p.moveDelta.x / m_preview.width * 360f;
-            m_previewRenderer.Render();
-        }
-
-        #region Sorting
         private static int ThemeCompare(Configuration.Theme a, Configuration.Theme b)
         {
             // Sort by name

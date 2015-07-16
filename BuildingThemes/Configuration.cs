@@ -11,6 +11,8 @@ namespace BuildingThemes
 {
     public class Configuration
     {
+        public bool UnlockPolicyPanel = true;
+        
         [XmlArray(ElementName = "Themes")]
         [XmlArrayItem(ElementName = "Theme")]
         public List<Theme> themes = new List<Theme>();
@@ -55,6 +57,15 @@ namespace BuildingThemes
                 return false;
             }
 
+            public Building getBuilding(string name)
+            {
+                foreach (Building building in buildings)
+                {
+                    if (building.name == name) return building;
+                }
+                return null;
+            }
+
             public Theme(string name)
             {
                 this.name = name;
@@ -72,6 +83,12 @@ namespace BuildingThemes
 
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
+
+            [XmlAttribute("min-level"), DefaultValue(-1)]
+            public int minLevel = -1;
+
+            [XmlAttribute("max-level"), DefaultValue(-1)]
+            public int maxLevel = -1;
 
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;
@@ -106,7 +123,7 @@ namespace BuildingThemes
             }
             catch (Exception e)
             {
-                Debug.Log("Couldn't load configuration (XML malformed?)");
+                Debugger.Log("Couldn't load configuration (XML malformed?)");
                 throw e;
             }
         }
@@ -119,6 +136,9 @@ namespace BuildingThemes
                 using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(filename))
                 {
                     var configCopy = new Configuration();
+
+                    configCopy.UnlockPolicyPanel = config.UnlockPolicyPanel;
+
                     foreach (var theme in config.themes)
                     {
                         var newTheme = new Theme(theme.name);
@@ -139,7 +159,7 @@ namespace BuildingThemes
             }
             catch (Exception e)
             {
-                Debug.Log("Couldn't create configuration file at \"" + Directory.GetCurrentDirectory() + "\"");
+                Debugger.Log("Couldn't create configuration file at \"" + Directory.GetCurrentDirectory() + "\"");
                 throw e;
             }
         }

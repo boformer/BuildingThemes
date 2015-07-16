@@ -1,15 +1,14 @@
-﻿using System;
-using ICities;
+﻿using ICities;
 using ColossalFramework;
 using ColossalFramework.UI;
 using UnityEngine;
+using System;
+using BuildingThemes.GUI;
 
 namespace BuildingThemes
 {
     public class BuildingThemesMod : LoadingExtensionBase, IUserMod
     {
-        public static bool isDebug = false;
-
         public string Name
         {
             get { return "Building Themes"; }
@@ -19,74 +18,107 @@ namespace BuildingThemes
             get { return "Create building themes and apply them to cities and districts."; }
         }
 
+        public void OnSettingsUI(UIHelperBase helper)
+        {
+            UIHelperBase group = helper.AddGroup("Building Themes");
+            group.AddCheckbox("Unlock Policies Panel From Start", PolicyPanelEnabler.Unlock, delegate(bool c) { PolicyPanelEnabler.Unlock = c; });
+            group.AddCheckbox("Generate Debug Output", Debugger.Enabled, delegate(bool c) { Debugger.Enabled = c; });
+        }
+
         public override void OnCreated(ILoading loading)
         {
             base.OnCreated(loading);
 
-            Debug.Log("Building Themes: Initializing Mod...");
+            Debugger.Initialize();
+
+            Debugger.Log("ON_CREATED");
+            Debugger.Log("Building Themes: Initializing Mod...");
+
+            PolicyPanelEnabler.Register();
 
             Singleton<BuildingThemesManager>.instance.Reset();
             Singleton<BuildingThemesManager>.instance.searchBuildingThemeMods();
 
-            Detour.BuildingManagerDetour.Deploy();
-            Detour.ZoneBlockDetour.Deploy();
-            Detour.ImmaterialResourceManagerDetour.Deploy();
-            Detour.PoliciesPanelDetour.Deploy();
+            try { Detour.BuildingManagerDetour.Deploy(); }
+            catch (Exception e) { Debugger.LogException(e); }
 
-            Debug.Log("Building Themes: Mod successfully intialized.");
+            try { Detour.ZoneBlockDetour.Deploy(); }
+            catch (Exception e) { Debugger.LogException(e); }
+
+            try { Detour.ImmaterialResourceManagerDetour.Deploy(); }
+            catch (Exception e) { Debugger.LogException(e); }
+
+            try { Detour.PrivateBuildingAIDetour<ResidentialBuildingAI>.Deploy(); }
+            catch (Exception e) { Debugger.LogException(e); }
+
+            try { Detour.PrivateBuildingAIDetour<CommercialBuildingAI>.Deploy(); }
+            catch (Exception e) { Debugger.LogException(e); }
+
+            try { Detour.PrivateBuildingAIDetour<IndustrialBuildingAI>.Deploy(); }
+            catch (Exception e) { Debugger.LogException(e); }
+
+            try { Detour.PrivateBuildingAIDetour<OfficeBuildingAI>.Deploy(); }
+            catch (Exception e) { Debugger.LogException(e); }
+
+            try { Detour.PoliciesPanelDetour.Deploy(); }
+            catch (Exception e) { Debugger.LogException(e); }
+
+            Debugger.Log("Building Themes: Mod successfully intialized.");
+        }
+
+        public override void OnLevelLoaded(LoadMode mode)
+        {
+            base.OnLevelLoaded(mode);
+
+            Debugger.Log("ON_LEVEL_LOADED");
+
+            Debugger.AppendModList();
+            Debugger.AppendThemeList();
+
+            PolicyPanelEnabler.UnlockPolicyToolbarButton();
+            UIThemeManager.Initialize();
+        }
+
+        public override void OnLevelUnloading()
+        {
+            base.OnLevelUnloading();
+
+            Debugger.Log("ON_LEVEL_UNLOADING");
+
+            UIThemeManager.Destroy();
         }
 
         public override void OnReleased()
         {
             base.OnReleased();
 
-            UnityEngine.Debug.Log("Building Themes: Reverting detoured methods...");
+            Debugger.Log("ON_RELEASED");
+
+            Debugger.Log("Building Themes: Reverting detoured methods...");
 
             Singleton<BuildingThemesManager>.instance.Reset();
 
-            Detour.BuildingManagerDetour.Revert();
-            Detour.ZoneBlockDetour.Revert();
-            Detour.ImmaterialResourceManagerDetour.Revert();
-            Detour.PoliciesPanelDetour.Revert();
-
-            UnityEngine.Debug.Log("Building Themes: Done!");
-        }
-
-        public GameObject gameObject;
-
-        public override void OnLevelLoaded(LoadMode mode)
-        {
             try
             {
-                // Is it an actual game ?
-                if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
-
-                // Creating our own gameObect, helps finding the UI in ModTools
-                gameObject = new GameObject("BuildingThemes");
-                gameObject.transform.parent = UIView.GetAView().transform;
-                gameObject.AddComponent<GUI.UIThemeManager>();
+                Detour.BuildingManagerDetour.Revert();
+                Detour.ZoneBlockDetour.Revert();
+                Detour.ImmaterialResourceManagerDetour.Revert();
+                Detour.PrivateBuildingAIDetour<ResidentialBuildingAI>.Revert();
+                Detour.PrivateBuildingAIDetour<CommercialBuildingAI>.Revert();
+                Detour.PrivateBuildingAIDetour<IndustrialBuildingAI>.Revert();
+                Detour.PrivateBuildingAIDetour<OfficeBuildingAI>.Revert();
+                Detour.PoliciesPanelDetour.Revert();
             }
             catch (Exception e)
             {
-                // Catching any exception to not block the loading process of other mods
-                Debug.Log("Building Themes: An error has happened during the UI creation.");
-                Debug.LogException(e);
+                Debugger.LogException(e);
             }
-        }
 
-        public override void OnLevelUnloading()
-        {
-            try
-            {
-                if(gameObject != null)
-                GameObject.Destroy(gameObject);
-            }
-            catch (Exception e)
-            {
-                // Catching any exception to not block the unloading process of other mods
-                Debug.Log("Building Themes: An error has happened during the UI destruction.");
-                Debug.LogException(e);
-            }
+            PolicyPanelEnabler.Unregister();
+
+            Debugger.Log("Building Themes: Done!");
+
+            Debugger.Deinitialize();
         }
     }
 }
