@@ -337,8 +337,8 @@ namespace BuildingThemes
 						// mod begin
                         if (!includeVariations && BuildingVariationManager.instance.IsVariation(prefab.name)) continue;
                         
-                        uint spawnRateSum = 0;
-                        uint hits = 0;
+                        int spawnRateSum = 0;
+                        int hits = 0;
 
                         if (enabledThemes != null && enabledThemes.Count > 0)
                         {
@@ -350,7 +350,7 @@ namespace BuildingThemes
                                 {
                                     hits++;
                                     // limit spawn rate to 50
-                                    spawnRateSum += building.spawnRate > 50 ? 50 : building.spawnRate;
+                                    spawnRateSum += Mathf.Clamp(building.spawnRate, 0, 50);
                                     break;
                                 }
                             }
@@ -376,8 +376,22 @@ namespace BuildingThemes
                                 }
                             }
 
-                            if (onBlacklist) continue;
+                            if (onBlacklist)
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                spawnRateSum = 5;
+                                hits = 1;
+                            }
                         }
+
+                        if (hits == 0 || spawnRateSum == 0) 
+                        {
+                            continue;
+                        }
+
                         // mod end
                         
                         int areaIndex = GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
@@ -387,7 +401,7 @@ namespace BuildingThemes
 						}
 
                         // mod begin
-                        uint spawnRate = spawnRateSum / hits;
+                        int spawnRate = spawnRateSum / hits;
                         for (uint s = 0; s < spawnRate; s++)
                         {
                         // mod end
