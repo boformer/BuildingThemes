@@ -234,10 +234,12 @@ namespace BuildingThemes
             info.upgradeBuildings.Clear();
             foreach (var theme in enabledThemes)
             {
-                foreach (var upgradeMapping in theme.upgrades) 
+                foreach (var building in theme.buildings) 
                 {
-                    var fromPrefab = PrefabCollection<BuildingInfo>.FindLoaded(upgradeMapping.Key);
-                    var toPrefab = PrefabCollection<BuildingInfo>.FindLoaded(upgradeMapping.Value);
+                    if (building.upgradeName == null) continue;
+                    
+                    var fromPrefab = PrefabCollection<BuildingInfo>.FindLoaded(building.name);
+                    var toPrefab = PrefabCollection<BuildingInfo>.FindLoaded(building.upgradeName);
 
                     if (fromPrefab != null && toPrefab != null && !info.upgradeBuildings.ContainsKey((ushort)fromPrefab.m_prefabDataIndex)) 
                     {
@@ -346,7 +348,7 @@ namespace BuildingThemes
                             {
                                 var building = theme.getBuilding(prefab.name);
 
-                                if (building != null && building.include && !building.notInLevelRange)
+                                if (building != null && building.include)
                                 {
                                     hits++;
                                     // limit spawn rate to 50
@@ -369,7 +371,7 @@ namespace BuildingThemes
                             {
                                 var building = theme.getBuilding(prefab.name);
 
-                                if (building != null && building.include && !building.notInLevelRange)
+                                if (building != null && building.include)
                                 {
                                     onBlacklist = true;
                                     break;

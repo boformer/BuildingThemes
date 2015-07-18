@@ -33,8 +33,6 @@ namespace BuildingThemes
         
         public Dictionary<string, BuildingInfo> CreateVariations(BuildingInfo prefab)
         {
-            var prefabLevel = (int)prefab.m_class.m_level + 1;
-
             var maxAllowedLevel = getMaxAllowedLevel(prefab.m_class);
 
             var prefabVariations = new Dictionary<string, BuildingInfo>();
@@ -43,70 +41,26 @@ namespace BuildingThemes
             {
                 foreach (var theme in BuildingThemesManager.instance.GetAllThemes())
                 {
-                    var building = theme.getBuilding(prefab.name); // TODO add support for service type variation?
-
-                    if (building == null || !building.include) continue;
-
-                    var minLevel = building.minLevel < 1 ? prefabLevel : Mathf.Min(building.minLevel, maxAllowedLevel);
-                    var maxLevel = Mathf.Clamp(building.maxLevel < 1 ? prefabLevel : building.maxLevel, minLevel, maxAllowedLevel);
-
-                    // all variations sorted by level
-                    var prefabsByLevel = new string[5];
-
-                    // check if the original prefab is in the specified level range
-                    int originalLevel = (int)prefab.m_class.m_level + 1;
-                    if (originalLevel >= minLevel && originalLevel <= maxLevel)
+                    foreach (var variation in theme.getVariations(prefab.name)) 
                     {
-                        // yes? add it to the list of variations sorted by level
-                        prefabsByLevel[(int)prefab.m_class.m_level] = prefab.name;
-                    }
-                    else
-                    {
-                        // no? prevent building from spawning
-                        building.notInLevelRange = true;
-                    }
+                        if (prefabVariations.ContainsKey(variation.name)) continue;
 
-                    if (building.upgrade != null && maxLevel < maxAllowedLevel) 
-                    {
-                        prefabsByLevel[maxLevel] = building.upgrade;
-                    }
-
-
-                    for (int l = minLevel; l <= maxLevel; l++)
-                    {
-                        var level = (ItemClass.Level)(l - 1);
-
-                        if (level == prefab.m_class.m_level) continue;
-
-                        var variationName = prefab.name + "#" + level;
-
-                        prefabsByLevel[(int)level] = variationName;
-                        theme.buildings.Add(new Configuration.Building { name = variationName, isBuiltIn = true });
-
-                        variations.Add(variationName);
-
-                        if (prefabVariations.ContainsKey(variationName)) continue;
+                        if (variation.level < 1 || variation.level > maxAllowedLevel) continue;
 
                         var variationClass = ScriptableObject.CreateInstance<ItemClass>();
 
                         variationClass.m_layer = prefab.m_class.m_layer;
                         variationClass.m_service = prefab.m_class.m_service;
                         variationClass.m_subService = prefab.m_class.m_subService;
-                        variationClass.m_level = level;
+                        variationClass.m_level = (ItemClass.Level)(variation.level - 1);
 
                         BuildingInfo prefabVariation = BuildingInfo.Instantiate(prefab);
-                        prefabVariation.name = variationName;
+                        prefabVariation.name = variation.name;
                         prefabVariation.m_class = variationClass;
 
-                        prefabVariations.Add(variationName, prefabVariation);
-                    }
+                        prefabVariations.Add(variation.name, prefabVariation);
 
-                    for (int l = 0; l < 4; l++)
-                    {
-                        if (prefabsByLevel[l] != null && prefabsByLevel[l + 1] != null)
-                        {
-                            theme.upgrades.Add(prefabsByLevel[l], prefabsByLevel[l + 1]);
-                        }
+                        variations.Add(variation.name);
                     }
                 }
             }

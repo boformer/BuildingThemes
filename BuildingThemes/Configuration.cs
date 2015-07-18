@@ -36,9 +36,6 @@ namespace BuildingThemes
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
 
-            [XmlIgnoreAttribute]
-            public Dictionary<string, string> upgrades = new Dictionary<string, string>();
-
             [XmlArray(ElementName = "Buildings")]
             [XmlArrayItem(ElementName = "Building")]
             public List<Building> buildings = new List<Building>();
@@ -60,6 +57,11 @@ namespace BuildingThemes
                     if (building.name == name) return true;
                 }
                 return false;
+            }
+
+            public IEnumerable<Building> getVariations(string baseName) 
+            {
+                return from building in buildings where building.baseName == baseName select building;
             }
 
             public Building getBuilding(string name)
@@ -89,17 +91,14 @@ namespace BuildingThemes
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
 
-            [XmlIgnoreAttribute]
-            public bool notInLevelRange = false;
+            [XmlAttribute("level"), DefaultValue(-1)]
+            public int level = -1;
 
-            [XmlAttribute("min-level"), DefaultValue(-1)]
-            public int minLevel = -1;
+            [XmlAttribute("upgrade-name"), DefaultValue(null)]
+            public string upgradeName = null;
 
-            [XmlAttribute("max-level"), DefaultValue(-1)]
-            public int maxLevel = -1;
-
-            [XmlAttribute("upgrade"), DefaultValue(null)]
-            public string upgrade = null;
+            [XmlAttribute("base-name"), DefaultValue(null)]
+            public string baseName = null;
 
             [XmlAttribute("spawn-rate"), DefaultValue(5)]
             public int spawnRate = 5;
