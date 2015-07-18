@@ -27,7 +27,7 @@ namespace BuildingThemes.GUI
         {
             UICheckBox checkBox = parent.AddUIComponent<UICheckBox>();
 
-            checkBox.width = 300f;
+            checkBox.width = parent.width;
             checkBox.height = 20f;
             checkBox.clipChildren = true;
 
@@ -49,7 +49,7 @@ namespace BuildingThemes.GUI
             return checkBox;
         }
 
-        public static UICheckBox CreateIconToggle(UIComponent parent, string atlas, string checkedSrpite, string uncheckedSripte)
+        public static UICheckBox CreateIconToggle(UIComponent parent, string atlas, string checkedSprite, string uncheckedSprite)
         {
             UICheckBox checkBox = parent.AddUIComponent<UICheckBox>();
 
@@ -62,18 +62,37 @@ namespace BuildingThemes.GUI
             panel.size = checkBox.size;
             panel.relativePosition = Vector3.zero;
 
-            checkBox.eventMouseEnter += (c, p) => { panel.backgroundSprite = "IconPolicyBaseRectHovered"; };
-            checkBox.eventMouseLeave += (c, p) => { panel.backgroundSprite = "IconPolicyBaseRect"; };
+            checkBox.eventCheckChanged += (c, b) =>
+            {
+                if (checkBox.isChecked)
+                    panel.backgroundSprite = "IconPolicyBaseRect";
+                else
+                    panel.backgroundSprite = "IconPolicyBaseRectDisabled";
+                panel.Invalidate();
+            };
+
+            checkBox.eventMouseEnter += (c, p) =>
+            {
+                panel.backgroundSprite = "IconPolicyBaseRectHovered";
+            };
+
+            checkBox.eventMouseLeave += (c, p) =>
+            {
+                if (checkBox.isChecked)
+                    panel.backgroundSprite = "IconPolicyBaseRect";
+                else
+                    panel.backgroundSprite = "IconPolicyBaseRectDisabled";
+            };
 
             UISprite sprite = panel.AddUIComponent<UISprite>();
             sprite.atlas = GetAtlas(atlas);
-            sprite.spriteName = uncheckedSripte;
+            sprite.spriteName = uncheckedSprite;
             sprite.size = checkBox.size;
             sprite.relativePosition = Vector3.zero;
 
             checkBox.checkedBoxObject = sprite.AddUIComponent<UISprite>();
             ((UISprite)checkBox.checkedBoxObject).atlas = sprite.atlas;
-            ((UISprite)checkBox.checkedBoxObject).spriteName = checkedSrpite;
+            ((UISprite)checkBox.checkedBoxObject).spriteName = checkedSprite;
             checkBox.checkedBoxObject.size = checkBox.size;
             checkBox.checkedBoxObject.relativePosition = Vector3.zero;
 
@@ -153,6 +172,9 @@ namespace BuildingThemes.GUI
 
         public static void ResizeIcon(UISprite icon, Vector2 maxSize)
         {
+            icon.width = icon.spriteInfo.width;
+            icon.height = icon.spriteInfo.height;
+
             if (icon.height == 0) return;
 
             float ratio = icon.width / icon.height;
