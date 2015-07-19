@@ -10,6 +10,8 @@ namespace BuildingThemes.GUI
         public UICheckBox[] zoningToggles;
         public UIButton allZones;
         public UIButton noZones;
+        public UIDropDown origin;
+        public UIDropDown status;
         public UIDropDown levelFilter;
         public UIDropDown sizeFilterX;
         public UIDropDown sizeFilterY;
@@ -27,6 +29,20 @@ namespace BuildingThemes.GUI
             Oil,
             Ore,
             Office
+        }
+
+        public enum Origin
+        {
+            All,
+            Default,
+            Custom
+        }
+
+        public enum Status
+        {
+            All,
+            Included,
+            Excluded
         }
 
         public bool IsZoneSelected(Zone zone)
@@ -67,6 +83,16 @@ namespace BuildingThemes.GUI
             get { return nameFilter.text.Trim(); }
         }
 
+        public Origin buildingOrigin
+        {
+            get { return (Origin)origin.selectedIndex; }
+        }
+
+        public Status buildingStatus
+        {
+            get { return (Status)status.selectedIndex; }
+        }
+
         public event PropertyChangedEventHandler<int> eventFilteringChanged;
 
         public override void Start()
@@ -88,7 +114,7 @@ namespace BuildingThemes.GUI
 
             for (int i = 0; i < 10; i++)
             {
-                zoningToggles[i].relativePosition = new Vector3(40 * i, 35);
+                zoningToggles[i].relativePosition = new Vector3(40 * i, 0);
                 zoningToggles[i].isChecked = true;
                 zoningToggles[i].readOnly = true;
                 zoningToggles[i].checkedBoxObject.isInteractive = false; // Don't eat my double click event please
@@ -112,7 +138,7 @@ namespace BuildingThemes.GUI
             allZones = UIUtils.CreateButton(this);
             allZones.width = 55;
             allZones.text = "All";
-            allZones.relativePosition = new Vector3(400, 40);
+            allZones.relativePosition = new Vector3(400, 5);
 
             allZones.eventClick += (c, p) =>
             {
@@ -126,7 +152,7 @@ namespace BuildingThemes.GUI
             noZones = UIUtils.CreateButton(this);
             noZones.width = 55;
             noZones.text = "None";
-            noZones.relativePosition = new Vector3(460, 40);
+            noZones.relativePosition = new Vector3(460, 5);
 
             noZones.eventClick += (c, p) =>
             {
@@ -137,12 +163,39 @@ namespace BuildingThemes.GUI
                 eventFilteringChanged(this, 0);
             };
 
+            // Display
+            UILabel display = AddUIComponent<UILabel>();
+            display.textScale = 0.8f;
+            display.padding = new RectOffset(0, 0, 8, 0);
+            display.text = "Display: ";
+            display.relativePosition = new Vector3(0, 40);
+
+            origin = UIUtils.CreateDropDown(this);
+            origin.width = 90;
+            origin.AddItem("All");
+            origin.AddItem("Default");
+            origin.AddItem("Custom");
+            origin.selectedIndex = 0;
+            origin.relativePosition = new Vector3(display.relativePosition.x + display.width + 5, 40);
+
+            origin.eventSelectedIndexChanged += (c, i) => eventFilteringChanged(this, 1);
+
+            status = UIUtils.CreateDropDown(this);
+            status.width = 90;
+            status.AddItem("All");
+            status.AddItem("Included");
+            status.AddItem("Excluded");
+            status.selectedIndex = 0;
+            status.relativePosition = new Vector3(origin.relativePosition.x + origin.width + 5, 40);
+
+            status.eventSelectedIndexChanged += (c, i) => eventFilteringChanged(this, 2);
+
             // Level
             UILabel levelLabel = AddUIComponent<UILabel>();
             levelLabel.textScale = 0.8f;
             levelLabel.padding = new RectOffset(0, 0, 8, 0);
             levelLabel.text = "Level: ";
-            levelLabel.relativePosition = new Vector3(0, 0);
+            levelLabel.relativePosition = new Vector3(status.relativePosition.x + status.width + 10, 40);
 
             levelFilter = UIUtils.CreateDropDown(this);
             levelFilter.width = 55;
@@ -153,16 +206,16 @@ namespace BuildingThemes.GUI
             levelFilter.AddItem("4");
             levelFilter.AddItem("5");
             levelFilter.selectedIndex = 0;
-            levelFilter.relativePosition = new Vector3(40, 0);
+            levelFilter.relativePosition = new Vector3(levelLabel.relativePosition.x + levelLabel.width + 5, 40);
 
-            levelFilter.eventSelectedIndexChanged += (c, i) => eventFilteringChanged(this, 1);
+            levelFilter.eventSelectedIndexChanged += (c, i) => eventFilteringChanged(this, 3);
 
             // Size
             UILabel sizeLabel = AddUIComponent<UILabel>();
             sizeLabel.textScale = 0.8f;
             sizeLabel.padding = new RectOffset(0, 0, 8, 0);
             sizeLabel.text = "Size: ";
-            sizeLabel.relativePosition = new Vector3(105, 0);
+            sizeLabel.relativePosition = new Vector3(levelFilter.relativePosition.x + levelFilter.width + 10, 40);
 
             sizeFilterX = UIUtils.CreateDropDown(this);
             sizeFilterX.width = 55;
@@ -172,14 +225,14 @@ namespace BuildingThemes.GUI
             sizeFilterX.AddItem("3");
             sizeFilterX.AddItem("4");
             sizeFilterX.selectedIndex = 0;
-            sizeFilterX.relativePosition = new Vector3(140, 0);
+            sizeFilterX.relativePosition = new Vector3(sizeLabel.relativePosition.x + sizeLabel.width + 5, 40);
 
             UILabel XLabel = AddUIComponent<UILabel>();
             XLabel.textScale = 0.8f;
             XLabel.padding = new RectOffset(0, 0, 8, 0);
             XLabel.text = "X";
             XLabel.isVisible = false;
-            XLabel.relativePosition = new Vector3(190, 5);
+            XLabel.relativePosition = new Vector3(sizeFilterX.relativePosition.x + sizeFilterX.width - 5, 40);
 
             sizeFilterY = UIUtils.CreateDropDown(this);
             sizeFilterY.width = 45;
@@ -189,7 +242,7 @@ namespace BuildingThemes.GUI
             sizeFilterY.AddItem("4");
             sizeFilterY.selectedIndex = 0;
             sizeFilterY.isVisible = false;
-            sizeFilterY.relativePosition = new Vector3(205, 0);
+            sizeFilterY.relativePosition = new Vector3(XLabel.relativePosition.x + XLabel.width + 5, 40);
 
             sizeFilterX.eventSelectedIndexChanged += (c, i) =>
             {
@@ -206,10 +259,10 @@ namespace BuildingThemes.GUI
                     sizeFilterY.isVisible = true;
                 }
 
-                eventFilteringChanged(this, 2);
+                eventFilteringChanged(this, 4);
             };
 
-            sizeFilterY.eventSelectedIndexChanged += (c, i) => eventFilteringChanged(this, 2);
+            sizeFilterY.eventSelectedIndexChanged += (c, i) => eventFilteringChanged(this, 4);
 
             // Name filter
             UILabel nameLabel = AddUIComponent<UILabel>();
@@ -224,8 +277,8 @@ namespace BuildingThemes.GUI
             nameFilter.padding = new RectOffset(6, 6, 6, 6);
             nameFilter.relativePosition = new Vector3(width - nameFilter.width, 0);
 
-            nameFilter.eventTextChanged += (c, s) => eventFilteringChanged(this, 3);
-            nameFilter.eventTextSubmitted += (c, s) => eventFilteringChanged(this, 3);
+            nameFilter.eventTextChanged += (c, s) => eventFilteringChanged(this, 5);
+            nameFilter.eventTextSubmitted += (c, s) => eventFilteringChanged(this, 5);
         }
     }
 }

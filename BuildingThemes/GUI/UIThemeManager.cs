@@ -94,9 +94,9 @@ namespace BuildingThemes.GUI
 
             // Filter
             m_filter = AddUIComponent<UIBuildingFilter>();
-            m_filter.width = width - LEFT_WIDTH - SPACING * 3;
-            m_filter.height = 75;
-            m_filter.relativePosition = new Vector3(LEFT_WIDTH + SPACING * 2, TITLE_HEIGHT);
+            m_filter.width = width - SPACING * 2;
+            m_filter.height = 70;
+            m_filter.relativePosition = new Vector3(SPACING, TITLE_HEIGHT);
 
             m_filter.eventFilteringChanged += (c, i) =>
             {
@@ -109,25 +109,25 @@ namespace BuildingThemes.GUI
             // Panels
             UIPanel left = AddUIComponent<UIPanel>();
             left.width = LEFT_WIDTH;
-            left.height = HEIGHT;
-            left.relativePosition = new Vector3(SPACING, TITLE_HEIGHT);
+            left.height = HEIGHT - m_filter.height;
+            left.relativePosition = new Vector3(SPACING, TITLE_HEIGHT + m_filter.height + SPACING);
 
             UIPanel middle = AddUIComponent<UIPanel>();
             middle.width = MIDDLE_WIDTH;
-            middle.height = HEIGHT - m_filter.height + SPACING;
-            middle.relativePosition = new Vector3(LEFT_WIDTH + SPACING * 2, TITLE_HEIGHT + m_filter.height);
+            middle.height = HEIGHT - m_filter.height;
+            middle.relativePosition = new Vector3(LEFT_WIDTH + SPACING * 2, TITLE_HEIGHT + m_filter.height + SPACING);
 
             UIPanel right = AddUIComponent<UIPanel>();
             right.width = RIGHT_WIDTH;
-            right.height = HEIGHT - SPACING - m_filter.height;
-            right.relativePosition = new Vector3(LEFT_WIDTH + MIDDLE_WIDTH + SPACING * 3, TITLE_HEIGHT + m_filter.height);
+            right.height = HEIGHT - m_filter.height;
+            right.relativePosition = new Vector3(LEFT_WIDTH + MIDDLE_WIDTH + SPACING * 3, TITLE_HEIGHT + m_filter.height + SPACING);
 
             // Theme selection
             m_themeSelection = UIFastList.Create<UIThemeItem>(left);
 
             m_themeSelection.backgroundSprite = "UnlockingPanel";
             m_themeSelection.width = left.width;
-            m_themeSelection.height = left.height - SPACING - 30;
+            m_themeSelection.height = left.height - 40;
             m_themeSelection.canSelect = true;
             m_themeSelection.rowHeight = 40;
             m_themeSelection.relativePosition = Vector3.zero;
@@ -146,13 +146,13 @@ namespace BuildingThemes.GUI
             m_themeAdd = UIUtils.CreateButton(left);
             m_themeAdd.width = (LEFT_WIDTH - SPACING) / 2;
             m_themeAdd.text = "New Theme";
-            m_themeAdd.relativePosition = new Vector3(0, HEIGHT- m_themeAdd.height);
+            m_themeAdd.relativePosition = new Vector3(0, m_themeSelection.height + SPACING);
 
             m_themeRemove = UIUtils.CreateButton(left);
             m_themeRemove.width = (LEFT_WIDTH - SPACING) / 2;
             m_themeRemove.text = "Delete Theme";
             m_themeRemove.isEnabled = false;
-            m_themeRemove.relativePosition = new Vector3(LEFT_WIDTH - m_themeRemove.width, HEIGHT - m_themeRemove.height);
+            m_themeRemove.relativePosition = new Vector3(LEFT_WIDTH - m_themeRemove.width, m_themeSelection.height + SPACING);
 
             // Building selection
             m_buildingSelection = UIFastList.Create<UIBuildingItem>(middle);
@@ -193,6 +193,7 @@ namespace BuildingThemes.GUI
             UILabel include = middle.AddUIComponent<UILabel>();
             include.width = 100;
             include.padding = new RectOffset(0, 0, 8, 0);
+            include.textScale = 0.8f;
             include.text = "Include:";
             include.relativePosition = new Vector3(m_includeAll.relativePosition.x - include.width - SPACING, m_buildingSelection.height + SPACING);
 
@@ -333,50 +334,53 @@ namespace BuildingThemes.GUI
         #region Filtering/Sorting
         private FastList<object> Filter(List<BuildingItem> list)
         {
-            bool shouldFilter = m_filter.buildingLevel != ItemClass.Level.None || m_filter.buildingSize != Vector2.zero || !m_filter.buildingName.IsNullOrWhiteSpace() || !m_filter.IsAllZoneSelected();
-            
-            if (shouldFilter)
+            List<BuildingItem> filtered = new List<BuildingItem>();
+            for (int i = 0; i < list.Count; i++)
             {
-                List<BuildingItem> filtered = new List<BuildingItem>();
-                for (int i = 0; i < list.Count; i++)
+                BuildingItem item = (BuildingItem)list[i];
+                bool prefabExists = item.prefab != null;
+
+                // Origin
+                if (m_filter.buildingOrigin == UIBuildingFilter.Origin.Default && item.isCustomAsset) continue;
+                if (m_filter.buildingOrigin == UIBuildingFilter.Origin.Custom && !item.isCustomAsset) continue;
+
+                // Status
+                if (m_filter.buildingStatus == UIBuildingFilter.Status.Included && !item.included) continue;
+                if (m_filter.buildingStatus == UIBuildingFilter.Status.Excluded && item.included) continue;
+
+                // Level
+                if (m_filter.buildingLevel != ItemClass.Level.None && !(prefabExists && item.prefab.m_class.m_level == m_filter.buildingLevel)) continue;
+
+                // size
+                Vector2 buildingSize = m_filter.buildingSize;
+                if (m_filter.buildingSize != Vector2.zero && !(prefabExists && item.prefab.m_cellWidth == buildingSize.x && item.prefab.m_cellLength == buildingSize.y)) continue;
+
+                // zone
+                bool inZone = m_filter.IsAllZoneSelected();
+                if (!inZone && prefabExists)
                 {
-                    BuildingItem item = (BuildingItem)list[i];
-                    bool prefabExists = item.prefab != null;
-
-                    // Level
-                    if (m_filter.buildingLevel != ItemClass.Level.None && !(prefabExists && item.prefab.m_class.m_level == m_filter.buildingLevel)) continue;
-
-                    // size
-                    Vector2 buildingSize = m_filter.buildingSize;
-                    if (m_filter.buildingSize != Vector2.zero && !(prefabExists && item.prefab.m_cellWidth == buildingSize.x && item.prefab.m_cellLength == buildingSize.y)) continue;
-
-                    // zone
-                    bool inZone = false;
-                    if (prefabExists)
-                    {
-                        ItemClass itemClass = item.prefab.m_class;
-                        if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.ResidentialLow) && itemClass.m_subService == ItemClass.SubService.ResidentialLow) inZone = true;
-                        if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.ResidentialHigh) && itemClass.m_subService == ItemClass.SubService.ResidentialHigh) inZone = true;
-                        if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.CommercialLow) && itemClass.m_subService == ItemClass.SubService.CommercialLow) inZone = true;
-                        if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.CommercialHigh) && itemClass.m_subService == ItemClass.SubService.CommercialHigh) inZone = true;
-                        if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Industrial) && itemClass.m_subService == ItemClass.SubService.IndustrialGeneric) inZone = true;
-                        if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Farming) && itemClass.m_subService == ItemClass.SubService.IndustrialFarming) inZone = true;
-                        if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Forestry) && itemClass.m_subService == ItemClass.SubService.IndustrialForestry) inZone = true;
-                        if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Oil) && itemClass.m_subService == ItemClass.SubService.IndustrialOil) inZone = true;
-                        if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Ore) && itemClass.m_subService == ItemClass.SubService.IndustrialOre) inZone = true;
-                        if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Office) && itemClass.m_service == ItemClass.Service.Office) inZone = true;
-                    }
-
-                    if (!inZone && !m_filter.IsAllZoneSelected()) continue;
-
-                    // Name
-                    if (!m_filter.buildingName.IsNullOrWhiteSpace() && !item.name.ToLower().Contains(m_filter.buildingName.ToLower())) continue;
-
-                    filtered.Add(item);
+                    ItemClass itemClass = item.prefab.m_class;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.ResidentialLow) && itemClass.m_subService == ItemClass.SubService.ResidentialLow) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.ResidentialHigh) && itemClass.m_subService == ItemClass.SubService.ResidentialHigh) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.CommercialLow) && itemClass.m_subService == ItemClass.SubService.CommercialLow) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.CommercialHigh) && itemClass.m_subService == ItemClass.SubService.CommercialHigh) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Industrial) && itemClass.m_subService == ItemClass.SubService.IndustrialGeneric) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Farming) && itemClass.m_subService == ItemClass.SubService.IndustrialFarming) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Forestry) && itemClass.m_subService == ItemClass.SubService.IndustrialForestry) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Oil) && itemClass.m_subService == ItemClass.SubService.IndustrialOil) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Ore) && itemClass.m_subService == ItemClass.SubService.IndustrialOre) inZone = true;
+                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Office) && itemClass.m_service == ItemClass.Service.Office) inZone = true;
                 }
 
-                list = filtered;
+                if (!inZone) continue;
+
+                // Name
+                if (!m_filter.buildingName.IsNullOrWhiteSpace() && !item.name.ToLower().Contains(m_filter.buildingName.ToLower())) continue;
+
+                filtered.Add(item);
             }
+
+            list = filtered;
 
             FastList<object> fastList = new FastList<object>();
             fastList.m_buffer = list.ToArray();
