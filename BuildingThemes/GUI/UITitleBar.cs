@@ -5,9 +5,26 @@ namespace BuildingThemes.GUI
 {
     public class UITitleBar : UIPanel
     {
+        private UISprite m_icon;
         private UILabel m_title;
         private UIButton m_close;
         private UIDragHandle m_drag;
+
+        public string iconSprite
+        {
+            get { return m_icon.spriteName; }
+            set
+            {
+                if (m_icon == null) SetupControls();
+                m_icon.spriteName = value;
+
+                if (m_icon.spriteInfo != null)
+                {
+                    UIUtils.ResizeIcon(m_icon, new Vector2(30, 30));
+                    m_icon.relativePosition = new Vector3(10, 5);
+                }
+            }
+        }
 
         public UIButton closeButton
         {
@@ -17,41 +34,37 @@ namespace BuildingThemes.GUI
         public string title
         {
             get { return m_title.text; }
-            set { m_title.text = value; }
+            set
+            {
+                if (m_title == null) SetupControls();
+                m_title.text = value;
+            }
         }
 
-        public override void Awake()
+        private void SetupControls()
         {
-            base.Awake();
-
-            m_title = AddUIComponent<UILabel>();
-            m_close = AddUIComponent<UIButton>();
-            m_drag = AddUIComponent<UIDragHandle>();
-
-            height = 40;
-            width = 450;
-            title = "(None)";
-        }
-
-        public override void Start()
-        {
-            base.Start();
-
             width = parent.width;
-            relativePosition = Vector3.zero;
+            height = 40;
             isVisible = true;
             canFocus = true;
             isInteractive = true;
+            relativePosition = Vector3.zero;
 
+            m_drag = AddUIComponent<UIDragHandle>();
             m_drag.width = width - 50;
             m_drag.height = height;
             m_drag.relativePosition = Vector3.zero;
             m_drag.target = parent;
 
+            m_icon = AddUIComponent<UISprite>();
+            m_icon.spriteName = iconSprite;
+            m_icon.relativePosition = new Vector3(10, 5);
 
+            m_title = AddUIComponent<UILabel>();
             m_title.relativePosition = new Vector3(50, 13);
             m_title.text = title;
 
+            m_close = AddUIComponent<UIButton>();
             m_close.relativePosition = new Vector3(width - 35, 2);
             m_close.normalBgSprite = "buttonclose";
             m_close.hoveredBgSprite = "buttonclosehover";

@@ -263,6 +263,15 @@ namespace BuildingThemes.GUI
             }
         }
 
+        public object selectedItem
+        {
+            get
+            {
+                if (m_selectedDataId == -1) return null;
+                return m_rowsData.m_buffer[m_selectedDataId];
+            }
+        }
+
         /// <summary>
         /// The number of pixels moved at each scroll step
         /// When set to 0 or less, rowHeight is used instead.

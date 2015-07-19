@@ -18,6 +18,8 @@ namespace BuildingThemes.GUI
             button.normalBgSprite = "ButtonMenu";
             button.hoveredBgSprite = "ButtonMenuHovered";
             button.pressedBgSprite = "ButtonMenuPressed";
+            button.disabledBgSprite = "ButtonMenuDisabled";
+            button.disabledTextColor = new Color32(128, 128, 128, 255);
             button.canFocus = false;
 
             return button;

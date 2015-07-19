@@ -13,7 +13,11 @@ namespace BuildingThemes.GUI
         private UITitleBar m_title;
         private UIBuildingFilter m_filter;
         private UIFastList m_themeSelection;
+        private UIButton m_themeAdd;
+        private UIButton m_themeRemove;
         private UIFastList m_buildingSelection;
+        private UIButton m_includeAll;
+        private UIButton m_includeNone;
         private UITextureSprite m_preview;
         private UISprite m_noPreview;
         private PreviewRenderer m_previewRenderer;
@@ -26,7 +30,7 @@ namespace BuildingThemes.GUI
         private const float LEFT_WIDTH = 250;
         private const float MIDDLE_WIDTH = 395;
         private const float RIGHT_WIDTH = 250;
-        private const float HEIGHT = 515;
+        private const float HEIGHT = 550;
         private const float SPACING = 5;
         private const float TITLE_HEIGHT = 40;
         #endregion
@@ -86,6 +90,7 @@ namespace BuildingThemes.GUI
             // Title Bar
             m_title = AddUIComponent<UITitleBar>();
             m_title.title = "Building Themes Manager";
+            m_title.iconSprite = "ToolbarIconZoomOutCity";
 
             // Filter
             m_filter = AddUIComponent<UIBuildingFilter>();
@@ -109,7 +114,7 @@ namespace BuildingThemes.GUI
 
             UIPanel middle = AddUIComponent<UIPanel>();
             middle.width = MIDDLE_WIDTH;
-            middle.height = HEIGHT - m_filter.height;
+            middle.height = HEIGHT - m_filter.height + SPACING;
             middle.relativePosition = new Vector3(LEFT_WIDTH + SPACING * 2, TITLE_HEIGHT + m_filter.height);
 
             UIPanel right = AddUIComponent<UIPanel>();
@@ -122,7 +127,7 @@ namespace BuildingThemes.GUI
 
             m_themeSelection.backgroundSprite = "UnlockingPanel";
             m_themeSelection.width = left.width;
-            m_themeSelection.height = left.height;
+            m_themeSelection.height = left.height - SPACING - 30;
             m_themeSelection.canSelect = true;
             m_themeSelection.rowHeight = 40;
             m_themeSelection.relativePosition = Vector3.zero;
@@ -133,21 +138,63 @@ namespace BuildingThemes.GUI
 
             m_themeSelection.eventSelectedIndexChanged += (c, i) =>
             {
+                m_buildingSelection.selectedIndex = -1;
                 m_buildingSelection.rowsData = Filter(m_themes[i]);
                 m_buildingSelection.DisplayAt(0);
             };
+
+            m_themeAdd = UIUtils.CreateButton(left);
+            m_themeAdd.width = (LEFT_WIDTH - SPACING) / 2;
+            m_themeAdd.text = "New Theme";
+            m_themeAdd.relativePosition = new Vector3(0, HEIGHT- m_themeAdd.height);
+
+            m_themeRemove = UIUtils.CreateButton(left);
+            m_themeRemove.width = (LEFT_WIDTH - SPACING) / 2;
+            m_themeRemove.text = "Delete Theme";
+            m_themeRemove.isEnabled = false;
+            m_themeRemove.relativePosition = new Vector3(LEFT_WIDTH - m_themeRemove.width, HEIGHT - m_themeRemove.height);
 
             // Building selection
             m_buildingSelection = UIFastList.Create<UIBuildingItem>(middle);
 
             m_buildingSelection.backgroundSprite = "UnlockingPanel";
             m_buildingSelection.width = middle.width;
-            m_buildingSelection.height = middle.height;
-            m_buildingSelection.canSelect = false;
+            m_buildingSelection.height = middle.height - 40;
+            m_buildingSelection.canSelect = true;
             m_buildingSelection.rowHeight = 40;
             m_buildingSelection.relativePosition = Vector3.zero;
 
             m_buildingSelection.rowsData = new FastList<object>();
+
+            BuildingItem selectedItem = null;
+            m_buildingSelection.eventSelectedIndexChanged += (c, i) =>
+            {
+                selectedItem = m_buildingSelection.selectedItem as BuildingItem;
+            };
+
+            m_buildingSelection.eventMouseLeave += (c, p) =>
+            {
+                if (selectedItem != null)
+                    UpdatePreview(selectedItem.prefab);
+                else
+                    UpdatePreview(null);
+            };
+
+            m_includeNone = UIUtils.CreateButton(middle);
+            m_includeNone.width = 55;
+            m_includeNone.text = "None";
+            m_includeNone.relativePosition = new Vector3(MIDDLE_WIDTH - m_includeNone.width, m_buildingSelection.height + SPACING);
+
+            m_includeAll = UIUtils.CreateButton(middle);
+            m_includeAll.width = 55;
+            m_includeAll.text = "All";
+            m_includeAll.relativePosition = new Vector3(m_includeNone.relativePosition.x - m_includeAll.width - SPACING, m_buildingSelection.height + SPACING);
+
+            UILabel include = middle.AddUIComponent<UILabel>();
+            include.width = 100;
+            include.padding = new RectOffset(0, 0, 8, 0);
+            include.text = "Include:";
+            include.relativePosition = new Vector3(m_includeAll.relativePosition.x - include.width - SPACING, m_buildingSelection.height + SPACING);
 
             // Preview
             UIPanel previewPanel = right.AddUIComponent<UIPanel>();
@@ -225,8 +272,6 @@ namespace BuildingThemes.GUI
             }
         }
 
-        private Dictionary<string, BuildingItem> m_buildingDictionary;
-
         private void InitBuildingLists()
         {
             m_allThemes = Singleton<BuildingThemesManager>.instance.GetAllThemes().ToArray();
@@ -242,37 +287,28 @@ namespace BuildingThemes.GUI
         private List<BuildingItem> GetBuildingItemList(Configuration.Theme theme)
         {
             // List of all growables prefabs
-            if (m_buildingDictionary == null)
+            Dictionary<string, BuildingItem> buildingDictionary = new Dictionary<string, BuildingItem>();
+            for (uint i = 0; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
             {
-                m_buildingDictionary = new Dictionary<string, BuildingItem>();
-                for (uint i = 0; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
+                BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
+                if (prefab != null && prefab.m_placementStyle == ItemClass.Placement.Automatic)
                 {
-                    BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
-                    if (prefab != null && prefab.m_placementStyle == ItemClass.Placement.Automatic)
-                    {
-                        BuildingItem item = new BuildingItem();
-                        item.prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
-                        m_buildingDictionary.Add(item.name, item);
-                    }
+                    BuildingItem item = new BuildingItem();
+                    item.prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
+                    buildingDictionary.Add(item.name, item);
                 }
-            }
-            else
-            {
-                // Reset building association
-                foreach (BuildingItem item in m_buildingDictionary.Values)
-                    item.building = null;
             }
 
             // Combine growables with buildings in configuration
-            List<BuildingItem> list = m_buildingDictionary.Values.ToList<BuildingItem>();
+            List<BuildingItem> list = buildingDictionary.Values.ToList<BuildingItem>();
 
             Configuration.Building[] buildings = theme.buildings.ToArray();
             for (int i = 0; i < buildings.Length; i++)
             {
-                if (m_buildingDictionary.ContainsKey(buildings[i].name))
+                if (buildingDictionary.ContainsKey(buildings[i].name))
                 {
                     // Associate building with prefab
-                    BuildingItem item = m_buildingDictionary[buildings[i].name];
+                    BuildingItem item = buildingDictionary[buildings[i].name];
                     item.building = buildings[i];
                 }
                 else
@@ -357,8 +393,13 @@ namespace BuildingThemes.GUI
 
         private static int BuildingCompare(BuildingItem a, BuildingItem b)
         {
-            // Sort by name
-            return a.displayName.CompareTo(b.displayName);
+            // Sort by displayName > level > size > name
+            int compare = a.displayName.CompareTo(b.displayName);
+            if (compare == 0) compare = a.level.CompareTo(b.level);
+            if (compare == 0) compare = a.size.CompareTo(b.size);
+            if (compare == 0) compare = a.name.CompareTo(b.name);
+
+            return compare;
         }
         #endregion
     }

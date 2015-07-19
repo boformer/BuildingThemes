@@ -225,6 +225,7 @@ namespace BuildingThemes.GUI
             nameFilter.relativePosition = new Vector3(width - nameFilter.width, 0);
 
             nameFilter.eventTextChanged += (c, s) => eventFilteringChanged(this, 3);
+            nameFilter.eventTextSubmitted += (c, s) => eventFilteringChanged(this, 3);
         }
     }
 }
