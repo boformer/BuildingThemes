@@ -182,6 +182,20 @@ namespace BuildingThemes
             CompileDistrictThemes(districtId);
         }
 
+        public void RefreshDistrictThemeInfos() 
+        {
+            for (byte d = 0; d < districtThemeInfos.Length; d++) 
+            {
+                var info = districtThemeInfos[d];
+                if(info == null) continue;
+                
+                // Remove themes which are no longer listed in the configuration
+                info.themes.RemoveWhere(theme => !Configuration.themes.Contains(theme));
+
+                CompileDistrictThemes(d);
+            }
+        }
+
         public void setThemeInfo(byte districtId, HashSet<Configuration.Theme> themes, bool blacklistMode)
         {
             var info = districtThemeInfos[districtId];
