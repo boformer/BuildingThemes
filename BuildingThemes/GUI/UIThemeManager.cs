@@ -24,7 +24,7 @@ namespace BuildingThemes.GUI
         private BuildingInfo m_renderPrefab;
 
         private FastList<List<BuildingItem>> m_themes = new FastList<List<BuildingItem>>();
-        Configuration.Theme[] m_allThemes;
+        private Configuration.Theme[] m_allThemes;
 
         #region Constant values
         private const float LEFT_WIDTH = 250;
@@ -36,15 +36,30 @@ namespace BuildingThemes.GUI
         #endregion
 
         private static GameObject _gameObject;
+        private static UIThemeManager _instance;
+
+        public static UIThemeManager instance
+        {
+            get { return _instance; }
+        }
+
+        public Configuration.Theme selectedTheme
+        {
+            get { return m_themeSelection.selectedItem as Configuration.Theme; }
+        }
 
         public static void Initialize()
         {
             try
             {
+                // Destroy the UI if already exists
+                _gameObject = GameObject.Find("BuildingThemes");
+                Destroy();
+
                 // Creating our own gameObect, helps finding the UI in ModTools
                 _gameObject = new GameObject("BuildingThemes");
                 _gameObject.transform.parent = UIView.GetAView().transform;
-                _gameObject.AddComponent<GUI.UIThemeManager>();
+                _instance = _gameObject.AddComponent<GUI.UIThemeManager>();
             }
             catch (Exception e)
             {
@@ -66,6 +81,56 @@ namespace BuildingThemes.GUI
                 // Catching any exception to not block the unloading process of other mods
                 Debugger.Log("Building Themes: An error has happened during the UI destruction.");
                 Debugger.LogException(e);
+            }
+        }
+
+        public void ChangeBuildingStatus(BuildingItem item, bool include)
+        {
+            if (item.building != null && item.building.isBuiltIn)
+            {
+                item.building.include = include;
+            }
+            else if (include)
+            {
+                Configuration.Building building = new Configuration.Building(item.name);
+
+                if (!selectedTheme.buildings.Contains(building))
+                {
+                    selectedTheme.buildings.Add(building);
+                    item.building = building;
+                }
+            }
+            else
+            {
+                Configuration.Building building = selectedTheme.getBuilding(item.name);
+                if (building != null)
+                    selectedTheme.buildings.Remove(building);
+
+                item.building = null;
+            }
+        }
+
+        public void UpdatePreview(BuildingInfo prefab)
+        {
+            m_renderPrefab = prefab;
+
+            if (m_renderPrefab != null && m_renderPrefab.m_mesh != null)
+            {
+                m_previewRenderer.cameraRotation = 210f;
+                m_previewRenderer.zoom = 4f;
+                m_previewRenderer.mesh = m_renderPrefab.m_mesh;
+                m_previewRenderer.material = m_renderPrefab.m_material;
+
+                RenderPreview();
+
+                m_preview.texture = m_previewRenderer.texture;
+
+                m_noPreview.isVisible = false;
+            }
+            else
+            {
+                m_preview.texture = null;
+                m_noPreview.isVisible = true;
             }
         }
 
@@ -141,6 +206,8 @@ namespace BuildingThemes.GUI
                 m_buildingSelection.selectedIndex = -1;
                 m_buildingSelection.rowsData = Filter(m_themes[i]);
                 m_buildingSelection.DisplayAt(0);
+
+                m_themeRemove.isEnabled = !m_allThemes[i].isBuiltIn;
             };
 
             m_themeAdd = UIUtils.CreateButton(left);
@@ -232,30 +299,6 @@ namespace BuildingThemes.GUI
             };
         }
 
-        public void UpdatePreview(BuildingInfo prefab)
-        {
-            m_renderPrefab = prefab;
-
-            if (m_renderPrefab != null && m_renderPrefab.m_mesh != null)
-            {
-                m_previewRenderer.cameraRotation = 210f;
-                m_previewRenderer.zoom = 4f;
-                m_previewRenderer.mesh = m_renderPrefab.m_mesh;
-                m_previewRenderer.material = m_renderPrefab.m_material;
-
-                RenderPreview();
-
-                m_preview.texture = m_previewRenderer.texture;
-
-                m_noPreview.isVisible = false;
-            }
-            else
-            {
-                m_preview.texture = null;
-                m_noPreview.isVisible = true;
-            }
-        }
-
         private void RenderPreview()
         {
             if (m_renderPrefab == null) return;
@@ -278,6 +321,7 @@ namespace BuildingThemes.GUI
             m_allThemes = Singleton<BuildingThemesManager>.instance.GetAllThemes().ToArray();
             Array.Sort(m_allThemes, ThemeCompare);
 
+            m_themes.Clear();
             for(int i = 0; i< m_allThemes.Length; i++)
             {
                 if (m_allThemes[i] != null)
@@ -321,6 +365,7 @@ namespace BuildingThemes.GUI
                 }
             }
 
+            // Sorting
             list.Sort(BuildingCompare);
             return list;
         }

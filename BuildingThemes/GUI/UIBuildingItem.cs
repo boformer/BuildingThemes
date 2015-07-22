@@ -20,7 +20,7 @@ namespace BuildingThemes.GUI
 
         public bool included
         {
-            get { return building != null; }
+            get { return building != null && (!building.isBuiltIn || building.include); }
         }
 
         public string name
@@ -101,7 +101,10 @@ namespace BuildingThemes.GUI
         {
             if (prefab != null)
             {
-                m_level = "L" + ((int)prefab.m_class.m_level + 1);
+                if (prefab.m_class.m_subService >= ItemClass.SubService.IndustrialForestry && prefab.m_class.m_subService <= ItemClass.SubService.IndustrialOre)
+                    m_level = "L1";
+                else
+                    m_level = "L" + ((int)prefab.m_class.m_level + 1);
                 m_size = prefab.m_cellWidth + "x" + prefab.m_cellLength;
             }
             else
@@ -118,8 +121,6 @@ namespace BuildingThemes.GUI
             m_displayName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(m_displayName);
 
             if (m_displayName.Length > 30) m_displayName = m_displayName.Substring(0, 27) + "...";
-
-            //m_displayName += " " + m_level + " " + m_size;
         }
     }
     public class UIBuildingItem : UIPanel, IUIFastListRow
@@ -174,6 +175,14 @@ namespace BuildingThemes.GUI
             m_name.width = 20;
             m_name.clipChildren = false;
             m_name.relativePosition = new Vector3(5, 13);
+
+            m_name.eventCheckChanged += (c, state) =>
+            {
+                if (m_building != null)
+                {
+                    UIThemeManager.instance.ChangeBuildingStatus(m_building, state);
+                }
+            };
 
             m_steamIcon = m_name.AddUIComponent<UISprite>();
             m_steamIcon.spriteName = "SteamWorkshop";
