@@ -55,8 +55,10 @@
   <ItemGroup>
     <Compile Include="BuildingThemesManager.cs" />
     <Compile Include="BuildingThemesMod.cs" />
+    <Compile Include="BuildingVariationManager.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Debugger.cs" />
+    <Compile Include="Detour\BuildingInfoDetour.cs" />
     <Compile Include="Detour\PrivateBuildingAIDetour.cs" />
     <Compile Include="Detour\ImmaterialResourceManagerDetour.cs" />
     <Compile Include="Detour\BuildingManagerDetour.cs" />

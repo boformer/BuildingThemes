@@ -41,34 +41,35 @@
         <Building name="L3 4x3 Shop10" />
         <Building name="L1 4x3 Shop02a" />
         <Building name="L3 1x1 Shop07" />
-        <Building name="H1_1x1_CommercialBlockhouse" />
-        <Building name="H1_2x2_CommercialBlockhouse" />
-        <Building name="H1_2x2_CommercialBlockhouse_Corner" />
-        <Building name="H1_2x3_CommercialBlockhouse" />
-        <Building name="H1_2x3_CommercialBlockhouse_Corner" />
+        <Building name="H1_1x1_CommercialBlockhouse" upgrade-name="H2_1x1_CommercialBlockhouse" />
+        <Building name="H1_2x2_CommercialBlockhouse" upgrade-name="H2_2x2_CommercialBlockhouse" />
+        <Building name="H1_2x2_CommercialBlockhouse_Corner" upgrade-name="H2_2x2_CommercialBlockhouse_Corner" />
+        <Building name="H1_2x3_CommercialBlockhouse" upgrade-name="H2_2x3_CommercialBlockhouse" />
+        <Building name="H1_2x3_CommercialBlockhouse_Corner" upgrade-name="H2_2x3_CommercialBlockhouse_Corner" />
+        <Building name="H1_2x4_CommercialBlockhouse" upgrade-name="H2_2x4_CommercialBlockhouse" />
+        <Building name="H1_3x2_CommercialBlockhouse" upgrade-name="H2_3x2_CommercialBlockhouse" />
+        <Building name="H1_3x2_CommercialBlockhouse01" upgrade-name="H2_3x2_CommercialBlockhouse01" />
+        <Building name="H1_3x2_CommercialBlockhouse_Corner" upgrade-name="H2_3x2_CommercialBlockhouse_Corner" />
+        <Building name="H1_3x3_CommercialBlockhouse" upgrade-name="H2_3x3_CommercialBlockhouse" />
+        <Building name="H1_3x3_CommercialBlockhouse_Corner" upgrade-name="H2_3x3_CommercialBlockhouse_Corner" />
+        <Building name="H1_3x4_CommercialBlockhouse" upgrade-name="H2_3x4_CommercialBlockhouse" />
+        <Building name="H1_4x3_CommercialBlockhouse" upgrade-name="H2_4x3_CommercialBlockhouse" />
+        <Building name="H1_4x4_CommercialBlockhouse" upgrade-name="H2_4x4_CommercialBlockhouse" />
+        <Building name="H2_1x1_CommercialBlockhouse" upgrade-name="H3_1x1_CommercialBlockhouse" />
+        <Building name="H2_2x2_CommercialBlockhouse" upgrade-name="H3_2x2_CommercialBlockhouse" />
+        <Building name="H2_2x2_CommercialBlockhouse_Corner" upgrade-name="H3_2x2_CommercialBlockhouse_Corner" />
+        <Building name="H2_2x3_CommercialBlockhouse" upgrade-name="H3_2x3_CommercialBlockhouse" />
+        <Building name="H2_2x3_CommercialBlockhouse_Corner" upgrade-name="H3_2x3_CommercialBlockhouse_Corner" />
+        <Building name="H2_2x4_CommercialBlockhouse" upgrade-name="H3_2x4_CommercialBlockhouse" />
+        <Building name="H2_3x2_CommercialBlockhouse" upgrade-name="H3_3x2_CommercialBlockhouse" />
+        <Building name="H2_3x2_CommercialBlockhouse01" upgrade-name="H3_3x2_CommercialBlockhouse01" />
+        <Building name="H2_3x2_CommercialBlockhouse_Corner" upgrade-name="H3_3x2_CommercialBlockhouse_Corner" />
+        <Building name="H2_3x3_CommercialBlockhouse" upgrade-name="H3_3x3_CommercialBlockhouse" />
+        <Building name="H2_3x3_CommercialBlockhouse_Corner" upgrade-name="H3_3x3_CommercialBlockhouse_Corner" />
+        <Building name="H2_3x4_CommercialBlockhouse" upgrade-name="H3_3x4_CommercialBlockhouse" />
+        <Building name="H2_4x3_CommercialBlockhouse" upgrade-name="H3_4x3_CommercialBlockhouse" />
+        <Building name="H2_4x4_CommercialBlockhouse" upgrade-name="H3_4x4_CommercialBlockhouse" />
         <Building name="H3_1x1_CommercialBlockhouse" />
-        <Building name="H1_3x2_CommercialBlockhouse" />
-        <Building name="H1_3x2_CommercialBlockhouse01" />
-        <Building name="H1_3x2_CommercialBlockhouse_Corner" />
-        <Building name="H1_3x3_CommercialBlockhouse" />
-        <Building name="H1_3x3_CommercialBlockhouse_Corner" />
-        <Building name="H1_3x4_CommercialBlockhouse" />
-        <Building name="H1_4x3_CommercialBlockhouse" />
-        <Building name="H1_4x4_CommercialBlockhouse" />
-        <Building name="H2_1x1_CommercialBlockhouse" />
-        <Building name="H2_2x2_CommercialBlockhouse" />
-        <Building name="H2_2x2_CommercialBlockhouse_Corner" />
-        <Building name="H2_2x3_CommercialBlockhouse" />
-        <Building name="H2_2x3_CommercialBlockhouse_Corner" />
-        <Building name="H2_2x4_CommercialBlockhouse" />
-        <Building name="H2_3x2_CommercialBlockhouse" />
-        <Building name="H2_3x2_CommercialBlockhouse01" />
-        <Building name="H2_3x2_CommercialBlockhouse_Corner" />
-        <Building name="H2_3x3_CommercialBlockhouse" />
-        <Building name="H2_3x3_CommercialBlockhouse_Corner" />
-        <Building name="H2_3x4_CommercialBlockhouse" />
-        <Building name="H2_4x3_CommercialBlockhouse" />
-        <Building name="H2_4x4_CommercialBlockhouse" />
         <Building name="H3_2x2_CommercialBlockhouse" />
         <Building name="H3_2x2_CommercialBlockhouse_Corner" />
         <Building name="H3_2x3_CommercialBlockhouse" />
@@ -82,7 +83,6 @@
         <Building name="H3_3x4_CommercialBlockhouse" />
         <Building name="H3_4x3_CommercialBlockhouse" />
         <Building name="H3_4x4_CommercialBlockhouse" />
-        <Building name="H1_2x4_CommercialBlockhouse" />
         <Building name="Ore 4x3 Processing" />
         <Building name="Ore 4x3 Processing02" />
         <Building name="Ore 3x2 Processing" />
@@ -167,62 +167,62 @@
         <Building name="L5 4x3 Villa07" />
         <Building name="L5 4x4 Villa03" />
         <Building name="L5 4x4 Villa08a" />
-        <Building name="H1_1x1_Blockhouse" />
-        <Building name="H1_2x2_Blockhouse_Corner" />
-        <Building name="H1_2x3_Blockhouse" />
-        <Building name="H1_2x3_Blockhouse_Corner" />
-        <Building name="H1_2x4_Blockhouse" />
-        <Building name="H1_2x2_Blockhouse" />
-        <Building name="H1_3x2_Blockhouse" />
-        <Building name="H1_3x2_Blockhouse01" />
-        <Building name="H1_3x2_Blockhouse_Corner" />
-        <Building name="H1_3x3_Blockhouse" />
-        <Building name="H1_3x3_Blockhouse_Corner" />
-        <Building name="H1_3x4_Blockhouse" />
-        <Building name="H1_4x3_Blockhouse" />
-        <Building name="H1_4x4_Blockhouse" />
-        <Building name="H2_1x1_Blockhouse" />
-        <Building name="H2_2x2_Blockhouse" />
-        <Building name="H2_2x2_Blockhouse_Corner" />
-        <Building name="H2_2x3_Blockhouse" />
-        <Building name="H2_2x3_Blockhouse_Corner" />
-        <Building name="H2_2x4_Blockhouse" />
-        <Building name="H2_3x2_Blockhouse" />
-        <Building name="H2_3x2_Blockhouse01" />
-        <Building name="H2_3x2_Blockhouse_Corner" />
-        <Building name="H2_3x3_Blockhouse" />
-        <Building name="H2_3x3_Blockhouse_Corner" />
-        <Building name="H2_3x4_Blockhouse" />
-        <Building name="H2_4x3_Blockhouse" />
-        <Building name="H2_4x4_Blockhouse" />
-        <Building name="H3_1x1_Blockhouse" />
-        <Building name="H3_2x2_Blockhouse" />
-        <Building name="H3_2x2_Blockhouse_Corner" />
-        <Building name="H3_2x3_Blockhouse" />
-        <Building name="H3_2x3_Blockhouse_Corner" />
-        <Building name="H3_2x4_Blockhouse" />
-        <Building name="H3_3x2_Blockhouse" />
-        <Building name="H3_3x2_Blockhouse01" />
-        <Building name="H3_3x2_Blockhouse_Corner" />
-        <Building name="H3_3x3_Blockhouse" />
-        <Building name="H3_3x3_Blockhouse_Corner" />
-        <Building name="H3_3x4_Blockhouse" />
-        <Building name="H3_4x3_Blockhouse" />
-        <Building name="H3_4x4_Blockhouse" />
-        <Building name="H4_1x1_Blockhouse" />
-        <Building name="H4_2x2_Blockhouse" />
-        <Building name="H4_2x2_Blockhouse_Corner" />
-        <Building name="H4_2x3_Blockhouse" />
-        <Building name="H4_2x3_Blockhouse_Corner" />
-        <Building name="H4_2x4_Blockhouse" />
-        <Building name="H4_3x2_Blockhouse" />
-        <Building name="H4_3x2_Blockhouse01" />
-        <Building name="H4_3x2_Blockhouse_Corner" />
-        <Building name="H4_3x3_Blockhouse" />
-        <Building name="H4_3x3_Blockhouse_Corner" />
-        <Building name="H4_3x4_Blockhouse" />
-        <Building name="H4_4x3_Blockhouse" />
-        <Building name="H4_4x4_Blockhouse" />
+        <Building name="H1_1x1_Blockhouse" upgrade-name="H2_1x1_Blockhouse" />
+        <Building name="H1_2x2_Blockhouse" upgrade-name="H2_2x2_Blockhouse" />
+        <Building name="H1_2x2_Blockhouse_Corner" upgrade-name="H2_2x2_Blockhouse_Corner" />
+        <Building name="H1_2x3_Blockhouse" upgrade-name="H2_2x3_Blockhouse" />
+        <Building name="H1_2x3_Blockhouse_Corner" upgrade-name="H2_2x3_Blockhouse_Corner" />
+        <Building name="H1_2x4_Blockhouse" upgrade-name="H2_2x4_Blockhouse" />
+        <Building name="H1_3x2_Blockhouse" upgrade-name="H2_3x2_Blockhouse" />
+        <Building name="H1_3x2_Blockhouse01" upgrade-name="H2_3x2_Blockhouse01" />
+        <Building name="H1_3x2_Blockhouse_Corner" upgrade-name="H2_3x2_Blockhouse_Corner" />
+        <Building name="H1_3x3_Blockhouse" upgrade-name="H2_3x3_Blockhouse" />
+        <Building name="H1_3x3_Blockhouse_Corner" upgrade-name="H2_3x3_Blockhouse_Corner" />
+        <Building name="H1_3x4_Blockhouse" upgrade-name="H2_3x4_Blockhouse" />
+        <Building name="H1_4x3_Blockhouse" upgrade-name="H2_4x3_Blockhouse" />
+        <Building name="H1_4x4_Blockhouse" upgrade-name="H2_4x4_Blockhouse" />
+        <Building name="H2_1x1_Blockhouse" upgrade-name="H3_1x1_Blockhouse" />
+        <Building name="H2_2x2_Blockhouse" upgrade-name="H3_2x2_Blockhouse" />
+        <Building name="H2_2x2_Blockhouse_Corner" upgrade-name="H3_2x2_Blockhouse_Corner" />
+        <Building name="H2_2x3_Blockhouse" upgrade-name="H3_2x3_Blockhouse" />
+        <Building name="H2_2x3_Blockhouse_Corner" upgrade-name="H3_2x3_Blockhouse_Corner" />
+        <Building name="H2_2x4_Blockhouse" upgrade-name="H3_2x4_Blockhouse" />
+        <Building name="H2_3x2_Blockhouse" upgrade-name="H3_3x2_Blockhouse" />
+        <Building name="H2_3x2_Blockhouse01" upgrade-name="H3_3x2_Blockhouse01" />
+        <Building name="H2_3x2_Blockhouse_Corner" upgrade-name="H3_3x2_Blockhouse_Corner" />
+        <Building name="H2_3x3_Blockhouse" upgrade-name="H3_3x3_Blockhouse" />
+        <Building name="H2_3x3_Blockhouse_Corner" upgrade-name="H3_3x3_Blockhouse_Corner" />
+        <Building name="H2_3x4_Blockhouse" upgrade-name="H3_3x4_Blockhouse" />
+        <Building name="H2_4x3_Blockhouse" upgrade-name="H3_4x3_Blockhouse" />
+        <Building name="H2_4x4_Blockhouse" upgrade-name="H3_4x4_Blockhouse" />
+        <Building name="H3_1x1_Blockhouse" upgrade-name="H4_1x1_Blockhouse" />
+        <Building name="H3_2x2_Blockhouse" upgrade-name="H4_2x2_Blockhouse" />
+        <Building name="H3_2x2_Blockhouse_Corner" upgrade-name="H4_2x2_Blockhouse_Corner" />
+        <Building name="H3_2x3_Blockhouse" upgrade-name="H4_2x3_Blockhouse" />
+        <Building name="H3_2x3_Blockhouse_Corner" upgrade-name="H4_2x3_Blockhouse_Corner" />
+        <Building name="H3_2x4_Blockhouse" upgrade-name="H4_2x4_Blockhouse" />
+        <Building name="H3_3x2_Blockhouse" upgrade-name="H4_3x2_Blockhouse" />
+        <Building name="H3_3x2_Blockhouse01" upgrade-name="H4_3x2_Blockhouse01" />
+        <Building name="H3_3x2_Blockhouse_Corner" upgrade-name="H4_3x2_Blockhouse_Corner" />
+        <Building name="H3_3x3_Blockhouse" upgrade-name="H4_3x3_Blockhouse" />
+        <Building name="H3_3x3_Blockhouse_Corner" upgrade-name="H4_3x3_Blockhouse_Corner" />
+        <Building name="H3_3x4_Blockhouse" upgrade-name="H4_3x4_Blockhouse" />
+        <Building name="H3_4x3_Blockhouse" upgrade-name="H4_4x3_Blockhouse" />
+        <Building name="H3_4x4_Blockhouse" upgrade-name="H4_4x4_Blockhouse" />
+        <Building name="H4_1x1_Blockhouse" upgrade-name="H5_1x1_Blockhouse" />
+        <Building name="H4_2x2_Blockhouse" upgrade-name="H5_2x2_Blockhouse" />
+        <Building name="H4_2x2_Blockhouse_Corner" upgrade-name="H5_2x2_Blockhouse_Corner" />
+        <Building name="H4_2x3_Blockhouse" upgrade-name="H5_2x3_Blockhouse" />
+        <Building name="H4_2x3_Blockhouse_Corner" upgrade-name="H5_2x3_Blockhouse_Corner" />
+        <Building name="H4_2x4_Blockhouse" upgrade-name="H5_2x4_Blockhouse" />
+        <Building name="H4_3x2_Blockhouse" upgrade-name="H5_3x2_Blockhouse" />
+        <Building name="H4_3x2_Blockhouse01" upgrade-name="H5_3x2_Blockhouse01" />
+        <Building name="H4_3x2_Blockhouse_Corner" upgrade-name="H5_3x2_Blockhouse_Corner" />
+        <Building name="H4_3x3_Blockhouse" upgrade-name="H5_3x3_Blockhouse" />
+        <Building name="H4_3x3_Blockhouse_Corner" upgrade-name="H5_3x3_Blockhouse_Corner" />
+        <Building name="H4_3x4_Blockhouse" upgrade-name="H5_3x4_Blockhouse" />
+        <Building name="H4_4x3_Blockhouse" upgrade-name="H5_4x3_Blockhouse" />
+        <Building name="H4_4x4_Blockhouse" upgrade-name="H5_4x4_Blockhouse" />
         <Building name="H5_1x1_Blockhouse" />
         <Building name="H5_2x2_Blockhouse" />
         <Building name="H5_2x2_Blockhouse_Corner" />
@@ -237,32 +237,32 @@
         <Building name="H5_3x4_Blockhouse" />
         <Building name="H5_4x3_Blockhouse" />
         <Building name="H5_4x4_Blockhouse" />
-        <Building name="H1_1x1_Officeblock" />
-        <Building name="H1_2x2_Officeblock" />
-        <Building name="H1_2x2_Officeblock_Corner" />
-        <Building name="H1_2x3_Officeblock_Corner" />
-        <Building name="H1_2x4_Officeblock" />
-        <Building name="H1_3x2_Officeblock_Corner" />
-        <Building name="H1_3x3_Officeblock" />
-        <Building name="H1_3x3_Officeblock_Corner" />
-        <Building name="H1_3x4_Officeblock" />
-        <Building name="H1_4x3_officeblock" />
-        <Building name="H1_officebuilding02EU_4x4" />
-        <Building name="H1_officebuilding02EU_4x4b" />
-        <Building name="H1_officebuilding04EU_4x4" />
-        <Building name="H2_1x1_Officeblock" />
-        <Building name="H2_2x2_Officeblock" />
-        <Building name="H2_2x2_Officeblock_Corner" />
-        <Building name="H2_2x3_Officeblock_Corner" />
-        <Building name="H2_2x4_Officeblock" />
-        <Building name="H2_3x2_Officeblock_Corner" />
-        <Building name="H2_3x3_Officeblock" />
-        <Building name="H2_3x3_Officeblock_Corner" />
-        <Building name="H2_3x4_Officeblock" />
-        <Building name="H2_4x3_officeblock" />
-        <Building name="H2_officebuilding02EU_4x4" />
-        <Building name="H2_officebuilding02EU_4x4b" />
-        <Building name="H2_officebuilding04EU_4x4" />
+        <Building name="H1_1x1_Officeblock" upgrade-name="H2_1x1_Officeblock" />
+        <Building name="H1_2x2_Officeblock" upgrade-name="H2_2x2_Officeblock" />
+        <Building name="H1_2x2_Officeblock_Corner" upgrade-name="H2_2x2_Officeblock_Corner" />
+        <Building name="H1_2x3_Officeblock_Corner" upgrade-name="H2_2x3_Officeblock_Corner" />
+        <Building name="H1_2x4_Officeblock" upgrade-name="H2_2x4_Officeblock" />
+        <Building name="H1_3x2_Officeblock_Corner" upgrade-name="H2_3x2_Officeblock_Corner" />
+        <Building name="H1_3x3_Officeblock" upgrade-name="H2_3x3_Officeblock" />
+        <Building name="H1_3x3_Officeblock_Corner" upgrade-name="H2_3x3_Officeblock_Corner" />
+        <Building name="H1_3x4_Officeblock" upgrade-name="H2_3x4_Officeblock" />
+        <Building name="H1_4x3_officeblock" upgrade-name="H2_4x3_officeblock" />
+        <Building name="H1_officebuilding02EU_4x4" upgrade-name="H2_officebuilding02EU_4x4" />
+        <Building name="H1_officebuilding02EU_4x4b" upgrade-name="H2_officebuilding02EU_4x4b" />
+        <Building name="H1_officebuilding04EU_4x4" upgrade-name="H2_officebuilding04EU_4x4" />
+        <Building name="H2_1x1_Officeblock" upgrade-name="H3_1x1_Officeblock" />
+        <Building name="H2_2x2_Officeblock" upgrade-name="H3_2x2_Officeblock" />
+        <Building name="H2_2x2_Officeblock_Corner" upgrade-name="H3_2x2_Officeblock_Corner" />
+        <Building name="H2_2x3_Officeblock_Corner" upgrade-name="H3_2x3_Officeblock_Corner" />
+        <Building name="H2_2x4_Officeblock" upgrade-name="H3_2x4_Officeblock" />
+        <Building name="H2_3x2_Officeblock_Corner" upgrade-name="H3_3x2_Officeblock_Corner" />
+        <Building name="H2_3x3_Officeblock" upgrade-name="H3_3x3_Officeblock" />
+        <Building name="H2_3x3_Officeblock_Corner" upgrade-name="H3_3x3_Officeblock_Corner" />
+        <Building name="H2_3x4_Officeblock" upgrade-name="H3_3x4_Officeblock" />
+        <Building name="H2_4x3_officeblock" upgrade-name="H3_4x3_officeblock" />
+        <Building name="H2_officebuilding02EU_4x4" upgrade-name="H3_officebuilding02EU_4x4" />
+        <Building name="H2_officebuilding02EU_4x4b" upgrade-name="H3_officebuilding02EU_4x4b" />
+        <Building name="H2_officebuilding04EU_4x4" upgrade-name="H3_officebuilding04EU_4x4" />
         <Building name="H3_1x1_Officeblock" />
         <Building name="H3_2x2_Officeblock" />
         <Building name="H3_2x2_Officeblock_Corner" />

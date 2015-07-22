@@ -1,6 +1,5 @@
 ﻿using ICities;
 using ColossalFramework;
-using ColossalFramework.UI;
 using UnityEngine;
 using System;
 using BuildingThemes.GUI;
@@ -22,7 +21,11 @@ namespace BuildingThemes
         {
             UIHelperBase group = helper.AddGroup("Building Themes");
             group.AddCheckbox("Unlock Policies Panel From Start", PolicyPanelEnabler.Unlock, delegate(bool c) { PolicyPanelEnabler.Unlock = c; });
+            group.AddCheckbox("Create Prefab Duplicates (required for some themes)", BuildingVariationManager.Enabled, delegate(bool c) { BuildingVariationManager.Enabled = c; });
+            group.AddGroup("Warning: When you disable this option, spawned duplicates will disappear!");
+            group.AddSpace(0);
             group.AddCheckbox("Generate Debug Output", Debugger.Enabled, delegate(bool c) { Debugger.Enabled = c; });
+            
         }
 
         public override void OnCreated(ILoading loading)
@@ -36,8 +39,16 @@ namespace BuildingThemes
 
             PolicyPanelEnabler.Register();
 
-            Singleton<BuildingThemesManager>.instance.Reset();
-            Singleton<BuildingThemesManager>.instance.searchBuildingThemeMods();
+            BuildingThemesManager.instance.Reset();
+            BuildingThemesManager.instance.searchBuildingThemeMods();
+
+            BuildingVariationManager.instance.Reset();
+
+            if (BuildingVariationManager.Enabled)
+            {
+                try { Detour.BuildingInfoDetour.Deploy(); }
+                catch (Exception e) { Debugger.LogException(e); }
+            }
 
             try { Detour.BuildingManagerDetour.Deploy(); }
             catch (Exception e) { Debugger.LogException(e); }
@@ -100,6 +111,7 @@ namespace BuildingThemes
 
             try
             {
+                Detour.BuildingInfoDetour.Revert();
                 Detour.BuildingManagerDetour.Revert();
                 Detour.ZoneBlockDetour.Revert();
                 Detour.ImmaterialResourceManagerDetour.Revert();
@@ -109,9 +121,9 @@ namespace BuildingThemes
                 Detour.PrivateBuildingAIDetour<OfficeBuildingAI>.Revert();
                 Detour.PoliciesPanelDetour.Revert();
             }
-            catch (Exception e)
-            {
-                Debugger.LogException(e);
+            catch (Exception e) 
+            { 
+                Debugger.LogException(e); 
             }
 
             PolicyPanelEnabler.Unregister();
