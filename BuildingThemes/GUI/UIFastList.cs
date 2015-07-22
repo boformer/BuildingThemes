@@ -345,6 +345,14 @@ namespace BuildingThemes.GUI
             UpdateScrollbar();
             m_updateContent = true;
         }
+
+        /// <summary>
+        /// Refresh the display
+        /// </summary>
+        public void Refresh()
+        {
+            DisplayAt(m_pos);
+        }
         #endregion
 
         #region Overrides

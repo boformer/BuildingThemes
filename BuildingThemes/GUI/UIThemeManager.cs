@@ -25,6 +25,7 @@ namespace BuildingThemes.GUI
 
         private FastList<List<BuildingItem>> m_themes = new FastList<List<BuildingItem>>();
         private Configuration.Theme[] m_allThemes;
+        private bool m_isDistrictThemesDirty = false;
 
         #region Constant values
         private const float LEFT_WIDTH = 250;
@@ -84,6 +85,61 @@ namespace BuildingThemes.GUI
             }
         }
 
+        public void Toggle()
+        {
+            if (isVisible)
+            {
+                Hide();
+            }
+            else
+            {
+                base.Show();
+
+                if (m_themeSelection.selectedIndex == -1) m_themeSelection.selectedIndex = 0;
+            }
+        }
+
+        public void CreateTheme(string name)
+        {
+            if (BuildingThemesManager.instance.GetThemeByName(name) == null)
+            {
+                Configuration.Theme newTheme = new Configuration.Theme(name);
+
+                BuildingThemesManager.instance.Configuration.themes.Add(newTheme);
+                m_isDistrictThemesDirty = true;
+
+                InitBuildingLists();
+
+                m_themeSelection.rowsData.m_buffer = m_allThemes;
+                m_themeSelection.rowsData.m_size = m_allThemes.Length;
+
+                for (int i = 0; i < m_allThemes.Length; i++)
+                {
+                    if (m_allThemes[i] == newTheme)
+                    {
+                        m_themeSelection.DisplayAt(i);
+                        m_themeSelection.selectedIndex = i;
+                    }
+                }
+            }
+        }
+
+        public void DeleteTheme(Configuration.Theme theme)
+        {
+            if (!theme.isBuiltIn)
+            {
+                BuildingThemesManager.instance.Configuration.themes.Remove(theme);
+                m_isDistrictThemesDirty = true;
+
+                InitBuildingLists();
+
+                m_themeSelection.rowsData.m_buffer = m_allThemes;
+                m_themeSelection.rowsData.m_size = m_allThemes.Length;
+                m_themeSelection.DisplayAt(0);
+                m_themeSelection.selectedIndex = 0;
+            }
+        }
+
         public void ChangeBuildingStatus(BuildingItem item, bool include)
         {
             if (item.building != null && item.building.isBuiltIn)
@@ -108,6 +164,8 @@ namespace BuildingThemes.GUI
 
                 item.building = null;
             }
+
+            m_isDistrictThemesDirty = true;
         }
 
         public void UpdatePreview(BuildingInfo prefab)
@@ -134,12 +192,24 @@ namespace BuildingThemes.GUI
             }
         }
 
+        public override void Update()
+        {
+            base.Update();
+
+            if (m_isDistrictThemesDirty)
+            {
+                BuildingThemesManager.instance.RefreshDistrictThemeInfos();
+                BuildingThemesManager.instance.SaveConfig();
+                m_isDistrictThemesDirty = false;
+            }
+        }
+
         public override void Start()
         {
             base.Start();
 
             backgroundSprite = "UnlockingPanel2";
-            isVisible = true;
+            isVisible = false;
             canFocus = true;
             isInteractive = true;
             width = SPACING + LEFT_WIDTH + SPACING + MIDDLE_WIDTH + SPACING + RIGHT_WIDTH + SPACING;
@@ -210,16 +280,30 @@ namespace BuildingThemes.GUI
                 m_themeRemove.isEnabled = !m_allThemes[i].isBuiltIn;
             };
 
+            // Add theme
             m_themeAdd = UIUtils.CreateButton(left);
             m_themeAdd.width = (LEFT_WIDTH - SPACING) / 2;
             m_themeAdd.text = "New Theme";
             m_themeAdd.relativePosition = new Vector3(0, m_themeSelection.height + SPACING);
 
+            m_themeAdd.eventClick += (c, p) =>
+            {
+                UIView.PushModal(UINewThemeModal.instance);
+                UINewThemeModal.instance.Show(true);
+            };
+
+            // Remove theme
             m_themeRemove = UIUtils.CreateButton(left);
             m_themeRemove.width = (LEFT_WIDTH - SPACING) / 2;
             m_themeRemove.text = "Delete Theme";
             m_themeRemove.isEnabled = false;
             m_themeRemove.relativePosition = new Vector3(LEFT_WIDTH - m_themeRemove.width, m_themeSelection.height + SPACING);
+
+            m_themeRemove.eventClick += (c, p) =>
+            {
+                ConfirmPanel.ShowModal("Delete Theme", "Are you sure you want to delete '" + selectedTheme.name + "' theme ?",
+                    (d, i) => { if (i == 1) DeleteTheme(selectedTheme); });
+            };
 
             // Building selection
             m_buildingSelection = UIFastList.Create<UIBuildingItem>(middle);
@@ -247,6 +331,7 @@ namespace BuildingThemes.GUI
                     UpdatePreview(null);
             };
 
+            // Include buttons
             m_includeNone = UIUtils.CreateButton(middle);
             m_includeNone.width = 55;
             m_includeNone.text = "None";
@@ -263,6 +348,28 @@ namespace BuildingThemes.GUI
             include.textScale = 0.8f;
             include.text = "Include:";
             include.relativePosition = new Vector3(m_includeAll.relativePosition.x - include.width - SPACING, m_buildingSelection.height + SPACING);
+
+            m_includeAll.eventClick += (c, p) =>
+            {
+                for (int i = 0; i < m_buildingSelection.rowsData.m_size; i++)
+                {
+                    BuildingItem item = m_buildingSelection.rowsData[i] as BuildingItem;
+                    if (item != null) ChangeBuildingStatus(item, true);
+                }
+
+                m_buildingSelection.Refresh();
+            };
+
+            m_includeNone.eventClick += (c, p) =>
+            {
+                for (int i = 0; i < m_buildingSelection.rowsData.m_size; i++)
+                {
+                    BuildingItem item = m_buildingSelection.rowsData[i] as BuildingItem;
+                    if (item != null) ChangeBuildingStatus(item, false);
+                }
+
+                m_buildingSelection.Refresh();
+            };
 
             // Preview
             UIPanel previewPanel = right.AddUIComponent<UIPanel>();
@@ -322,7 +429,7 @@ namespace BuildingThemes.GUI
             Array.Sort(m_allThemes, ThemeCompare);
 
             m_themes.Clear();
-            for(int i = 0; i< m_allThemes.Length; i++)
+            for (int i = 0; i < m_allThemes.Length; i++)
             {
                 if (m_allThemes[i] != null)
                     m_themes.Add(GetBuildingItemList(m_allThemes[i]));
@@ -453,3 +560,4 @@ namespace BuildingThemes.GUI
         #endregion
     }
 }
+

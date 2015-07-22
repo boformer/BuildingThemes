@@ -72,6 +72,7 @@
     <Compile Include="GUI\UIBuildingItem.cs" />
     <Compile Include="GUI\UIFastList.cs" />
     <Compile Include="GUI\UIThemeItem.cs" />
+    <Compile Include="GUI\UINewThemeModal.cs" />
     <Compile Include="GUI\UIThemeManager.cs" />
     <Compile Include="GUI\UITitleBar.cs" />
     <Compile Include="GUI\UIUtils.cs" />
