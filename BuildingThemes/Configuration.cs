@@ -12,6 +12,8 @@ namespace BuildingThemes
     public class Configuration
     {
         public bool UnlockPolicyPanel = true;
+
+        public bool CreateBuildingDuplicates = true;
         
         [XmlArray(ElementName = "Themes")]
         [XmlArrayItem(ElementName = "Theme")]
@@ -57,6 +59,11 @@ namespace BuildingThemes
                 return false;
             }
 
+            public IEnumerable<Building> getVariations(string baseName) 
+            {
+                return from building in buildings where building.baseName == baseName select building;
+            }
+
             public Building getBuilding(string name)
             {
                 foreach (Building building in buildings)
@@ -84,11 +91,17 @@ namespace BuildingThemes
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
 
-            [XmlAttribute("min-level"), DefaultValue(-1)]
-            public int minLevel = -1;
+            [XmlAttribute("level"), DefaultValue(-1)]
+            public int level = -1;
 
-            [XmlAttribute("max-level"), DefaultValue(-1)]
-            public int maxLevel = -1;
+            [XmlAttribute("upgrade-name"), DefaultValue(null)]
+            public string upgradeName = null;
+
+            [XmlAttribute("base-name"), DefaultValue(null)]
+            public string baseName = null;
+
+            [XmlAttribute("spawn-rate"), DefaultValue(10)]
+            public int spawnRate = 10;
 
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;
@@ -138,12 +151,13 @@ namespace BuildingThemes
                     var configCopy = new Configuration();
 
                     configCopy.UnlockPolicyPanel = config.UnlockPolicyPanel;
+                    configCopy.CreateBuildingDuplicates = config.CreateBuildingDuplicates;
 
                     foreach (var theme in config.themes)
                     {
                         var newTheme = new Theme(theme.name);
 
-                        foreach (var building in theme.buildings.Where(building => !theme.isBuiltIn || !building.isBuiltIn || !building.include))
+                        foreach (var building in theme.buildings.Where(building => !building.isBuiltIn || !building.include))
                         {
                             newTheme.buildings.Add(building);
                         }
