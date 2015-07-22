@@ -100,8 +100,8 @@ namespace BuildingThemes
             [XmlAttribute("base-name"), DefaultValue(null)]
             public string baseName = null;
 
-            [XmlAttribute("spawn-rate"), DefaultValue(5)]
-            public int spawnRate = 5;
+            [XmlAttribute("spawn-rate"), DefaultValue(10)]
+            public int spawnRate = 10;
 
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;

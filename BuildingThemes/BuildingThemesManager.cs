@@ -366,7 +366,7 @@ namespace BuildingThemes
                                 {
                                     hits++;
                                     // limit spawn rate to 50
-                                    spawnRateSum += Mathf.Clamp(building.spawnRate, 0, 50);
+                                    spawnRateSum += Mathf.Clamp(building.spawnRate, 0, 100);
                                     break;
                                 }
                             }
@@ -398,7 +398,7 @@ namespace BuildingThemes
                             }
                             else
                             {
-                                spawnRateSum = 5;
+                                spawnRateSum = 10;
                                 hits = 1;
                             }
                         }
