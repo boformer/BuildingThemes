@@ -64,6 +64,7 @@
     <Compile Include="Detour\BuildingManagerDetour.cs" />
     <Compile Include="Detour\ZoneBlockDetour.cs" />
     <Compile Include="Detour\PoliciesPanelDetour.cs" />
+    <Compile Include="GUI\BuildingItem.cs" />
     <Compile Include="GUI\PolicyPanelEnabler.cs" />
     <Compile Include="GUI\BlacklistModeCheckboxContainer.cs" />
     <Compile Include="GUI\PreviewRenderer.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="GUI\UIBuildingFilter.cs" />
     <Compile Include="GUI\UIBuildingItem.cs" />
     <Compile Include="GUI\UIFastList.cs" />
+    <Compile Include="GUI\UIBuildingInfo.cs" />
     <Compile Include="GUI\UIThemeItem.cs" />
     <Compile Include="GUI\UINewThemeModal.cs" />
     <Compile Include="GUI\UIThemeManager.cs" />

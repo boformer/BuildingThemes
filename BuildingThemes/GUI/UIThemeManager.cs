@@ -3,7 +3,6 @@ using ColossalFramework.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace BuildingThemes.GUI
@@ -22,6 +21,7 @@ namespace BuildingThemes.GUI
         private UISprite m_noPreview;
         private PreviewRenderer m_previewRenderer;
         private BuildingInfo m_renderPrefab;
+        private UIBuildingInfo m_buildingOptions;
 
         private FastList<List<BuildingItem>> m_themes = new FastList<List<BuildingItem>>();
         private Configuration.Theme[] m_allThemes;
@@ -146,6 +146,8 @@ namespace BuildingThemes.GUI
 
         public void ChangeBuildingStatus(BuildingItem item, bool include)
         {
+            if (include == item.included) return;
+
             if (item.building != null && item.building.isBuiltIn)
             {
                 item.building.include = include;
@@ -154,7 +156,7 @@ namespace BuildingThemes.GUI
             {
                 Configuration.Building building = new Configuration.Building(item.name);
 
-                if (!selectedTheme.buildings.Contains(building))
+                if (!selectedTheme.containsBuilding(building.name))
                 {
                     selectedTheme.buildings.Add(building);
                     item.building = building;
@@ -172,9 +174,11 @@ namespace BuildingThemes.GUI
             m_isDistrictThemesDirty = true;
         }
 
-        public void UpdatePreview(BuildingInfo prefab)
+        public void UpdateBuildingInfo(BuildingItem item)
         {
-            m_renderPrefab = prefab;
+            m_buildingOptions.Show(item);
+
+            m_renderPrefab = (item == null) ? null : item.prefab;
 
             if (m_renderPrefab != null && m_renderPrefab.m_mesh != null)
             {
@@ -277,11 +281,18 @@ namespace BuildingThemes.GUI
 
             m_themeSelection.eventSelectedIndexChanged += (c, i) =>
             {
+                int listCount = m_buildingSelection.rowsData.m_size;
+                float pos = m_buildingSelection.listPosition;
+
                 m_buildingSelection.selectedIndex = -1;
                 m_buildingSelection.rowsData = Filter(m_themes[i]);
-                m_buildingSelection.DisplayAt(0);
 
-                m_themeRemove.isEnabled = !m_allThemes[i].isBuiltIn;
+                if (m_filter.buildingStatus == UIBuildingFilter.Status.All && m_buildingSelection.rowsData.m_size == listCount)
+                {
+                    m_buildingSelection.DisplayAt(pos);
+                }
+
+                m_themeRemove.isEnabled = !((Configuration.Theme)m_themeSelection.selectedItem).isBuiltIn;
             };
 
             // Add theme
@@ -330,9 +341,9 @@ namespace BuildingThemes.GUI
             m_buildingSelection.eventMouseLeave += (c, p) =>
             {
                 if (selectedItem != null)
-                    UpdatePreview(selectedItem.prefab);
+                    UpdateBuildingInfo(selectedItem);
                 else
-                    UpdatePreview(null);
+                    UpdateBuildingInfo(null);
             };
 
             // Include buttons
@@ -379,7 +390,7 @@ namespace BuildingThemes.GUI
             UIPanel previewPanel = right.AddUIComponent<UIPanel>();
             previewPanel.backgroundSprite = "GenericPanel";
             previewPanel.width = right.width;
-            previewPanel.height = previewPanel.width;
+            previewPanel.height = (right.height - SPACING * 2) / 2;
             previewPanel.relativePosition = Vector3.zero;
 
             m_preview = previewPanel.AddUIComponent<UITextureSprite>();
@@ -408,6 +419,12 @@ namespace BuildingThemes.GUI
                 m_previewRenderer.zoom -= Mathf.Sign(p.wheelDelta) * 0.25f;
                 RenderPreview();
             };
+
+            // Building Options
+            m_buildingOptions = right.AddUIComponent<UIBuildingInfo>();
+            m_buildingOptions.width = RIGHT_WIDTH;
+            m_buildingOptions.height = (right.height - SPACING * 2) / 2;
+            m_buildingOptions.relativePosition = new Vector3(0, previewPanel.height + SPACING);
         }
 
         private void RenderPreview()
@@ -429,14 +446,13 @@ namespace BuildingThemes.GUI
 
         private void InitBuildingLists()
         {
-            m_allThemes = Singleton<BuildingThemesManager>.instance.GetAllThemes().ToArray();
+            m_allThemes = BuildingThemesManager.instance.GetAllThemes().ToArray();
             Array.Sort(m_allThemes, ThemeCompare);
 
             m_themes.Clear();
             for (int i = 0; i < m_allThemes.Length; i++)
             {
-                if (m_allThemes[i] != null)
-                    m_themes.Add(GetBuildingItemList(m_allThemes[i]));
+                m_themes.Add(GetBuildingItemList(m_allThemes[i]));
             }
         }
 
@@ -512,24 +528,11 @@ namespace BuildingThemes.GUI
                 if (m_filter.buildingSize != Vector2.zero && !(prefabExists && item.prefab.m_cellWidth == buildingSize.x && item.prefab.m_cellLength == buildingSize.y)) continue;
 
                 // zone
-                bool inZone = m_filter.IsAllZoneSelected();
-                if (!inZone && prefabExists)
+                if (!m_filter.IsAllZoneSelected())
                 {
-                    ItemClass itemClass = item.prefab.m_class;
-                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.ResidentialLow) && itemClass.m_subService == ItemClass.SubService.ResidentialLow) inZone = true;
-                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.ResidentialHigh) && itemClass.m_subService == ItemClass.SubService.ResidentialHigh) inZone = true;
-                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.CommercialLow) && itemClass.m_subService == ItemClass.SubService.CommercialLow) inZone = true;
-                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.CommercialHigh) && itemClass.m_subService == ItemClass.SubService.CommercialHigh) inZone = true;
-                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Industrial) && itemClass.m_subService == ItemClass.SubService.IndustrialGeneric) inZone = true;
-                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Farming) && itemClass.m_subService == ItemClass.SubService.IndustrialFarming) inZone = true;
-                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Forestry) && itemClass.m_subService == ItemClass.SubService.IndustrialForestry) inZone = true;
-                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Oil) && itemClass.m_subService == ItemClass.SubService.IndustrialOil) inZone = true;
-                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Ore) && itemClass.m_subService == ItemClass.SubService.IndustrialOre) inZone = true;
-                    if (m_filter.IsZoneSelected(UIBuildingFilter.Zone.Office) && itemClass.m_service == ItemClass.Service.Office) inZone = true;
+                    Category category = item.category;
+                    if (category == Category.None || !m_filter.IsZoneSelected(category)) continue;
                 }
-
-                if (!inZone) continue;
-
                 // Name
                 if (!m_filter.buildingName.IsNullOrWhiteSpace() && !item.name.ToLower().Contains(m_filter.buildingName.ToLower())) continue;
 

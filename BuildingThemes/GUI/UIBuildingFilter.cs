@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using ColossalFramework.UI;
 
-using System.Reflection;
-
 namespace BuildingThemes.GUI
 {
     public class UIBuildingFilter : UIPanel
@@ -16,20 +14,6 @@ namespace BuildingThemes.GUI
         public UIDropDown sizeFilterX;
         public UIDropDown sizeFilterY;
         public UITextField nameFilter;
-
-        public enum Zone
-        {
-            ResidentialLow = 0,
-            ResidentialHigh,
-            CommercialLow,
-            CommercialHigh,
-            Industrial,
-            Farming,
-            Forestry,
-            Oil,
-            Ore,
-            Office
-        }
 
         public enum Origin
         {
@@ -45,23 +29,23 @@ namespace BuildingThemes.GUI
             Excluded
         }
 
-        public bool IsZoneSelected(Zone zone)
+        public bool IsZoneSelected(Category zone)
         {
             return zoningToggles[(int)zone].isChecked;
         }
 
         public bool IsAllZoneSelected()
         {
-            return zoningToggles[(int)Zone.ResidentialLow].isChecked &&
-                zoningToggles[(int)Zone.ResidentialHigh].isChecked &&
-                zoningToggles[(int)Zone.CommercialLow].isChecked &&
-                zoningToggles[(int)Zone.CommercialHigh].isChecked &&
-                zoningToggles[(int)Zone.Industrial].isChecked &&
-                zoningToggles[(int)Zone.Farming].isChecked &&
-                zoningToggles[(int)Zone.Forestry].isChecked &&
-                zoningToggles[(int)Zone.Oil].isChecked &&
-                zoningToggles[(int)Zone.Ore].isChecked &&
-                zoningToggles[(int)Zone.Office].isChecked;
+            return zoningToggles[(int)Category.ResidentialLow].isChecked &&
+                zoningToggles[(int)Category.ResidentialHigh].isChecked &&
+                zoningToggles[(int)Category.CommercialLow].isChecked &&
+                zoningToggles[(int)Category.CommercialHigh].isChecked &&
+                zoningToggles[(int)Category.Industrial].isChecked &&
+                zoningToggles[(int)Category.Farming].isChecked &&
+                zoningToggles[(int)Category.Forestry].isChecked &&
+                zoningToggles[(int)Category.Oil].isChecked &&
+                zoningToggles[(int)Category.Ore].isChecked &&
+                zoningToggles[(int)Category.Office].isChecked;
         }
 
         public ItemClass.Level buildingLevel
@@ -101,16 +85,16 @@ namespace BuildingThemes.GUI
 
             // Zoning
             zoningToggles = new UICheckBox[10];
-            zoningToggles[(int)Zone.ResidentialLow] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningResidentialLow", "ZoningResidentialLowDisabled");
-            zoningToggles[(int)Zone.ResidentialHigh] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningResidentialHigh", "ZoningResidentialHighDisabled");
-            zoningToggles[(int)Zone.CommercialLow] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningCommercialLow", "ZoningCommercialLowDisabled");
-            zoningToggles[(int)Zone.CommercialHigh] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningCommercialHigh", "ZoningCommercialHighDisabled");
-            zoningToggles[(int)Zone.Industrial] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningIndustrial", "ZoningIndustrialDisabled");
-            zoningToggles[(int)Zone.Farming] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyFarming", "IconPolicyFarmingDisabled");
-            zoningToggles[(int)Zone.Forestry] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyForest", "IconPolicyForestDisabled");
-            zoningToggles[(int)Zone.Oil] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyOil", "IconPolicyOilDisabled");
-            zoningToggles[(int)Zone.Ore] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyOre", "IconPolicyOreDisabled");
-            zoningToggles[(int)Zone.Office] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningOffice", "ZoningOfficeDisabled");
+            zoningToggles[(int)Category.ResidentialLow] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningResidentialLow", "ZoningResidentialLowDisabled");
+            zoningToggles[(int)Category.ResidentialHigh] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningResidentialHigh", "ZoningResidentialHighDisabled");
+            zoningToggles[(int)Category.CommercialLow] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningCommercialLow", "ZoningCommercialLowDisabled");
+            zoningToggles[(int)Category.CommercialHigh] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningCommercialHigh", "ZoningCommercialHighDisabled");
+            zoningToggles[(int)Category.Industrial] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningIndustrial", "ZoningIndustrialDisabled");
+            zoningToggles[(int)Category.Farming] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyFarming", "IconPolicyFarmingDisabled");
+            zoningToggles[(int)Category.Forestry] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyForest", "IconPolicyForestDisabled");
+            zoningToggles[(int)Category.Oil] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyOil", "IconPolicyOilDisabled");
+            zoningToggles[(int)Category.Ore] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyOre", "IconPolicyOreDisabled");
+            zoningToggles[(int)Category.Office] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningOffice", "ZoningOfficeDisabled");
 
             for (int i = 0; i < 10; i++)
             {

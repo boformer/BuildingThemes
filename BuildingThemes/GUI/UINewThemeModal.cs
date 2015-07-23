@@ -1,9 +1,5 @@
 ﻿using ColossalFramework;
 using ColossalFramework.UI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace BuildingThemes.GUI
@@ -100,7 +96,7 @@ namespace BuildingThemes.GUI
         {
             base.OnVisibilityChanged();
 
-            UIComponent modalEffect = GetUIView().panelsLibraryModalEffect;
+            UIComponent modalEffect = GetUIView().panelsLibraryModalEffect; // TODO fix null the first time
 
             if (isVisible)
             {
@@ -110,24 +106,21 @@ namespace BuildingThemes.GUI
                 if (modalEffect != null)
                 {
                     modalEffect.Show(false);
-                    ValueAnimator.Animate("ModalEffect67419", delegate(float val)
+                    ValueAnimator.Animate("NewThemeModalEffect", delegate(float val)
                     {
                         modalEffect.opacity = val;
                     }, new AnimatedFloat(0f, 1f, 0.7f, EasingType.CubicEaseOut));
                 }
             }
-            else
+            else if (modalEffect != null)
             {
-                if (modalEffect != null)
+                ValueAnimator.Animate("NewThemeModalEffect", delegate(float val)
                 {
-                    ValueAnimator.Animate("ModalEffect67419", delegate(float val)
-                    {
-                        modalEffect.opacity = val;
-                    }, new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut), delegate
-                    {
-                        modalEffect.Hide();
-                    });
-                }
+                    modalEffect.opacity = val;
+                }, new AnimatedFloat(1f, 0f, 0.7f, EasingType.CubicEaseOut), delegate
+                {
+                    modalEffect.Hide();
+                });
             }
         }
 
