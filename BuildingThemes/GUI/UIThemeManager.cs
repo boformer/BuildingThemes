@@ -121,6 +121,8 @@ namespace BuildingThemes.GUI
                         m_themeSelection.selectedIndex = i;
                     }
                 }
+
+                Detour.PoliciesPanelDetour.RefreshThemesContainer();
             }
         }
 
@@ -137,6 +139,8 @@ namespace BuildingThemes.GUI
                 m_themeSelection.rowsData.m_size = m_allThemes.Length;
                 m_themeSelection.DisplayAt(0);
                 m_themeSelection.selectedIndex = 0;
+
+                Detour.PoliciesPanelDetour.RefreshThemesContainer();
             }
         }
 
