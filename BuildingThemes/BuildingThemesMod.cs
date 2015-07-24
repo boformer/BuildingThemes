@@ -81,12 +81,16 @@ namespace BuildingThemes
         {
             base.OnLevelLoaded(mode);
 
+            // Don't load if it's not a game
+            if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
+
             Debugger.Log("ON_LEVEL_LOADED");
 
             Debugger.AppendModList();
             Debugger.AppendThemeList();
 
             PolicyPanelEnabler.UnlockPolicyToolbarButton();
+            UIThemeManager.Initialize();
         }
 
         public override void OnLevelUnloading()
@@ -94,6 +98,8 @@ namespace BuildingThemes
             base.OnLevelUnloading();
 
             Debugger.Log("ON_LEVEL_UNLOADING");
+
+            UIThemeManager.Destroy();
         }
 
         public override void OnReleased()

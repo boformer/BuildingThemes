@@ -94,6 +94,8 @@ namespace BuildingThemes.Detour
 
         private static UIButton tab;
         private static UIPanel container;
+        private static UIPanel controls;
+        private static FastList<UIPanel> themePolicyButtons = new FastList<UIPanel>();
 
         private static void AddThemesTab()
         {
@@ -106,6 +108,7 @@ namespace BuildingThemes.Detour
             UITabstrip tabstrip = ToolsModifierControl.policiesPanel.Find("Tabstrip") as UITabstrip;
             tab = tabstrip.AddTab("Themes");
             tab.stringUserData = "Themes";
+            tab.textScale = 0.875f;
 
             // recalculate the width of the tabs
             for (int i = 0; i < tabstrip.tabCount; i++)
@@ -125,10 +128,19 @@ namespace BuildingThemes.Detour
             container.isVisible = tabstrip.selectedIndex == pageIndex;
 
             // Add the theme buttons
+            themePolicyButtons.Clear();
             RefreshThemesContainer();
 
+            // The panel holding the controls
+            controls = container.AddUIComponent<UIPanel>();
+
+            controls.width = container.width;
+            controls.autoLayout = true;
+            controls.autoLayoutDirection = LayoutDirection.Vertical;
+            controls.autoLayoutPadding.top = 5;
+
             // Add a checkbox to toggle "Blacklist Mode"
-            UICheckBox blacklistModeCheckBox = CreateCheckBox(container);
+            UICheckBox blacklistModeCheckBox = CreateCheckBox(controls);
             blacklistModeCheckBox.name = "Blacklist Mode Checkbox";
             blacklistModeCheckBox.gameObject.AddComponent<BlacklistModeCheckboxContainer>();
             blacklistModeCheckBox.text = "Allow buildings which are not in any theme";
@@ -146,7 +158,7 @@ namespace BuildingThemes.Detour
             };
 
             // Add a checkbox to "Enable Theme Management for this district"
-            UICheckBox enableThemeManagementCheckBox = CreateCheckBox(container);
+            UICheckBox enableThemeManagementCheckBox = CreateCheckBox(controls);
             enableThemeManagementCheckBox.name = "Theme Management Checkbox";
             enableThemeManagementCheckBox.gameObject.AddComponent<ThemeManagementCheckboxContainer>();
             enableThemeManagementCheckBox.text = "Enable Theme Management for this district";
@@ -163,7 +175,12 @@ namespace BuildingThemes.Detour
 
             };
 
+            // Add a button to show the Building Theme Manager
+            UIButton showThemeManager = GUI.UIUtils.CreateButton(controls);
+            showThemeManager.width = controls.width;
+            showThemeManager.text = "Theme Manager";
 
+            showThemeManager.eventClick += (c, p) => GUI.UIThemeManager.instance.Toggle();
         }
 
         // This method has to be called when the theme list was modified!
@@ -174,17 +191,20 @@ namespace BuildingThemes.Detour
                 return;
             }
 
-            // remove the existing stuff if something is in there
-            foreach (Transform child in container.gameObject.transform)
+            // remove the existing PolicyButtons
+            for (int i = 0; i < themePolicyButtons.m_size; i++)
             {
-                GameObject.Destroy(child.gameObject);
+                GameObject.Destroy(themePolicyButtons[i].gameObject);
             }
+            themePolicyButtons.Clear();
 
             // Add the theme buttons
             foreach (Configuration.Theme theme in Singleton<BuildingThemesManager>.instance.GetAllThemes())
             {
                 AddThemePolicyButton(container, theme);
             }
+
+            if (controls != null) controls.BringToFront();
         }
 
         private static void RemoveThemesTab()
@@ -214,6 +234,8 @@ namespace BuildingThemes.Detour
             policyPanel.backgroundSprite = "GenericPanel";
             policyPanel.size = new Vector2(364f, 44f);
             policyPanel.objectUserData = ToolsModifierControl.policiesPanel;
+
+            themePolicyButtons.Add(policyPanel);
 
             UIButton policyButton = policyPanel.AddUIComponent<UIButton>();
             policyButton.name = "PolicyButton";
