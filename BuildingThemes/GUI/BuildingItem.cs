@@ -23,6 +23,7 @@ namespace BuildingThemes.GUI
 
     public class BuildingItem
     {
+        private string m_name;
         private string m_displayName;
         private string m_steamID;
         private string m_level = "-";
@@ -40,9 +41,13 @@ namespace BuildingThemes.GUI
         {
             get
             {
-                if (prefab != null) return prefab.name;
-                if (building != null) return building.name;
-                return string.Empty;
+                if (m_name == null)
+                {
+                    if (prefab != null) m_name = prefab.name;
+                    else if (building != null) m_name = building.name;
+                    else m_name = string.Empty;
+                }
+                return m_name;
             }
         }
 
