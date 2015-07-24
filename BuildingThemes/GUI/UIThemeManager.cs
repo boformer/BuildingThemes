@@ -110,6 +110,7 @@ namespace BuildingThemes.GUI
 
                 InitBuildingLists();
 
+                m_themeSelection.selectedIndex = -1;
                 m_themeSelection.rowsData.m_buffer = m_allThemes;
                 m_themeSelection.rowsData.m_size = m_allThemes.Length;
 
@@ -135,6 +136,7 @@ namespace BuildingThemes.GUI
 
                 InitBuildingLists();
 
+                m_themeSelection.selectedIndex = -1;
                 m_themeSelection.rowsData.m_buffer = m_allThemes;
                 m_themeSelection.rowsData.m_size = m_allThemes.Length;
                 m_themeSelection.DisplayAt(0);
@@ -281,6 +283,8 @@ namespace BuildingThemes.GUI
 
             m_themeSelection.eventSelectedIndexChanged += (c, i) =>
             {
+                if (i == -1) return;
+
                 int listCount = m_buildingSelection.rowsData.m_size;
                 float pos = m_buildingSelection.listPosition;
 
