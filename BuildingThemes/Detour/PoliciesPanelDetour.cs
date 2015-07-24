@@ -178,7 +178,7 @@ namespace BuildingThemes.Detour
             // Add a button to show the Building Theme Manager
             UIButton showThemeManager = GUI.UIUtils.CreateButton(controls);
             showThemeManager.width = controls.width;
-            showThemeManager.text = "Building Themes Manager";
+            showThemeManager.text = "Theme Manager";
 
             showThemeManager.eventClick += (c, p) => GUI.UIThemeManager.instance.Toggle();
         }

@@ -51,6 +51,7 @@ namespace BuildingThemes.GUI
 
             m_theme = data as Configuration.Theme;
             m_name.text = m_theme.name;
+            UIUtils.TruncateLabel(m_name, parent.width - 30);
 
             if (isRowOdd)
             {

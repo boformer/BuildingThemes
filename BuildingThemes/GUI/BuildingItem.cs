@@ -154,8 +154,6 @@ namespace BuildingThemes.GUI
             m_displayName = Regex.Replace(m_displayName, @"\s+", " ").Trim();
 
             m_displayName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(m_displayName);
-
-            if (m_displayName.Length > 30) m_displayName = m_displayName.Substring(0, 27) + "...";
         }
     }
 }

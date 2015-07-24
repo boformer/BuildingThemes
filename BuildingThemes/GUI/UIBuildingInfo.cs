@@ -11,7 +11,7 @@ namespace BuildingThemes.GUI
         private UILabel m_level;
         private UILabel m_size;
 
-        private UICheckBox m_included;
+        /*private UICheckBox m_included;
 
         private UILabel m_spawnRateLabel;
         private UITextField m_spawnRate;
@@ -19,7 +19,7 @@ namespace BuildingThemes.GUI
         private UILabel m_baseName;
 
         private UILabel m_upgradeNameLabel;
-        private UITextField m_upgradeName;
+        private UITextField m_upgradeName;*/
 
         private BuildingItem m_item;
 

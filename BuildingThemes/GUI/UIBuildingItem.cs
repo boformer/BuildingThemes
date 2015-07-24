@@ -97,6 +97,8 @@ namespace BuildingThemes.GUI
         {
             if (m_name == null) SetupControls();
 
+            float maxLabelWidth = width - 120;
+
             m_building = data as BuildingItem;
             m_name.text = m_building.displayName;
             m_name.label.textColor = m_building.GetStatusColor();
@@ -110,6 +112,8 @@ namespace BuildingThemes.GUI
             {
                 m_steamIcon.tooltip = m_building.steamID;
                 m_steamIcon.isVisible = true;
+
+                maxLabelWidth -= 30;
 
                 m_name.label.relativePosition = new Vector3(52, 2);
             }
@@ -129,6 +133,9 @@ namespace BuildingThemes.GUI
             {
                 background.backgroundSprite = null;
             }
+
+
+            UIUtils.TruncateLabel(m_name.label, maxLabelWidth);
         }
 
         public void Select(bool isRowOdd)

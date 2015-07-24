@@ -29,7 +29,7 @@ namespace BuildingThemes.GUI
 
         #region Constant values
         private const float LEFT_WIDTH = 250;
-        private const float MIDDLE_WIDTH = 395;
+        private const float MIDDLE_WIDTH = 450;
         private const float RIGHT_WIDTH = 250;
         private const float HEIGHT = 550;
         private const float SPACING = 5;
@@ -93,7 +93,7 @@ namespace BuildingThemes.GUI
             }
             else
             {
-                base.Show();
+                Show(true);
 
                 if (m_themeSelection.selectedIndex == -1) m_themeSelection.selectedIndex = 0;
             }
@@ -234,7 +234,7 @@ namespace BuildingThemes.GUI
         {
             // Title Bar
             m_title = AddUIComponent<UITitleBar>();
-            m_title.title = "Building Themes Manager";
+            m_title.title = "Theme Manager";
             m_title.iconSprite = "ToolbarIconZoomOutCity";
 
             // Filter

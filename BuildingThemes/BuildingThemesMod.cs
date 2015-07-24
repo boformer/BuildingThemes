@@ -81,6 +81,9 @@ namespace BuildingThemes
         {
             base.OnLevelLoaded(mode);
 
+            // Don't load if it's not a game
+            if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
+
             Debugger.Log("ON_LEVEL_LOADED");
 
             Debugger.AppendModList();

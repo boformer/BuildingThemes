@@ -209,6 +209,16 @@ namespace BuildingThemes.GUI
 
             return UIView.GetAView().defaultAtlas;
         }
+
+        public static void TruncateLabel(UILabel label, float maxWidth)
+        {
+            label.autoSize = true;
+            while (label.width > maxWidth)
+            {
+                label.text = label.text.Substring(0, label.text.Length - 4) + "...";
+                label.autoSize = true;
+            }
+        }
     }
 }
 
