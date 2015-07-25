@@ -751,9 +751,15 @@ namespace BuildingThemes.Detour
                     {
                         // Calculate the z position of the furthest away prop
                         float biggestPropPosZ = 0;
-                        foreach (var prop in buildingInfo.m_props)
+
+                        if (buildingInfo.m_props != null)
                         {
-                            biggestPropPosZ = Mathf.Max(biggestPropPosZ, buildingInfo.m_expandFrontYard ? prop.m_position.z : -prop.m_position.z);
+                            foreach (var prop in buildingInfo.m_props)
+                            {
+                                if (prop == null) continue;
+
+                                biggestPropPosZ = Mathf.Max(biggestPropPosZ, buildingInfo.m_expandFrontYard ? prop.m_position.z : -prop.m_position.z);
+                            }
                         }
 
                         // Check if the furthest away prop is outside of the bounds of the prefab
