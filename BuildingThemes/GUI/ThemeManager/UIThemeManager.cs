@@ -123,7 +123,7 @@ namespace BuildingThemes.GUI
                     }
                 }
 
-                Detour.PoliciesPanelDetour.RefreshThemesContainer();
+                UIPoliciesThemeTab.RefreshThemesContainer();
             }
         }
 
@@ -142,7 +142,7 @@ namespace BuildingThemes.GUI
                 m_themeSelection.DisplayAt(0);
                 m_themeSelection.selectedIndex = 0;
 
-                Detour.PoliciesPanelDetour.RefreshThemesContainer();
+                UIPoliciesThemeTab.RefreshThemesContainer();
             }
         }
 
