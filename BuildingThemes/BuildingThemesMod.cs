@@ -97,6 +97,9 @@ namespace BuildingThemes
         {
             base.OnLevelUnloading();
 
+            BuildingThemesManager.instance.Reset();
+            BuildingThemesManager.instance.searchBuildingThemeMods();
+
             Debugger.Log("ON_LEVEL_UNLOADING");
 
             UIThemeManager.Destroy();
