@@ -32,6 +32,15 @@ namespace BuildingThemes.GUI
             }
         }
 
+        protected override void OnSizeChanged()
+        {
+            base.OnSizeChanged();
+
+            background.width = width;
+            m_size.relativePosition = new Vector3(width - m_size.width, 15);
+            m_level.relativePosition = new Vector3(width - m_level.width - m_size.width, 15);
+        }
+
         protected override void OnMouseEnter(UIMouseEventParameter p)
         {
             base.OnMouseEnter(p);

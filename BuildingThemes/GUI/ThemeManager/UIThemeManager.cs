@@ -123,7 +123,7 @@ namespace BuildingThemes.GUI
                     }
                 }
 
-                UIPoliciesThemeTab.RefreshThemesContainer();
+                ThemePolicyTab.RefreshThemesContainer();
             }
         }
 
@@ -142,7 +142,7 @@ namespace BuildingThemes.GUI
                 m_themeSelection.DisplayAt(0);
                 m_themeSelection.selectedIndex = 0;
 
-                UIPoliciesThemeTab.RefreshThemesContainer();
+                ThemePolicyTab.RefreshThemesContainer();
             }
         }
 
@@ -275,6 +275,7 @@ namespace BuildingThemes.GUI
             m_themeSelection.height = left.height - 40;
             m_themeSelection.canSelect = true;
             m_themeSelection.rowHeight = 40;
+            m_themeSelection.autoHideScrollbar = true;
             m_themeSelection.relativePosition = Vector3.zero;
 
             m_themeSelection.rowsData.m_buffer = m_allThemes;
@@ -332,6 +333,7 @@ namespace BuildingThemes.GUI
             m_buildingSelection.height = middle.height - 40;
             m_buildingSelection.canSelect = true;
             m_buildingSelection.rowHeight = 40;
+            m_buildingSelection.autoHideScrollbar = true;
             m_buildingSelection.relativePosition = Vector3.zero;
 
             m_buildingSelection.rowsData = new FastList<object>();
