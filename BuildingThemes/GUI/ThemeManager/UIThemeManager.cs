@@ -489,6 +489,8 @@ namespace BuildingThemes.GUI
                     // Associate building with prefab
                     BuildingItem item = buildingDictionary[buildings[i].name];
                     item.building = buildings[i];
+                    // TODO: better fix
+                    if (!item.building.include) item.building.isBuiltIn = true;
                 }
                 else
                 {
