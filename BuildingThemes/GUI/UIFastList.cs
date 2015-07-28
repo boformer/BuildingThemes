@@ -474,16 +474,14 @@ namespace BuildingThemes.GUI
 
             if (m_autoHideScrollbar)
             {
-                bool isVisible = m_rowsData.m_size >= m_rows.m_size;
-                float newWidth = isVisible ? width - 10f : width;
+                bool isVisible = m_rowsData.m_size * m_rowHeight > height;
+                float newPanelWidth = isVisible ? width - 10f : width;
+                float newItemWidth = isVisible ? width - 20f : width;
 
-                if(m_panel.width != newWidth)
+                m_panel.width = newPanelWidth;
+                for (int i = 0; i < m_rows.m_size; i++)
                 {
-                    m_panel.width = newWidth;
-                    for(int i=0; i<m_rows.m_size; i++)
-                    {
-                        m_rows[i].width = m_panel.width;
-                    }
+                    m_rows[i].width = newItemWidth;
                 }
 
                 m_scrollbar.isVisible = isVisible;

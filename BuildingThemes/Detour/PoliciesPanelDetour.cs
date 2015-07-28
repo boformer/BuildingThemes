@@ -62,7 +62,7 @@ namespace BuildingThemes.Detour
         {
             // We have to remove the custom tab before the original SetParentButton method is called
             // SetParentButton() is searching for a TutorialUITag component which our tab does not have
-            GUI.UIPoliciesThemeTab.RemoveThemesTab();
+            GUI.ThemePolicyTab.RemoveThemesTab();
 
             // Call the original method
             RedirectionHelper.RevertRedirect(_PoliciesPanel_SetParentButton_original, _PoliciesPanel_SetParentButton_state);
@@ -70,7 +70,7 @@ namespace BuildingThemes.Detour
             RedirectionHelper.RedirectCalls(_PoliciesPanel_SetParentButton_original, _PoliciesPanel_SetParentButton_detour);
 
             // After the method call, add our custom tab again
-            GUI.UIPoliciesThemeTab.AddThemesTab();
+            GUI.ThemePolicyTab.AddThemesTab();
         }
 
         private void RefreshPanel()
@@ -78,7 +78,7 @@ namespace BuildingThemes.Detour
             // We have to remove the custom tab before the original RefreshPanel method is called
             // RefreshPanel() checks for every policy button if the assigned policy is loaded
             // Our fake policy buttons are not related to a game policy
-            GUI.UIPoliciesThemeTab.RemoveThemesTab();
+            GUI.ThemePolicyTab.RemoveThemesTab();
 
             // Call the original method
             RedirectionHelper.RevertRedirect(_PoliciesPanel_RefreshPanel_original, _PoliciesPanel_RefreshPanel_state);
@@ -86,7 +86,7 @@ namespace BuildingThemes.Detour
             RedirectionHelper.RedirectCalls(_PoliciesPanel_RefreshPanel_original, _PoliciesPanel_RefreshPanel_detour);
 
             // After the method call, add our custom tab again
-            GUI.UIPoliciesThemeTab.AddThemesTab();
+            GUI.ThemePolicyTab.AddThemesTab();
         }
     }
 }

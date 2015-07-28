@@ -7,14 +7,14 @@ using UnityEngine;
 
 namespace BuildingThemes.GUI
 {
-    public class UIPoliciesThemeTab
+    public class ThemePolicyTab
     {
         // Themes tab GUI Helpers
 
         private static UIButton tab;
         private static UIPanel container;
         private static UIPanel controls;
-        private static FastList<UIPanel> themePolicyButtons = new FastList<UIPanel>();
+        private static UIFastList themePolicyButtons;
 
         public static void AddThemesTab()
         {
@@ -47,14 +47,17 @@ namespace BuildingThemes.GUI
             // Only make the container visible if our tab was selected when the panel was closed last time
             container.isVisible = tabstrip.selectedIndex == pageIndex;
 
-            // Add the theme buttons
-            themePolicyButtons.Clear();
-            RefreshThemesContainer();
+            // Theme buttons
+            themePolicyButtons = UIFastList.Create<UIThemePolicyItem>(container);
+            themePolicyButtons.width = 364f;
+            themePolicyButtons.rowHeight = 49f;
+            themePolicyButtons.autoHideScrollbar = true;
 
             // The panel holding the controls
             controls = container.AddUIComponent<UIPanel>();
 
             controls.width = container.width;
+            controls.height = 100f;
             controls.autoLayout = true;
             controls.autoLayoutDirection = LayoutDirection.Vertical;
             controls.autoLayoutPadding.top = 5;
@@ -101,6 +104,8 @@ namespace BuildingThemes.GUI
             showThemeManager.text = "Theme Manager";
 
             showThemeManager.eventClick += (c, p) => GUI.UIThemeManager.instance.Toggle();
+
+            RefreshThemesContainer();
         }
 
         // This method has to be called when the theme list was modified!
@@ -111,18 +116,13 @@ namespace BuildingThemes.GUI
                 return;
             }
 
-            // remove the existing PolicyButtons
-            for (int i = 0; i < themePolicyButtons.m_size; i++)
-            {
-                GameObject.Destroy(themePolicyButtons[i].gameObject);
-            }
-            themePolicyButtons.Clear();
+            themePolicyButtons.rowsData.m_buffer = BuildingThemesManager.instance.GetAllThemes().ToArray();
+            themePolicyButtons.rowsData.m_size = themePolicyButtons.rowsData.m_buffer.Length;
+            Array.Sort(themePolicyButtons.rowsData.m_buffer as Configuration.Theme[], ThemeCompare);
 
-            // Add the theme buttons
-            foreach (Configuration.Theme theme in Singleton<BuildingThemesManager>.instance.GetAllThemes())
-            {
-                AddThemePolicyButton(container, theme);
-            }
+            controls.autoSize = true;
+            themePolicyButtons.height = Mathf.Min(themePolicyButtons.rowsData.m_size * themePolicyButtons.rowHeight, container.height - controls.height - 5);
+            themePolicyButtons.Refresh();
 
             if (controls != null) controls.BringToFront();
         }
@@ -145,84 +145,6 @@ namespace BuildingThemes.GUI
                 container = null;
 
             }
-        }
-
-        private static void AddThemePolicyButton(UIPanel container, Configuration.Theme theme)
-        {
-            UIPanel policyPanel = container.AddUIComponent<UIPanel>();
-            policyPanel.name = theme.name;
-            policyPanel.backgroundSprite = "GenericPanel";
-            policyPanel.size = new Vector2(364f, 44f);
-            policyPanel.objectUserData = ToolsModifierControl.policiesPanel;
-
-            themePolicyButtons.Add(policyPanel);
-
-            UIButton policyButton = policyPanel.AddUIComponent<UIButton>();
-            policyButton.name = "PolicyButton";
-            policyButton.text = theme.name;
-            policyButton.size = new Vector2(324f, 40f);
-            policyButton.focusedBgSprite = "PolicyBarBackActive";
-            policyButton.normalBgSprite = "PolicyBarBack";
-            policyButton.relativePosition = new Vector3(2f, 2f, 0f);
-            policyButton.textPadding.left = 50;
-            policyButton.textColor = new Color32(0, 0, 0, 255);
-            policyButton.disabledTextColor = new Color32(0, 0, 0, 255);
-            policyButton.hoveredTextColor = new Color32(0, 0, 0, 255);
-            policyButton.pressedTextColor = new Color32(0, 0, 0, 255);
-            policyButton.focusedTextColor = new Color32(0, 0, 0, 255);
-            policyButton.disabledColor = new Color32(124, 124, 124, 255);
-            policyButton.dropShadowColor = new Color32(103, 103, 103, 255);
-            policyButton.dropShadowOffset = new Vector2(1f, 1f);
-            policyButton.textHorizontalAlignment = UIHorizontalAlignment.Left;
-            policyButton.useDropShadow = false;
-            policyButton.textScale = 0.875f;
-
-            // This helper component updates the checkbox state every game tick
-            policyButton.gameObject.AddComponent<ThemePolicyContainer>();
-
-            UICheckBox policyCheckBox = policyButton.AddUIComponent<UICheckBox>();
-            policyCheckBox.name = "Checkbox";
-            policyCheckBox.size = new Vector2(363f, 44f);
-            policyCheckBox.relativePosition = new Vector3(0f, -2f, 0f);
-            policyCheckBox.clipChildren = true;
-            policyCheckBox.objectUserData = theme;
-
-            // Check if theme is enabled in selected district and set the checkbox
-            var districtId = ToolsModifierControl.policiesPanel.targetDistrict;
-            var districtThemes = Singleton<BuildingThemesManager>.instance.GetDistrictThemes(districtId, true);
-            policyCheckBox.isChecked = districtThemes.Contains(theme);
-
-            // Connect the checkbox with our theme manager
-            policyCheckBox.eventCheckChanged += delegate(UIComponent component, bool isChecked)
-            {
-                lock (component)
-                {
-                    var districtId1 = ToolsModifierControl.policiesPanel.targetDistrict;
-
-                    if (isChecked)
-                    {
-                        Singleton<BuildingThemesManager>.instance.EnableTheme(districtId1, theme);
-                    }
-                    else
-                    {
-                        Singleton<BuildingThemesManager>.instance.DisableTheme(districtId1, theme);
-                    }
-                }
-
-            };
-
-            // Checkbox-related UI components
-            UISprite sprite = policyCheckBox.AddUIComponent<UISprite>();
-            sprite.name = "Unchecked";
-            sprite.spriteName = "ToggleBase";
-            sprite.size = new Vector2(16f, 16f);
-            sprite.relativePosition = new Vector3(336.6984f, 14, 0f);
-
-            policyCheckBox.checkedBoxObject = sprite.AddUIComponent<UISprite>();
-            policyCheckBox.checkedBoxObject.name = "Checked";
-            ((UISprite)policyCheckBox.checkedBoxObject).spriteName = "ToggleBaseFocused";
-            policyCheckBox.checkedBoxObject.size = new Vector2(16f, 16f);
-            policyCheckBox.checkedBoxObject.relativePosition = Vector3.zero;
         }
 
         public static UICheckBox CreateCheckBox(UIComponent parent)
@@ -249,6 +171,12 @@ namespace BuildingThemes.GUI
             checkBox.label.relativePosition = new Vector3(22f, 2f);
 
             return checkBox;
+        }
+
+        private static int ThemeCompare(Configuration.Theme a, Configuration.Theme b)
+        {
+            // Sort by name
+            return a.name.CompareTo(b.name);
         }
     }
 }
