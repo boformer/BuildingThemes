@@ -247,6 +247,7 @@ namespace BuildingThemes.GUI
             {
                 if (m_themeSelection != null && m_themeSelection.selectedIndex != -1)
                 {
+                    m_buildingSelection.selectedIndex = -1;
                     m_buildingSelection.rowsData = Filter(m_themes[m_themeSelection.selectedIndex]);
                 }
             };
