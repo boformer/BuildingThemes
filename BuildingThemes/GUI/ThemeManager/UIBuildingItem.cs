@@ -32,6 +32,17 @@ namespace BuildingThemes.GUI
             }
         }
 
+        protected override void OnSizeChanged()
+        {
+            base.OnSizeChanged();
+
+            if (m_name == null) return;
+
+            background.width = width;
+            m_size.relativePosition = new Vector3(width - 40f, 15);
+            m_level.relativePosition = new Vector3(width - 70f, 15);
+        }
+
         protected override void OnMouseEnter(UIMouseEventParameter p)
         {
             base.OnMouseEnter(p);
@@ -46,6 +57,8 @@ namespace BuildingThemes.GUI
 
         private void SetupControls()
         {
+            if (m_name != null) return;
+
             isVisible = true;
             canFocus = true;
             isInteractive = true;
@@ -82,20 +95,18 @@ namespace BuildingThemes.GUI
             }
 
             m_size = AddUIComponent<UILabel>();
-            m_size.width = 50;
+            m_size.width = 40;
             m_size.textAlignment = UIHorizontalAlignment.Center;
-            m_size.relativePosition = new Vector3(width - m_size.width, 15);
 
             m_level = AddUIComponent<UILabel>();
             m_level.width = 30;
             m_level.textAlignment = UIHorizontalAlignment.Center;
-            m_level.relativePosition = new Vector3(width - m_level.width - m_size.width, 15);
         }
 
         #region IUIFastListRow implementation
         public void Display(object data, bool isRowOdd)
         {
-            if (m_name == null) SetupControls();
+            SetupControls();
 
             float maxLabelWidth = width - 120;
 

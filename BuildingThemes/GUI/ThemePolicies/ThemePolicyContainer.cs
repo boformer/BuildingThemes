@@ -30,7 +30,7 @@ namespace BuildingThemes.GUI
 
                         if (Debugger.Enabled)
                         {
-                            Debugger.LogFormat("Building Themes: ThemePolicyContainer. Chacnging theme {0} checkbox for district {1} to state: {2}",
+                            Debugger.LogFormat("Building Themes: ThemePolicyContainer. Changing theme {0} checkbox for district {1} to state: {2}",
                                 theme.name, districtId, this.m_Check.isChecked);
                         }
                     }

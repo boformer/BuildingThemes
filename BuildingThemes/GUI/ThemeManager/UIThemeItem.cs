@@ -39,6 +39,13 @@ namespace BuildingThemes.GUI
             height = 40;
         }
 
+        protected override void OnSizeChanged()
+        {
+            base.OnSizeChanged();
+
+            background.width = width;
+        }
+
         #region IUIFastListRow implementation
         public void Display(object data, bool isRowOdd)
         {

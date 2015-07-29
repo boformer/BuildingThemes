@@ -31,6 +31,7 @@ namespace BuildingThemes.GUI
         #region From UIPanel
         // No need to implement those, they are in UIPanel
         // Those are declared here so they can be used inside UIFastList
+        float width { get; set; }
         bool enabled { get; set; }
         Vector3 relativePosition { get; set; }
         event MouseEventHandler eventClick;
@@ -85,6 +86,7 @@ namespace BuildingThemes.GUI
         private int m_selectedRowId = -1;
         private bool m_lock = false;
         private bool m_updateContent = true;
+        private bool m_autoHideScrollbar = false;
         #endregion
 
         /// <summary>
@@ -104,6 +106,18 @@ namespace BuildingThemes.GUI
         }
 
         #region Public accessors
+        public bool autoHideScrollbar
+        {
+            get { return m_autoHideScrollbar; }
+            set
+            {
+                if (m_autoHideScrollbar != value)
+                {
+                    m_autoHideScrollbar = value;
+                    UpdateScrollbar();
+                }
+            }
+        }
         /// <summary>
         /// Change the color of the background
         /// </summary>
@@ -458,6 +472,21 @@ namespace BuildingThemes.GUI
         {
             if (m_rowsData == null || m_rowHeight <= 0) return;
 
+            if (m_autoHideScrollbar)
+            {
+                bool isVisible = m_rowsData.m_size * m_rowHeight > height;
+                float newPanelWidth = isVisible ? width - 10f : width;
+                float newItemWidth = isVisible ? width - 20f : width;
+
+                m_panel.width = newPanelWidth;
+                for (int i = 0; i < m_rows.m_size; i++)
+                {
+                    m_rows[i].width = newItemWidth;
+                }
+
+                m_scrollbar.isVisible = isVisible;
+            }
+
             float H = m_rowHeight * m_rowsData.m_size;
             float scrollSize = height * height / (m_rowHeight * m_rowsData.m_size);
             float amount = stepSize * height / (m_rowHeight * m_rowsData.m_size);
@@ -466,6 +495,7 @@ namespace BuildingThemes.GUI
             m_scrollbar.minValue = 0f;
             m_scrollbar.maxValue = height;
             m_scrollbar.incrementAmount = Mathf.Max(1f, amount);
+
             UpdateScrollPosition();
         }
 

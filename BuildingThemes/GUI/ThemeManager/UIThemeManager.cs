@@ -123,7 +123,7 @@ namespace BuildingThemes.GUI
                     }
                 }
 
-                Detour.PoliciesPanelDetour.RefreshThemesContainer();
+                ThemePolicyTab.RefreshThemesContainer();
             }
         }
 
@@ -142,7 +142,7 @@ namespace BuildingThemes.GUI
                 m_themeSelection.DisplayAt(0);
                 m_themeSelection.selectedIndex = 0;
 
-                Detour.PoliciesPanelDetour.RefreshThemesContainer();
+                ThemePolicyTab.RefreshThemesContainer();
             }
         }
 
@@ -247,6 +247,7 @@ namespace BuildingThemes.GUI
             {
                 if (m_themeSelection != null && m_themeSelection.selectedIndex != -1)
                 {
+                    m_buildingSelection.selectedIndex = -1;
                     m_buildingSelection.rowsData = Filter(m_themes[m_themeSelection.selectedIndex]);
                 }
             };
@@ -275,6 +276,7 @@ namespace BuildingThemes.GUI
             m_themeSelection.height = left.height - 40;
             m_themeSelection.canSelect = true;
             m_themeSelection.rowHeight = 40;
+            m_themeSelection.autoHideScrollbar = true;
             m_themeSelection.relativePosition = Vector3.zero;
 
             m_themeSelection.rowsData.m_buffer = m_allThemes;
@@ -332,6 +334,7 @@ namespace BuildingThemes.GUI
             m_buildingSelection.height = middle.height - 40;
             m_buildingSelection.canSelect = true;
             m_buildingSelection.rowHeight = 40;
+            m_buildingSelection.autoHideScrollbar = true;
             m_buildingSelection.relativePosition = Vector3.zero;
 
             m_buildingSelection.rowsData = new FastList<object>();
@@ -486,6 +489,8 @@ namespace BuildingThemes.GUI
                     // Associate building with prefab
                     BuildingItem item = buildingDictionary[buildings[i].name];
                     item.building = buildings[i];
+                    // TODO: better fix
+                    if (!item.building.include) item.building.isBuiltIn = true;
                 }
                 else
                 {
