@@ -23,8 +23,7 @@ namespace BuildingThemes.GUI
         private BuildingInfo m_renderPrefab;
         private UIBuildingInfo m_buildingOptions;
 
-        private FastList<List<BuildingItem>> m_themes = new FastList<List<BuildingItem>>();
-        private Configuration.Theme[] m_allThemes;
+        private Dictionary<Configuration.Theme, List<BuildingItem>> m_themes = new Dictionary<Configuration.Theme,List<BuildingItem>>();
         private bool m_isDistrictThemesDirty = false;
 
         #region Constant values
@@ -111,12 +110,12 @@ namespace BuildingThemes.GUI
                 InitBuildingLists();
 
                 m_themeSelection.selectedIndex = -1;
-                m_themeSelection.rowsData.m_buffer = m_allThemes;
-                m_themeSelection.rowsData.m_size = m_allThemes.Length;
+                m_themeSelection.rowsData.m_buffer = m_themes.Keys.ToArray();
+                m_themeSelection.rowsData.m_size = m_themeSelection.rowsData.m_buffer.Length;
 
-                for (int i = 0; i < m_allThemes.Length; i++)
+                for (int i = 0; i < m_themeSelection.rowsData.m_buffer.Length; i++)
                 {
-                    if (m_allThemes[i] == newTheme)
+                    if (m_themeSelection.rowsData.m_buffer[i] == newTheme)
                     {
                         m_themeSelection.DisplayAt(i);
                         m_themeSelection.selectedIndex = i;
@@ -137,8 +136,8 @@ namespace BuildingThemes.GUI
                 InitBuildingLists();
 
                 m_themeSelection.selectedIndex = -1;
-                m_themeSelection.rowsData.m_buffer = m_allThemes;
-                m_themeSelection.rowsData.m_size = m_allThemes.Length;
+                m_themeSelection.rowsData.m_buffer = m_themes.Keys.ToArray();
+                m_themeSelection.rowsData.m_size = m_themeSelection.rowsData.m_buffer.Length;
                 m_themeSelection.DisplayAt(0);
                 m_themeSelection.selectedIndex = 0;
 
@@ -174,6 +173,7 @@ namespace BuildingThemes.GUI
             }
 
             m_isDistrictThemesDirty = true;
+            m_themeSelection.Refresh();
         }
 
         public void UpdateBuildingInfo(BuildingItem item)
@@ -200,6 +200,17 @@ namespace BuildingThemes.GUI
                 m_preview.texture = null;
                 m_noPreview.isVisible = true;
             }
+        }
+
+        public bool IsThemeValid(Configuration.Theme theme)
+        {
+            List<BuildingItem> list = m_themes[theme];
+
+            foreach (BuildingItem item in list)
+            {
+                if (item.level == "L1" && item.included) return true;
+            }
+            return false;
         }
 
         public override void Update()
@@ -247,8 +258,9 @@ namespace BuildingThemes.GUI
             {
                 if (m_themeSelection != null && m_themeSelection.selectedIndex != -1)
                 {
+                    Configuration.Theme theme = m_themeSelection.selectedItem as Configuration.Theme;
                     m_buildingSelection.selectedIndex = -1;
-                    m_buildingSelection.rowsData = Filter(m_themes[m_themeSelection.selectedIndex]);
+                    m_buildingSelection.rowsData = Filter(m_themes[theme]);
                 }
             };
 
@@ -279,8 +291,8 @@ namespace BuildingThemes.GUI
             m_themeSelection.autoHideScrollbar = true;
             m_themeSelection.relativePosition = Vector3.zero;
 
-            m_themeSelection.rowsData.m_buffer = m_allThemes;
-            m_themeSelection.rowsData.m_size = m_allThemes.Length;
+            m_themeSelection.rowsData.m_buffer = m_themes.Keys.ToArray();
+            m_themeSelection.rowsData.m_size = m_themeSelection.rowsData.m_buffer.Length;
             m_themeSelection.DisplayAt(0);
 
             m_themeSelection.eventSelectedIndexChanged += (c, i) =>
@@ -290,8 +302,9 @@ namespace BuildingThemes.GUI
                 int listCount = m_buildingSelection.rowsData.m_size;
                 float pos = m_buildingSelection.listPosition;
 
+                Configuration.Theme theme = m_themeSelection.selectedItem as Configuration.Theme;
                 m_buildingSelection.selectedIndex = -1;
-                m_buildingSelection.rowsData = Filter(m_themes[i]);
+                m_buildingSelection.rowsData = Filter(m_themes[theme]);
 
                 if (m_filter.buildingStatus == UIBuildingFilter.Status.All && m_buildingSelection.rowsData.m_size == listCount)
                 {
@@ -453,13 +466,13 @@ namespace BuildingThemes.GUI
 
         private void InitBuildingLists()
         {
-            m_allThemes = BuildingThemesManager.instance.GetAllThemes().ToArray();
-            Array.Sort(m_allThemes, ThemeCompare);
+            Configuration.Theme[] themes = BuildingThemesManager.instance.GetAllThemes().ToArray();
+            Array.Sort(themes, ThemeCompare);
 
             m_themes.Clear();
-            for (int i = 0; i < m_allThemes.Length; i++)
+            for (int i = 0; i < themes.Length; i++)
             {
-                m_themes.Add(GetBuildingItemList(m_allThemes[i]));
+                m_themes.Add(themes[i], GetBuildingItemList(themes[i]));
             }
         }
 
@@ -490,7 +503,11 @@ namespace BuildingThemes.GUI
                     BuildingItem item = buildingDictionary[buildings[i].name];
                     item.building = buildings[i];
                     // TODO: better fix
-                    if (!item.building.include) item.building.isBuiltIn = true;
+                    if (!item.building.include)
+                    {
+                        theme.isBuiltIn = true;
+                        item.building.isBuiltIn = true;
+                    }
                 }
                 else
                 {

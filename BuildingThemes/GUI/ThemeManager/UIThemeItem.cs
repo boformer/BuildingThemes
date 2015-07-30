@@ -60,6 +60,17 @@ namespace BuildingThemes.GUI
             m_name.text = m_theme.name;
             UIUtils.TruncateLabel(m_name, parent.width - 30);
 
+            if(UIThemeManager.instance.IsThemeValid(m_theme))
+            {
+                m_name.textColor = new Color32(255, 255, 255, 255);
+                tooltip = null;
+            }
+            else
+            {
+                m_name.textColor = new Color32(255, 255, 0, 255);
+                tooltip = "No level 1 building included.";
+            }
+            
             if (isRowOdd)
             {
                 background.backgroundSprite = "UnlockingItemBackground";

@@ -109,6 +109,17 @@ namespace BuildingThemes.GUI
             m_theme = data as Configuration.Theme;
             m_policyButton.text = m_theme.name;
             m_policyCheckBox.objectUserData = m_theme;
+
+            if (UIThemeManager.instance != null && UIThemeManager.instance.IsThemeValid(m_theme))
+            {
+                m_policyCheckBox.enabled = true;
+                tooltip = null;
+            }
+            else
+            {
+                m_policyCheckBox.enabled = false;
+                tooltip = "No level 1 building included.";
+            }
         }
 
         public void Select(bool isRowOdd) { }

@@ -64,11 +64,11 @@
     <Compile Include="Detour\BuildingManagerDetour.cs" />
     <Compile Include="Detour\ZoneBlockDetour.cs" />
     <Compile Include="Detour\PoliciesPanelDetour.cs" />
-    <Compile Include="GUI\BuildingItem.cs" />
+    <Compile Include="GUI\ThemeManager\BuildingItem.cs" />
     <Compile Include="GUI\ThemePolicies\ThemePolicyTab.cs" />
     <Compile Include="GUI\ThemePolicies\PolicyPanelEnabler.cs" />
     <Compile Include="GUI\ThemePolicies\BlacklistModeCheckboxContainer.cs" />
-    <Compile Include="GUI\PreviewRenderer.cs" />
+    <Compile Include="GUI\ThemeManager\PreviewRenderer.cs" />
     <Compile Include="GUI\ThemePolicies\ThemeManagementCheckboxContainer.cs" />
     <Compile Include="GUI\ThemeManager\UIBuildingFilter.cs" />
     <Compile Include="GUI\ThemeManager\UIBuildingItem.cs" />
