@@ -17,11 +17,9 @@ namespace BuildingThemes.GUI
         private UIFastList m_buildingSelection;
         private UIButton m_includeAll;
         private UIButton m_includeNone;
-        private UITextureSprite m_preview;
-        private UISprite m_noPreview;
-        private PreviewRenderer m_previewRenderer;
-        private BuildingInfo m_renderPrefab;
-        private UIBuildingInfo m_buildingOptions;
+        private UIBuildingPreview m_buildingPreview;
+        private UIBuildingOptions m_buildingOptions;
+        private UIButton m_cloneBuilding;
 
         private Dictionary<Configuration.Theme, List<BuildingItem>> m_themes = new Dictionary<Configuration.Theme,List<BuildingItem>>();
         private bool m_isDistrictThemesDirty = false;
@@ -46,6 +44,11 @@ namespace BuildingThemes.GUI
         public Configuration.Theme selectedTheme
         {
             get { return m_themeSelection.selectedItem as Configuration.Theme; }
+        }
+
+        public UIBuildingPreview buildingPreview
+        {
+            get { return m_buildingPreview; }
         }
 
         public static void Initialize()
@@ -178,28 +181,19 @@ namespace BuildingThemes.GUI
 
         public void UpdateBuildingInfo(BuildingItem item)
         {
+            m_buildingPreview.Show(item);
             m_buildingOptions.Show(item);
+        }
 
-            m_renderPrefab = (item == null) ? null : item.prefab;
-
-            if (m_renderPrefab != null && m_renderPrefab.m_mesh != null)
+        public BuildingItem GetBuildingItem(string name)
+        {
+            for(int i = 0; i< m_buildingSelection.rowsData.m_size; i++)
             {
-                m_previewRenderer.cameraRotation = 210f;
-                m_previewRenderer.zoom = 4f;
-                m_previewRenderer.mesh = m_renderPrefab.m_mesh;
-                m_previewRenderer.material = m_renderPrefab.m_material;
-
-                RenderPreview();
-
-                m_preview.texture = m_previewRenderer.texture;
-
-                m_noPreview.isVisible = false;
+                BuildingItem item = m_buildingSelection.rowsData[i] as BuildingItem;
+                if (item.name == name) return item;
             }
-            else
-            {
-                m_preview.texture = null;
-                m_noPreview.isVisible = true;
-            }
+
+            return null;
         }
 
         public bool IsThemeValid(Configuration.Theme theme)
@@ -219,6 +213,7 @@ namespace BuildingThemes.GUI
 
             if (m_isDistrictThemesDirty)
             {
+                ThemePolicyTab.RefreshThemesContainer();
                 BuildingThemesManager.instance.RefreshDistrictThemeInfos();
                 BuildingThemesManager.instance.SaveConfig();
                 m_isDistrictThemesDirty = false;
@@ -306,7 +301,7 @@ namespace BuildingThemes.GUI
                 m_buildingSelection.selectedIndex = -1;
                 m_buildingSelection.rowsData = Filter(m_themes[theme]);
 
-                if (m_filter.buildingStatus == UIBuildingFilter.Status.All && m_buildingSelection.rowsData.m_size == listCount)
+                if (m_filter.buildingStatus == Status.All && m_buildingSelection.rowsData.m_size == listCount)
                 {
                     m_buildingSelection.DisplayAt(pos);
                 }
@@ -356,6 +351,7 @@ namespace BuildingThemes.GUI
             m_buildingSelection.eventSelectedIndexChanged += (c, i) =>
             {
                 selectedItem = m_buildingSelection.selectedItem as BuildingItem;
+                m_cloneBuilding.isEnabled = selectedItem != null && selectedItem.prefab != null;
             };
 
             m_buildingSelection.eventMouseLeave += (c, p) =>
@@ -407,61 +403,25 @@ namespace BuildingThemes.GUI
             };
 
             // Preview
-            UIPanel previewPanel = right.AddUIComponent<UIPanel>();
-            previewPanel.backgroundSprite = "GenericPanel";
-            previewPanel.width = right.width;
-            previewPanel.height = (right.height - SPACING * 2) / 2;
-            previewPanel.relativePosition = Vector3.zero;
-
-            m_preview = previewPanel.AddUIComponent<UITextureSprite>();
-            m_preview.size = previewPanel.size;
-            m_preview.relativePosition = Vector3.zero;
-
-            m_noPreview = previewPanel.AddUIComponent<UISprite>();
-            m_noPreview.spriteName = "Niet";
-            m_noPreview.relativePosition = new Vector3((previewPanel.width - m_noPreview.spriteInfo.width) / 2, (previewPanel.height - m_noPreview.spriteInfo.height) / 2);
-
-            m_previewRenderer = gameObject.AddComponent<PreviewRenderer>();
-            m_previewRenderer.size = m_preview.size * 2; // Twice the size for anti-aliasing
-
-            previewPanel.eventMouseDown += (c, p) =>
-            {
-                eventMouseMove += RotateCamera;
-            };
-
-            previewPanel.eventMouseUp += (c, p) =>
-            {
-                eventMouseMove -= RotateCamera;
-            };
-
-            previewPanel.eventMouseWheel += (c, p) =>
-            {
-                m_previewRenderer.zoom -= Mathf.Sign(p.wheelDelta) * 0.25f;
-                RenderPreview();
-            };
+            m_buildingPreview = right.AddUIComponent<UIBuildingPreview>();
+            m_buildingPreview.width = right.width;
+            m_buildingPreview.height = (right.height - SPACING) / 2;
+            m_buildingPreview.relativePosition = Vector3.zero;
 
             // Building Options
-            m_buildingOptions = right.AddUIComponent<UIBuildingInfo>();
+            m_buildingOptions = right.AddUIComponent<UIBuildingOptions>();
             m_buildingOptions.width = RIGHT_WIDTH;
-            m_buildingOptions.height = (right.height - SPACING * 2) / 2;
-            m_buildingOptions.relativePosition = new Vector3(0, previewPanel.height + SPACING);
-        }
+            m_buildingOptions.height = (right.height - SPACING) / 2 - 40;
+            m_buildingOptions.relativePosition = new Vector3(0, m_buildingPreview.height + SPACING);
 
-        private void RenderPreview()
-        {
-            if (m_renderPrefab == null) return;
+            // Clone building
+            m_cloneBuilding = UIUtils.CreateButton(right);
+            m_cloneBuilding.width = RIGHT_WIDTH;
+            m_cloneBuilding.height = 30;
+            m_cloneBuilding.text = "Clone building";
+            m_cloneBuilding.isEnabled = false;
+            m_cloneBuilding.relativePosition = new Vector3(0, m_buildingOptions.relativePosition.y + m_buildingOptions.height + SPACING);
 
-            if (m_renderPrefab.m_useColorVariations)
-            {
-                Color materialColor = m_renderPrefab.m_material.color;
-                m_renderPrefab.m_material.color = m_renderPrefab.m_color0;
-                m_previewRenderer.Render();
-                m_renderPrefab.m_material.color = materialColor;
-            }
-            else
-            {
-                m_previewRenderer.Render();
-            }
         }
 
         private void InitBuildingLists()
@@ -523,12 +483,6 @@ namespace BuildingThemes.GUI
             return list;
         }
 
-        private void RotateCamera(UIComponent c, UIMouseEventParameter p)
-        {
-            m_previewRenderer.cameraRotation -= p.moveDelta.x / m_preview.width * 360f;
-            RenderPreview();
-        }
-
         #region Filtering/Sorting
         private FastList<object> Filter(List<BuildingItem> list)
         {
@@ -539,12 +493,12 @@ namespace BuildingThemes.GUI
                 bool prefabExists = item.prefab != null;
 
                 // Origin
-                if (m_filter.buildingOrigin == UIBuildingFilter.Origin.Default && item.isCustomAsset) continue;
-                if (m_filter.buildingOrigin == UIBuildingFilter.Origin.Custom && !item.isCustomAsset) continue;
+                if (m_filter.buildingOrigin == Origin.Default && item.isCustomAsset) continue;
+                if (m_filter.buildingOrigin == Origin.Custom && !item.isCustomAsset) continue;
 
                 // Status
-                if (m_filter.buildingStatus == UIBuildingFilter.Status.Included && !item.included) continue;
-                if (m_filter.buildingStatus == UIBuildingFilter.Status.Excluded && item.included) continue;
+                if (m_filter.buildingStatus == Status.Included && !item.included) continue;
+                if (m_filter.buildingStatus == Status.Excluded && item.included) continue;
 
                 // Level
                 if (m_filter.buildingLevel != ItemClass.Level.None && !(prefabExists && item.prefab.m_class.m_level == m_filter.buildingLevel)) continue;
@@ -582,8 +536,9 @@ namespace BuildingThemes.GUI
 
         private static int BuildingCompare(BuildingItem a, BuildingItem b)
         {
-            // Sort by displayName > level > size > name
-            int compare = a.displayName.CompareTo(b.displayName);
+            // Sort by category > displayName > level > size > name
+            int compare = (int)a.category - (int)b.category;
+            if (compare == 0) compare = a.displayName.CompareTo(b.displayName);
             if (compare == 0) compare = a.level.CompareTo(b.level);
             if (compare == 0) compare = a.size.CompareTo(b.size);
             if (compare == 0) compare = a.name.CompareTo(b.name);

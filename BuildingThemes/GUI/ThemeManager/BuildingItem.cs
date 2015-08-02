@@ -6,21 +6,6 @@ using ColossalFramework.Globalization;
 
 namespace BuildingThemes.GUI
 {
-    public enum Category
-    {
-        None = -1,
-        ResidentialLow = 0,
-        ResidentialHigh,
-        CommercialLow,
-        CommercialHigh,
-        Industrial,
-        Farming,
-        Forestry,
-        Oil,
-        Ore,
-        Office
-    }
-
     public class BuildingItem
     {
         private string m_name;
@@ -62,8 +47,6 @@ namespace BuildingThemes.GUI
                 {
                     m_displayName = name.Substring(m_displayName.IndexOf('.') + 1).Replace("_Data", "");
                 }
-
-                if (prefab == null) m_displayName += " (not loaded)";
 
                 CleanDisplayName();
 

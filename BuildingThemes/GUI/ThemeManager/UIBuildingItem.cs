@@ -8,6 +8,7 @@ namespace BuildingThemes.GUI
     {
         private UICheckBox m_name;
         private UISprite m_steamIcon;
+        private UISprite m_category;
         private UILabel m_level;
         private UILabel m_size;
         private UIPanel m_background;
@@ -39,8 +40,9 @@ namespace BuildingThemes.GUI
             if (m_name == null) return;
 
             background.width = width;
-            m_size.relativePosition = new Vector3(width - 40f, 15);
-            m_level.relativePosition = new Vector3(width - 70f, 15);
+            m_size.relativePosition = new Vector3(width - 35f, 15);
+            m_level.relativePosition = new Vector3(width - 65f, 15);
+            m_category.relativePosition = new Vector3(width - 95f, 10);
         }
 
         protected override void OnMouseEnter(UIMouseEventParameter p)
@@ -95,12 +97,15 @@ namespace BuildingThemes.GUI
             }
 
             m_size = AddUIComponent<UILabel>();
-            m_size.width = 40;
+            m_size.width = 30;
             m_size.textAlignment = UIHorizontalAlignment.Center;
 
             m_level = AddUIComponent<UILabel>();
             m_level.width = 30;
             m_level.textAlignment = UIHorizontalAlignment.Center;
+
+            m_category = AddUIComponent<UISprite>();
+            m_category.size = new Vector2(20, 20);
         }
 
         #region IUIFastListRow implementation
@@ -112,12 +117,23 @@ namespace BuildingThemes.GUI
 
             m_building = data as BuildingItem;
             m_name.text = m_building.displayName;
+            if (m_building.prefab == null) m_name.text += " (Not Loaded)";
             m_name.label.textColor = m_building.GetStatusColor();
             m_name.label.isInteractive = false;
             m_name.isChecked = m_building.included;
 
             m_level.text = m_building.level;
             m_size.text = m_building.size;
+
+            if (m_building.category != Category.None)
+            {
+                m_category.atlas = UIUtils.GetAtlas(CategoryIcons.atlases[(int)m_building.category]);
+                m_category.spriteName = CategoryIcons.spriteNames[(int)m_building.category];
+                m_category.tooltip = CategoryIcons.tooltips[(int)m_building.category];
+                m_category.isVisible = true;
+            }
+            else
+                m_category.isVisible = false;
 
             if(m_building.steamID != null)
             {
