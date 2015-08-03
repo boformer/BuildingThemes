@@ -11,8 +11,8 @@ namespace BuildingThemes.GUI
         private string m_name;
         private string m_displayName;
         private string m_steamID;
-        private string m_level = "-";
-        private string m_size = "-";
+        private string m_level;
+        private string m_size;
 
         public BuildingInfo prefab;
         public Configuration.Building building;
@@ -45,10 +45,9 @@ namespace BuildingThemes.GUI
                 m_displayName = Locale.GetUnchecked("BUILDING_TITLE", name);
                 if (m_displayName.StartsWith("BUILDING_TITLE"))
                 {
-                    m_displayName = name.Substring(m_displayName.IndexOf('.') + 1).Replace("_Data", "");
+                    m_displayName = name.Substring(name.IndexOf('.') + 1).Replace("_Data", "");
                 }
-
-                CleanDisplayName();
+                CleanDisplayName(!name.Contains("."));
 
                 return m_displayName;
             }
@@ -78,12 +77,43 @@ namespace BuildingThemes.GUI
 
         public string level
         {
-            get { return m_level; }
+            get
+            {
+                if(m_level == null)
+                {
+                    if (prefab != null)
+                    {
+                        if (prefab.m_class.m_subService >= ItemClass.SubService.IndustrialForestry && prefab.m_class.m_subService <= ItemClass.SubService.IndustrialOre)
+                            m_level = "L1";
+                        else
+                            m_level = "L" + ((int)prefab.m_class.m_level + 1);
+                    }
+                    else
+                    {
+                        m_level = Regex.Match(name, @"[HL]\d").Value.Replace("H", "L");
+                    }
+                }
+                return m_level;
+            }
         }
 
         public string size
         {
-            get { return m_size; }
+            get
+            {
+                if (m_size == null)
+                {
+                    if (prefab != null)
+                    {
+                        m_size = prefab.m_cellWidth + "x" + prefab.m_cellLength;
+                    }
+                    else
+                    {
+                        m_size = Regex.Match(name, @"\d[xX]\d").Value.ToLower();
+                    }
+                }
+                return m_size;
+            }
         }
 
         public string steamID
@@ -120,25 +150,15 @@ namespace BuildingThemes.GUI
             return new Color32(255, 255, 255, 255);
         }
 
-        private void CleanDisplayName()
+        private void CleanDisplayName(bool cleanNumbers)
         {
-            if (prefab != null)
-            {
-                if (prefab.m_class.m_subService >= ItemClass.SubService.IndustrialForestry && prefab.m_class.m_subService <= ItemClass.SubService.IndustrialOre)
-                    m_level = "L1";
-                else
-                    m_level = "L" + ((int)prefab.m_class.m_level + 1);
-                m_size = prefab.m_cellWidth + "x" + prefab.m_cellLength;
-            }
-            else
-            {
-                m_level = Regex.Match(m_displayName, @"[HL]\d").Value.Replace("H", "L");
-                m_size = Regex.Match(m_displayName, @"\d[xX]\d").Value.ToLower();
-            }
-
             m_displayName = Regex.Replace(m_displayName, @"_+", " ");
-            m_displayName = Regex.Replace(m_displayName, @"(\d[xX]\d)|([HL]\d)|(\d+[\da-z])", "");
-            m_displayName = Regex.Replace(m_displayName, @"\s\d+", " ");
+            m_displayName = Regex.Replace(m_displayName, @"(\d[xX]\d)|([HL]\d)", "");
+            if (cleanNumbers)
+            {
+                m_displayName = Regex.Replace(m_displayName, @"(\d+[\da-z])", "");
+                m_displayName = Regex.Replace(m_displayName, @"\s\d+", " ");
+            }
             m_displayName = Regex.Replace(m_displayName, @"\s+", " ").Trim();
 
             m_displayName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(m_displayName);
