@@ -3,6 +3,7 @@ using ColossalFramework.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 namespace BuildingThemes.GUI
@@ -44,6 +45,11 @@ namespace BuildingThemes.GUI
         public Configuration.Theme selectedTheme
         {
             get { return m_themeSelection.selectedItem as Configuration.Theme; }
+        }
+
+        public BuildingItem selectedBuilding
+        {
+            get { return m_buildingSelection.selectedItem as BuildingItem; }
         }
 
         public UIBuildingPreview buildingPreview
@@ -148,6 +154,41 @@ namespace BuildingThemes.GUI
             }
         }
 
+        public void CloneBuilding(BuildingItem item, string cloneName, int level)
+        {
+            Configuration.Theme theme = selectedTheme;
+
+            if (!selectedTheme.containsBuilding(cloneName))
+            {
+                Configuration.Building clone = new Configuration.Building(cloneName);
+                clone.baseName = item.building.baseName.IsNullOrWhiteSpace() ? item.name : item.building.baseName;
+                clone.level = level;
+
+                selectedTheme.buildings.Add(clone);
+                m_isDistrictThemesDirty = true;
+
+                // Refresh building list
+                List<BuildingItem> list = GetBuildingItemList(theme);
+                m_themes[theme] = list;
+
+                m_buildingSelection.selectedIndex = -1;
+                m_buildingSelection.rowsData = Filter(list);
+
+                // Select cloned item if displayed
+                for (int i = 0; i < m_buildingSelection.rowsData.m_size; i++)
+                {
+                    BuildingItem buildingItem = m_buildingSelection.rowsData.m_buffer[i] as BuildingItem;
+                    if (buildingItem.building == clone)
+                    {
+                        m_buildingSelection.selectedIndex = i;
+                        m_buildingSelection.DisplayAt(i);
+                        UpdateBuildingInfo(list[i]);
+                        break;
+                    }
+                }
+            }
+        }
+
         public void ChangeBuildingStatus(BuildingItem item, bool include)
         {
             if (include == item.included) return;
@@ -159,6 +200,7 @@ namespace BuildingThemes.GUI
             else if (include)
             {
                 Configuration.Building building = new Configuration.Building(item.name);
+                building.baseName = BuildingVariationManager.instance.GetBasePrefabName(item.name);
 
                 if (!selectedTheme.containsBuilding(building.name))
                 {
@@ -187,24 +229,52 @@ namespace BuildingThemes.GUI
 
         public BuildingItem GetBuildingItem(string name)
         {
-            for(int i = 0; i< m_buildingSelection.rowsData.m_size; i++)
+            List<BuildingItem> list = m_themes[m_themeSelection.selectedItem as Configuration.Theme];
+            for(int i = 0; i< list.Count; i++)
             {
-                BuildingItem item = m_buildingSelection.rowsData[i] as BuildingItem;
-                if (item.name == name) return item;
+                if (list[i].name == name) return list[i];
             }
 
             return null;
         }
 
-        public bool IsThemeValid(Configuration.Theme theme)
+        private enum ThemeValidity
+        {
+            Valid = 0,
+            Empty = 1,
+            MissingL1 = 2,
+            BuildingNotLoaded = 4
+        }
+
+        public string ThemeValidityError(Configuration.Theme theme)
         {
             List<BuildingItem> list = m_themes[theme];
+            ThemeValidity validity = list.Count == 0 ? ThemeValidity.Empty : ThemeValidity.Valid;
+
+            int l1Count = 0;
 
             foreach (BuildingItem item in list)
             {
-                if (item.level == "L1" && item.included) return true;
+                if (item.included)
+                {
+                    if (item.level == "L1") l1Count++;
+                    if (item.prefab == null) validity |= ThemeValidity.BuildingNotLoaded;
+                }
             }
-            return false;
+
+            if (l1Count == 0) validity |= ThemeValidity.MissingL1;
+            else if (validity == 0) return null;
+
+            StringBuilder errorMessage = new StringBuilder();
+            if ((validity & ThemeValidity.Empty) == ThemeValidity.Empty)
+                errorMessage.Append("No building included.\n");
+            else if ((validity & ThemeValidity.MissingL1) == ThemeValidity.MissingL1)
+                errorMessage.Append("No level 1 building included.\n");
+            if ((validity & ThemeValidity.BuildingNotLoaded) == ThemeValidity.BuildingNotLoaded)
+                errorMessage.Append("Not all buildings are loaded.\n");
+            errorMessage.Length--;
+
+            return errorMessage.ToString(); ;
         }
 
         public override void Update()
@@ -224,16 +294,25 @@ namespace BuildingThemes.GUI
         {
             base.Start();
 
-            backgroundSprite = "UnlockingPanel2";
-            isVisible = false;
-            canFocus = true;
-            isInteractive = true;
-            width = SPACING + LEFT_WIDTH + SPACING + MIDDLE_WIDTH + SPACING + RIGHT_WIDTH + SPACING;
-            height = TITLE_HEIGHT + HEIGHT + SPACING;
-            relativePosition = new Vector3(Mathf.Floor((GetUIView().fixedWidth - width) / 2), Mathf.Floor((GetUIView().fixedHeight - height) / 2));
+            try
+            {
+                backgroundSprite = "UnlockingPanel2";
+                isVisible = false;
+                canFocus = true;
+                isInteractive = true;
+                width = SPACING + LEFT_WIDTH + SPACING + MIDDLE_WIDTH + SPACING + RIGHT_WIDTH + SPACING;
+                height = TITLE_HEIGHT + HEIGHT + SPACING;
+                relativePosition = new Vector3(Mathf.Floor((GetUIView().fixedWidth - width) / 2), Mathf.Floor((GetUIView().fixedHeight - height) / 2));
 
-            InitBuildingLists();
-            SetupControls();
+                InitBuildingLists();
+                SetupControls();
+            }
+            catch(Exception e)
+            {
+                Debugger.Log("Building Themes: An error has happened during the UI start.");
+                Debugger.LogException(e);
+                Destroy();
+            }
         }
 
         private void SetupControls()
@@ -422,6 +501,11 @@ namespace BuildingThemes.GUI
             m_cloneBuilding.isEnabled = false;
             m_cloneBuilding.relativePosition = new Vector3(0, m_buildingOptions.relativePosition.y + m_buildingOptions.height + SPACING);
 
+            m_cloneBuilding.eventClick += (c, p) =>
+            {
+                UIView.PushModal(UICloneBuildingModal.instance);
+                UICloneBuildingModal.instance.Show(true);
+            };
         }
 
         private void InitBuildingLists()
@@ -438,6 +522,8 @@ namespace BuildingThemes.GUI
 
         private List<BuildingItem> GetBuildingItemList(Configuration.Theme theme)
         {
+            List<BuildingItem> list = new List<BuildingItem>();
+
             // List of all growables prefabs
             Dictionary<string, BuildingItem> buildingDictionary = new Dictionary<string, BuildingItem>();
             for (uint i = 0; i < PrefabCollection<BuildingInfo>.PrefabCount(); i++)
@@ -448,12 +534,11 @@ namespace BuildingThemes.GUI
                     BuildingItem item = new BuildingItem();
                     item.prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
                     buildingDictionary.Add(item.name, item);
+                    list.Add(item);
                 }
             }
 
             // Combine growables with buildings in configuration
-            List<BuildingItem> list = buildingDictionary.Values.ToList<BuildingItem>();
-
             Configuration.Building[] buildings = theme.buildings.ToArray();
             for (int i = 0; i < buildings.Length; i++)
             {
@@ -490,7 +575,6 @@ namespace BuildingThemes.GUI
             for (int i = 0; i < list.Count; i++)
             {
                 BuildingItem item = (BuildingItem)list[i];
-                bool prefabExists = item.prefab != null;
 
                 // Origin
                 if (m_filter.buildingOrigin == Origin.Default && item.isCustomAsset) continue;
@@ -501,11 +585,13 @@ namespace BuildingThemes.GUI
                 if (m_filter.buildingStatus == Status.Excluded && item.included) continue;
 
                 // Level
-                if (m_filter.buildingLevel != ItemClass.Level.None && !(prefabExists && item.prefab.m_class.m_level == m_filter.buildingLevel)) continue;
+                string level = "L" + (int)(m_filter.buildingLevel + 1);
+                if (m_filter.buildingLevel != ItemClass.Level.None && item.level != level) continue;
 
                 // size
                 Vector2 buildingSize = m_filter.buildingSize;
-                if (m_filter.buildingSize != Vector2.zero && !(prefabExists && item.prefab.m_cellWidth == buildingSize.x && item.prefab.m_cellLength == buildingSize.y)) continue;
+                string size = buildingSize.x + "x" + buildingSize.y;
+                if (buildingSize != Vector2.zero && item.size != size) continue;
 
                 // zone
                 if (!m_filter.IsAllZoneSelected())

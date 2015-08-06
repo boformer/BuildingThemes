@@ -1,25 +1,31 @@
 ﻿using ColossalFramework;
 using ColossalFramework.UI;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace BuildingThemes.GUI
 {
-    public class UINewThemeModal : UIPanel
+    public class UICloneBuildingModal : UIPanel
     {
         private UITitleBar m_title;
         private UITextField m_name;
+        private UIDropDown m_level;
         private UIButton m_ok;
         private UIButton m_cancel;
 
-        private static UINewThemeModal _instance;
+        private BuildingItem m_item;
+        private string m_cloneName;
+        private int m_selectedLevel;
 
-        public static UINewThemeModal instance
+        private static UICloneBuildingModal _instance;
+
+        public static UICloneBuildingModal instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = UIView.GetAView().AddUIComponent(typeof(UINewThemeModal)) as UINewThemeModal;
+                    _instance = UIView.GetAView().AddUIComponent(typeof(UICloneBuildingModal)) as UICloneBuildingModal;
                 }
                 return _instance;
             }
@@ -33,46 +39,47 @@ namespace BuildingThemes.GUI
             isVisible = false;
             canFocus = true;
             isInteractive = true;
-            width = 250;
+            width = 350;
 
             // Title Bar
             m_title = AddUIComponent<UITitleBar>();
-            m_title.title = "Create New Theme";
+            m_title.title = "Clone Building";
             m_title.iconSprite = "ToolbarIconZoomOutCity";
             m_title.isModal = true;
 
             // Name
             UILabel name = AddUIComponent<UILabel>();
             name.height = 30;
-            name.text = "Theme name:";
+            name.text = "Building name:";
             name.relativePosition = new Vector3(5, m_title.height);
 
             m_name = UIUtils.CreateTextField(this);
-            m_name.width = width - 10;
+            m_name.width = width - 115;
             m_name.height = 30;
             m_name.padding = new RectOffset(6, 6, 6, 6);
             m_name.relativePosition = new Vector3(5, name.relativePosition.y + name.height + 5);
 
             m_name.Focus();
-            m_name.eventTextChanged += (c, s) =>
-            {
-                m_ok.isEnabled = !s.IsNullOrWhiteSpace() && BuildingThemesManager.instance.GetThemeByName(s) == null;
-            };
+            m_name.eventTextChanged += (c, s) => CheckValidity();
 
-            m_name.eventTextSubmitted += (c, s) =>
-            {
-                if (m_ok.isEnabled && Input.GetKey(KeyCode.Return)) m_ok.SimulateClick();
-            };
+            // Level
+            m_level = UIUtils.CreateDropDown(this);
+            m_level.width = 100;
+            m_level.height = 30;
+            (m_level.triggerButton as UIButton).textPadding = new RectOffset(6, 6, 6, 0);
+            m_level.relativePosition = new Vector3(m_name.relativePosition.x + m_name.width + 5, m_name.relativePosition.y);
+
+            m_level.eventSelectedIndexChanged += (c, i) => CheckValidity();
 
             // Ok
             m_ok = UIUtils.CreateButton(this);
-            m_ok.text = "Create";
+            m_ok.text = "Clone";
             m_ok.isEnabled = false;
             m_ok.relativePosition = new Vector3(5, m_name.relativePosition.y + m_name.height + 5);
 
             m_ok.eventClick += (c, p) =>
             {
-                UIThemeManager.instance.CreateTheme(m_name.text);
+                UIThemeManager.instance.CloneBuilding(m_item, m_cloneName, m_selectedLevel);
                 UIView.PopModal();
                 Hide();
             };
@@ -94,6 +101,15 @@ namespace BuildingThemes.GUI
             isVisible = true;
         }
 
+        private void CheckValidity()
+        {
+            int.TryParse(m_level.selectedValue.Replace("Level ", ""), out m_selectedLevel);
+            m_cloneName = m_name.text + " L" + m_selectedLevel + " " + UIThemeManager.instance.selectedBuilding.size;
+            BuildingItem item = UIThemeManager.instance.GetBuildingItem(m_cloneName);
+
+            m_ok.isEnabled = !m_name.text.IsNullOrWhiteSpace() && item == null;
+        }
+
         protected override void OnVisibilityChanged()
         {
             base.OnVisibilityChanged();
@@ -102,8 +118,43 @@ namespace BuildingThemes.GUI
 
             if (isVisible)
             {
-                m_name.text = "";
-                m_name.Focus();
+                if (UIThemeManager.instance.selectedBuilding == null)
+                {
+                    UIView.PopModal();
+                    Hide();
+                    return;
+                }
+
+                m_item = UIThemeManager.instance.selectedBuilding;
+
+                m_name.text = m_item.displayName;
+
+                int maxLevel = 3;
+                
+                switch(m_item.category)
+                {
+                    case Category.None:
+                    case Category.ResidentialHigh:
+                    case Category.ResidentialLow:
+                        maxLevel = 5;
+                        break;
+                    case Category.Farming:
+                    case Category.Forestry:
+                    case Category.Oil:
+                    case Category.Ore:
+                        maxLevel = 1;
+                        break;
+                }
+                
+                m_level.items = new string[0];
+                for (int i = 1; i <= maxLevel; i++ )
+                {
+                    m_level.AddItem("Level " + i);
+                }
+
+                int level = 0;
+                if (m_item.level != null) int.TryParse(m_item.level.Replace("L", ""), out level);
+                m_level.selectedIndex = (level < maxLevel) ? level : 0;
 
                 if (modalEffect != null)
                 {

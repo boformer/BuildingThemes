@@ -48,13 +48,13 @@ namespace BuildingThemes.GUI
         protected override void OnMouseEnter(UIMouseEventParameter p)
         {
             base.OnMouseEnter(p);
-            if (enabled) GetUIView().FindUIComponent<UIThemeManager>("BuildingThemes").UpdateBuildingInfo(m_building);
+            if (enabled) UIThemeManager.instance.UpdateBuildingInfo(m_building);
         }
 
         protected override void OnMouseWheel(UIMouseEventParameter p)
         {
             base.OnMouseWheel(p);
-            if (enabled) GetUIView().FindUIComponent<UIThemeManager>("BuildingThemes").UpdateBuildingInfo(m_building);
+            if (enabled) UIThemeManager.instance.UpdateBuildingInfo(m_building);
         }
 
         private void SetupControls()

@@ -6,7 +6,7 @@ namespace BuildingThemes
 {
     public class BuildingVariationManager : Singleton<BuildingVariationManager>
     {
-        private readonly HashSet<string> variations = new HashSet<string>();
+        private readonly Dictionary<string, BuildingInfo> variations = new Dictionary<string, BuildingInfo>();
 
         public static bool Enabled
         {
@@ -28,7 +28,17 @@ namespace BuildingThemes
         
         public bool IsVariation(string prefabName) 
         {
-            return variations.Contains(prefabName);
+            return variations.ContainsKey(prefabName);
+        }
+
+        public string GetBasePrefabName(string prefabName)
+        {
+            if(variations.ContainsKey(prefabName))
+            {
+                return variations[prefabName].name;
+            }
+
+            return null;
         }
         
         public Dictionary<string, BuildingInfo> CreateVariations(BuildingInfo prefab)
@@ -60,7 +70,7 @@ namespace BuildingThemes
 
                         prefabVariations.Add(variation.name, prefabVariation);
 
-                        variations.Add(variation.name);
+                        variations.Add(variation.name, prefab);
                     }
                 }
             }

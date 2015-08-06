@@ -17,6 +17,7 @@ namespace BuildingThemes.GUI
         private BuildingItem m_item;
         private BuildingItem m_upgradeBuilding;
         private BuildingItem m_baseBuilding;
+        private UIFastList m_dropDownList;
 
         public override void Start()
         {
@@ -74,7 +75,7 @@ namespace BuildingThemes.GUI
 
             // Upgrade Name
             UIPanel upgradeNamePanel = AddUIComponent<UIPanel>();
-            upgradeNamePanel.height = 25;
+            upgradeNamePanel.height = 50;
             upgradeNamePanel.isVisible = false;
 
             UILabel upgradeNameLabel = upgradeNamePanel.AddUIComponent<UILabel>();
@@ -91,9 +92,14 @@ namespace BuildingThemes.GUI
             m_upgradeName.eventMouseEnter += (c, p) => UIThemeManager.instance.buildingPreview.Show(m_upgradeBuilding);
             m_upgradeName.eventMouseLeave += (c, p) => UIThemeManager.instance.buildingPreview.Show(m_item);
 
+            m_upgradeName.eventEnterFocus += (c, p) =>
+            {
+                ShowDropDown(new FastList<object>());
+            };
+
             // Base Name
             UIPanel baseNamePanel = AddUIComponent<UIPanel>();
-            baseNamePanel.height = 25;
+            baseNamePanel.height = 50;
             baseNamePanel.isVisible = false;
 
             UILabel baseNameLabel = baseNamePanel.AddUIComponent<UILabel>();
@@ -153,5 +159,82 @@ namespace BuildingThemes.GUI
                 m_baseName.parent.isVisible = true;
             }
         }
+
+        private void ShowDropDown(FastList<object> list)
+        {
+            m_dropDownList = UIFastList.Create<UIDropDownItem>(GetRootContainer());
+            m_dropDownList.width = m_upgradeName.width;
+            m_dropDownList.height = 150;// Mathf.Min(list.m_size * 30, 150);
+            m_dropDownList.rowHeight = 30;
+            m_dropDownList.autoHideScrollbar = true;
+            m_dropDownList.canSelect = true;
+            m_dropDownList.backgroundSprite = "GenericPanelLight";
+            m_dropDownList.backgroundColor = new Color32(45, 52, 61, 255);
+            m_dropDownList.absolutePosition = m_upgradeName.absolutePosition + new Vector3(0, m_upgradeName.height);
+
+            m_dropDownList.rowsData = list;
+        }
     }
+
+    public class UIDropDownItem: UIPanel, IUIFastListRow
+    {
+        private UILabel m_name;
+        private UILabel m_size;
+
+        private BuildingItem m_building;
+
+        protected override void OnSizeChanged()
+        {
+            base.OnSizeChanged();
+
+            if (m_name == null) return;
+
+            m_size.relativePosition = new Vector3(width - 35f, 5);
+        }
+
+        private void SetupControls()
+        {
+            if (m_name != null) return;
+
+            isVisible = true;
+            canFocus = true;
+            isInteractive = true;
+            width = parent.width;
+            height = 30;
+
+            m_name = AddUIComponent<UILabel>();
+            m_name.relativePosition = new Vector3(5, 5);
+            m_name.textColor = new Color32(170, 170, 170, 255);
+
+            m_size = AddUIComponent<UILabel>();
+            m_size.width = 30;
+            m_size.textAlignment = UIHorizontalAlignment.Center;
+            m_size.textColor = new Color32(170, 170, 170, 255);
+        }
+
+        #region IUIFastListRow implementation
+        public void Display(object data, bool isRowOdd)
+        {
+            SetupControls();
+
+            m_building = data as BuildingItem;
+            m_name.text = m_building.displayName;
+            UIUtils.TruncateLabel(m_name, width - 40);
+
+            m_size.text = m_building.size;
+        }
+
+        public void Select(bool isRowOdd)
+        {
+            backgroundSprite = "ListItemHighlight";
+            color = new Color32(255, 255, 255, 255);
+        }
+
+        public void Deselect(bool isRowOdd)
+        {
+            backgroundSprite = null;
+        }
+        #endregion
+    }
+
 }

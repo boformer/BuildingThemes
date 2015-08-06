@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using ColossalFramework.UI;
 
+using System.Text;
+
 namespace BuildingThemes.GUI
 {
     public class UIThemePolicyItem : UIPanel, IUIFastListRow
@@ -110,15 +112,12 @@ namespace BuildingThemes.GUI
             m_policyButton.text = m_theme.name;
             m_policyCheckBox.objectUserData = m_theme;
 
-            if (UIThemeManager.instance != null && UIThemeManager.instance.IsThemeValid(m_theme))
+            if (UIThemeManager.instance != null)
             {
-                m_policyCheckBox.enabled = true;
-                tooltip = null;
-            }
-            else
-            {
-                m_policyCheckBox.enabled = false;
-                tooltip = "No level 1 building included.";
+                string validityError = UIThemeManager.instance.ThemeValidityError(m_theme);
+
+                m_policyCheckBox.enabled = (validityError == null);
+                tooltip = validityError;
             }
         }
 
