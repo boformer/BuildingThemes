@@ -260,7 +260,7 @@ namespace BuildingThemes.GUI
                 if (item != null) category = item.category;
             }
 
-            FastList<object> list = UIThemeManager.instance.GetBuildingsFiltered(category, m_item.level + 1, m_upgradeName.text);
+            FastList<object> list = UIThemeManager.instance.GetBuildingsFiltered(category, m_item.level + 1, m_item.size, m_upgradeName.text);
 
             if (m_dropDownList == null)
             {
@@ -328,6 +328,7 @@ namespace BuildingThemes.GUI
             m_size.width = 30;
             m_size.textAlignment = UIHorizontalAlignment.Center;
             m_size.textColor = new Color32(170, 170, 170, 255);
+            m_size.relativePosition = new Vector3(width - 35f, 5);
         }
 
         protected override void OnMouseDown(UIMouseEventParameter p)
@@ -360,7 +361,7 @@ namespace BuildingThemes.GUI
             m_name.text = m_building.displayName;
 
             UIUtils.TruncateLabel(m_name, width - 40);
-            m_size.text = m_building.size;
+            m_size.text = m_building.sizeAsString;
 
             backgroundSprite = null;
         }

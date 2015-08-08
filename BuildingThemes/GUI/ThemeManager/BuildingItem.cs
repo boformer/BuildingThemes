@@ -2,6 +2,7 @@
 using System.Globalization;
 
 using UnityEngine;
+using ColossalFramework;
 using ColossalFramework.Globalization;
 
 namespace BuildingThemes.GUI
@@ -12,7 +13,7 @@ namespace BuildingThemes.GUI
         private string m_displayName;
         private string m_steamID;
         private int m_level = -1;
-        private string m_size;
+        private Vector2 m_size;
 
         public BuildingInfo prefab;
         public Configuration.Building building;
@@ -119,22 +120,40 @@ namespace BuildingThemes.GUI
             }
         }
 
-        public string size
+        public Vector2 size
         {
             get
             {
-                if (m_size == null)
+                if (m_size == Vector2.zero)
                 {
                     if (prefab != null)
                     {
-                        m_size = prefab.m_cellWidth + "x" + prefab.m_cellLength;
+                        m_size = new Vector2(prefab.m_cellWidth, prefab.m_cellLength);
                     }
                     else
                     {
-                        m_size = Regex.Match(name, @"\d[xX]\d").Value.ToLower();
+                        string size = Regex.Match(name, @"\d[xX]\d").Value.ToLower();
+                        if(!size.IsNullOrWhiteSpace())
+                        {
+                            string[] splitSize = size.Split('x');
+
+                            int x, y;
+                            int.TryParse(splitSize[0], out x);
+                            int.TryParse(splitSize[0], out y);
+                            m_size = new Vector2(x, y);
+                        }
                     }
                 }
                 return m_size;
+            }
+        }
+
+        public string sizeAsString
+        {
+            get
+            {
+                if (size == Vector2.zero) return "";
+                return size.x + "x" + size.y;
             }
         }
 

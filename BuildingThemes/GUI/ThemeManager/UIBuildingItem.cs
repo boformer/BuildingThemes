@@ -123,7 +123,7 @@ namespace BuildingThemes.GUI
             m_name.isChecked = m_building.included;
 
             m_level.text = m_building.level == 0 ? null : "L" + m_building.level;
-            m_size.text = m_building.size;
+            m_size.text = m_building.sizeAsString;
 
             if (m_building.category != Category.None)
             {

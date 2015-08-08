@@ -148,9 +148,9 @@ namespace BuildingThemes.GUI
             }
 
             // Size
-            if (m_item.size != "")
+            if (m_item.size != Vector2.zero)
             {
-                m_size.text = m_item.size;
+                m_size.text = m_item.sizeAsString;
                 m_size.isVisible = true;
 
                 m_size.autoSize = true;

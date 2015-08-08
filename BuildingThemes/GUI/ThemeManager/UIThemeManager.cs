@@ -158,31 +158,38 @@ namespace BuildingThemes.GUI
         {
             Configuration.Theme theme = selectedTheme;
 
-            if (!selectedTheme.containsBuilding(cloneName))
+            if (!theme.containsBuilding(cloneName))
             {
+                Debug.Log("1");
                 Configuration.Building clone = new Configuration.Building(cloneName);
-                clone.baseName = item.building.baseName.IsNullOrWhiteSpace() ? item.name : item.building.baseName;
+                clone.baseName = (item.building == null || item.building.baseName.IsNullOrWhiteSpace()) ? item.name : item.building.baseName;
                 clone.level = level;
+                Debug.Log("2");
 
                 selectedTheme.buildings.Add(clone);
                 m_isDistrictThemesDirty = true;
+                Debug.Log("3");
 
                 // Refresh building list
                 List<BuildingItem> list = GetBuildingItemList(theme);
                 m_themes[theme] = list;
+                Debug.Log("4");
 
                 m_buildingSelection.selectedIndex = -1;
                 m_buildingSelection.rowsData = Filter(list);
+                Debug.Log("5");
 
                 // Select cloned item if displayed
                 for (int i = 0; i < m_buildingSelection.rowsData.m_size; i++)
                 {
                     BuildingItem buildingItem = m_buildingSelection.rowsData.m_buffer[i] as BuildingItem;
+                    Debug.Log("6");
                     if (buildingItem.building == clone)
                     {
                         m_buildingSelection.selectedIndex = i;
                         m_buildingSelection.DisplayAt(i);
                         UpdateBuildingInfo(list[i]);
+                        Debug.Log("7");
                         break;
                     }
                 }
@@ -265,6 +272,12 @@ namespace BuildingThemes.GUI
 
         public string ThemeValidityError(Configuration.Theme theme)
         {
+            if (!m_themes.ContainsKey(theme))
+            {
+                InitBuildingLists();
+                if (!m_themes.ContainsKey(theme)) return "Theme not found";
+            }
+
             List<BuildingItem> list = m_themes[theme];
             ThemeValidity validity = list.Count == 0 ? ThemeValidity.Empty : ThemeValidity.Valid;
 
@@ -580,7 +593,7 @@ namespace BuildingThemes.GUI
         }
 
         #region Filtering/Sorting
-        public FastList<object> GetBuildingsFiltered(Category category, int level, string name)
+        public FastList<object> GetBuildingsFiltered(Category category, int level, Vector2 size, string name)
         {
             List<BuildingItem> list = m_themes[selectedTheme];
             FastList<object> filtered = new FastList<object>();
@@ -594,6 +607,9 @@ namespace BuildingThemes.GUI
 
                 // Level
                 if (item.level != level) continue;
+
+                // size
+                if (item.size.x != size.x || item.size.y > size.y) continue;
 
                 // Name
                 if (!item.name.ToLower().Contains(name.ToLower())) continue;
@@ -626,8 +642,7 @@ namespace BuildingThemes.GUI
 
                 // size
                 Vector2 buildingSize = m_filter.buildingSize;
-                string size = buildingSize.x + "x" + buildingSize.y;
-                if (buildingSize != Vector2.zero && item.size != size) continue;
+                if (buildingSize != Vector2.zero && item.size != buildingSize) continue;
 
                 // zone
                 if (!m_filter.IsAllZoneSelected())
@@ -662,7 +677,7 @@ namespace BuildingThemes.GUI
             int compare = (int)a.category - (int)b.category;
             if (compare == 0) compare = a.displayName.CompareTo(b.displayName);
             if (compare == 0) compare = a.level.CompareTo(b.level);
-            if (compare == 0) compare = a.size.CompareTo(b.size);
+            if (compare == 0) compare = a.sizeAsString.CompareTo(b.sizeAsString);
             if (compare == 0) compare = a.name.CompareTo(b.name);
 
             return compare;
