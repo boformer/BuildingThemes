@@ -193,27 +193,8 @@ namespace BuildingThemes.GUI
         {
             if (include == item.included) return;
 
-            if (item.building != null && item.building.isBuiltIn)
-            {
-                item.building.include = include;
-            }
-            else if (include)
-            {
-                CreateBuilding(item);
-                item.building.include = true;
-            }
-            else
-            {
-                if (item.building.spawnRate != 10 || item.building.upgradeName != null)
-                {
-                    item.building.include = false;
-                }
-                else
-                {
-                    selectedTheme.buildings.Remove(item.building);
-                    item.building = null;
-                }
-            }
+            CreateBuilding(item);
+            item.building.include = include;
 
             m_isDistrictThemesDirty = true;
             m_buildingSelection.Refresh();
@@ -227,7 +208,6 @@ namespace BuildingThemes.GUI
             else
                 selectedBuilding.building.upgradeName = building.name;
 
-            selectedBuilding.building.isBuiltIn = false;
             m_isDistrictThemesDirty = true;
         }
 
@@ -239,7 +219,6 @@ namespace BuildingThemes.GUI
             if(selectedBuilding.building.spawnRate != spawnRate)
             {
                 selectedBuilding.building.spawnRate = spawnRate;
-                selectedBuilding.building.isBuiltIn = false;
                 m_isDistrictThemesDirty = true;
             }
         }
@@ -585,12 +564,6 @@ namespace BuildingThemes.GUI
                     // Associate building with prefab
                     BuildingItem item = buildingDictionary[buildings[i].name];
                     item.building = buildings[i];
-                    // TODO: better fix
-                    if (!item.building.include)
-                    {
-                        theme.isBuiltIn = true;
-                        item.building.isBuiltIn = true;
-                    }
                 }
                 else
                 {
