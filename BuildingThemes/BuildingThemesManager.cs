@@ -111,20 +111,24 @@ namespace BuildingThemes
                 return;
             }
 
-            foreach (var building in theme.buildings)
-            {
-                building.isBuiltIn = true;
-            }
-
             var existingTheme = Configuration.getTheme(theme.name);
 
             if (existingTheme != null)
             {
-                foreach (var building in theme.buildings)
+                existingTheme.isBuiltIn = true;
+                
+                foreach (var builtInBuilding in theme.buildings)
                 {
-                    if (!existingTheme.containsBuilding(building.name))
+                    Configuration.Building existingBuilding = existingTheme.getBuilding(builtInBuilding.name);
+
+                    if (existingBuilding == null)
                     {
+                        var building = new Configuration.Building(builtInBuilding);
                         existingTheme.buildings.Add(building);
+                    }
+                    else if (existingBuilding.builtInBuilding == null)
+                    {
+                        existingBuilding.builtInBuilding = builtInBuilding;
                     }
                 }
             }

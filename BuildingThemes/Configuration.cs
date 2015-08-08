@@ -40,16 +40,6 @@ namespace BuildingThemes
             [XmlArrayItem(ElementName = "Building")]
             public List<Building> buildings = new List<Building>();
 
-            public void addAll(string[] buildingNames, bool builtIn)
-            {
-                foreach (string b in buildingNames)
-                {
-                    if (!containsBuilding(b))
-                    {
-                        buildings.Add(new Building(b, builtIn));
-                    }
-                }
-            }
             public bool containsBuilding(string name)
             {
                 foreach (Building building in buildings)
@@ -89,7 +79,7 @@ namespace BuildingThemes
             public string name;
 
             [XmlIgnoreAttribute]
-            public bool isBuiltIn = false;
+            public Building builtInBuilding = null;
 
             [XmlAttribute("level"), DefaultValue(-1)]
             public int level = -1;
@@ -106,15 +96,38 @@ namespace BuildingThemes
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;
 
+            public override bool Equals(object other)
+            {
+                return Equals(other as Building);
+            }
+
+            public virtual bool Equals(Building other)
+            {
+                if (other == null) { return false; }
+                if (object.ReferenceEquals(this, other)) { return true; }
+                return this.name == other.name 
+                    && this.level == other.level 
+                    && this.upgradeName == other.upgradeName 
+                    && this.baseName == other.baseName 
+                    && this.spawnRate == other.spawnRate 
+                    && this.include == other.include;
+            }
+
             public Building(string name)
             {
                 this.name = name;
             }
 
-            public Building(string name, bool isBuiltIn)
+            public Building(Building builtInBuilding)
             {
-                this.name = name;
-                this.isBuiltIn = isBuiltIn;
+                this.builtInBuilding = builtInBuilding;
+
+                this.name = builtInBuilding.name;
+                this.level = builtInBuilding.level;
+                this.upgradeName = builtInBuilding.upgradeName;
+                this.baseName = builtInBuilding.baseName;
+                this.spawnRate = builtInBuilding.spawnRate;
+                this.include = builtInBuilding.include;
             }
 
             public Building()
@@ -157,7 +170,7 @@ namespace BuildingThemes
                     {
                         var newTheme = new Theme(theme.name);
 
-                        foreach (var building in theme.buildings.Where(building => !building.isBuiltIn || !building.include))
+                        foreach (var building in theme.buildings.Where(building => (building.builtInBuilding == null && building.include) || !building.Equals(building.builtInBuilding)))
                         {
                             newTheme.buildings.Add(building);
                         }

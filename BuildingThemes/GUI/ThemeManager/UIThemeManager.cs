@@ -150,7 +150,7 @@ namespace BuildingThemes.GUI
         {
             if (include == item.included) return;
 
-            if (item.building != null && item.building.isBuiltIn)
+            if (item.building != null)
             {
                 item.building.include = include;
             }
@@ -489,8 +489,6 @@ namespace BuildingThemes.GUI
                     // Associate building with prefab
                     BuildingItem item = buildingDictionary[buildings[i].name];
                     item.building = buildings[i];
-                    // TODO: better fix
-                    if (!item.building.include) item.building.isBuiltIn = true;
                 }
                 else
                 {
