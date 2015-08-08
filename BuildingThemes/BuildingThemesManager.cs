@@ -38,6 +38,8 @@ namespace BuildingThemes
                 {
                     _configuration = Configuration.Deserialize(userConfigPath);
 
+                    searchBuildingThemeMods();
+
                     if (Debugger.Enabled)
                     {
                         Debugger.Log("Building Themes: User Configuration loaded.");
@@ -76,7 +78,7 @@ namespace BuildingThemes
         }
 
         private const string modConfigPath = "BuildingThemes.xml";
-        public void searchBuildingThemeMods()
+        private void searchBuildingThemeMods()
         {
             foreach (var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo())
             {
@@ -111,34 +113,29 @@ namespace BuildingThemes
                 return;
             }
 
-            var existingTheme = Configuration.getTheme(theme.name);
+            var existingTheme = _configuration.getTheme(theme.name);
 
-            if (existingTheme != null)
+            if (existingTheme == null)
             {
-                existingTheme.isBuiltIn = true;
+                existingTheme = new Configuration.Theme(theme.name);
+            }
                 
-                foreach (var builtInBuilding in theme.buildings)
-                {
-                    Configuration.Building existingBuilding = existingTheme.getBuilding(builtInBuilding.name);
+            existingTheme.isBuiltIn = true;
+                
+            foreach (var builtInBuilding in theme.buildings)
+            {
+                Configuration.Building existingBuilding = existingTheme.getBuilding(builtInBuilding.name);
 
-                    if (existingBuilding == null)
-                    {
-                        var building = new Configuration.Building(builtInBuilding);
-                        existingTheme.buildings.Add(building);
-                    }
-                    else if (existingBuilding.builtInBuilding == null)
-                    {
-                        existingBuilding.builtInBuilding = builtInBuilding;
-                    }
+                if (existingBuilding == null)
+                {
+                    var building = new Configuration.Building(builtInBuilding);
+                    existingTheme.buildings.Add(building);
+                }
+                else if (existingBuilding.builtInBuilding == null)
+                {
+                    existingBuilding.builtInBuilding = builtInBuilding;
                 }
             }
-            else
-            {
-                theme.isBuiltIn = true;
-                Configuration.themes.Add(theme);
-            }
-
-            SaveConfig();
 
             Debugger.LogFormat("Building Themes: Theme {0} added by mod {1}", theme.name, modName);
         }

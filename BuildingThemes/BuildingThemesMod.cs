@@ -40,7 +40,6 @@ namespace BuildingThemes
             PolicyPanelEnabler.Register();
 
             BuildingThemesManager.instance.Reset();
-            BuildingThemesManager.instance.searchBuildingThemeMods();
 
             BuildingVariationManager.instance.Reset();
 
@@ -98,7 +97,6 @@ namespace BuildingThemes
             base.OnLevelUnloading();
 
             BuildingThemesManager.instance.Reset();
-            BuildingThemesManager.instance.searchBuildingThemeMods();
 
             Debugger.Log("ON_LEVEL_UNLOADING");
 
