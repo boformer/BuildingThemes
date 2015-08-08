@@ -34,7 +34,7 @@ namespace BuildingThemes.GUI
 
         public bool included
         {
-            get { return building != null && (!building.isBuiltIn || building.include); }
+            get { return building != null && building.include; }
         }
 
         public string name
