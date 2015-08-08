@@ -199,30 +199,29 @@ namespace BuildingThemes.GUI
             }
             else if (include)
             {
-                Configuration.Building building = new Configuration.Building(item.name);
-                building.baseName = BuildingVariationManager.instance.GetBasePrefabName(item.name);
-
-                if (!selectedTheme.containsBuilding(building.name))
-                {
-                    selectedTheme.buildings.Add(building);
-                    item.building = building;
-                }
+                CreateBuilding(item);
+                item.building.include = true;
             }
             else
             {
-                Configuration.Building building = selectedTheme.getBuilding(item.name);
-                if (building != null)
-                    selectedTheme.buildings.Remove(building);
-
-                item.building = null;
+                if (item.building.spawnRate != 10 || item.building.upgradeName != null)
+                {
+                    item.building.include = false;
+                }
+                else
+                {
+                    selectedTheme.buildings.Remove(item.building);
+                    item.building = null;
+                }
             }
 
             m_isDistrictThemesDirty = true;
-            m_themeSelection.Refresh();
+            m_buildingSelection.Refresh();
         }
 
         public void ChangeUpgradeBuilding(BuildingItem building)
         {
+            CreateBuilding(selectedBuilding);
             if (building == null)
                 selectedBuilding.building.upgradeName = null;
             else
@@ -234,12 +233,29 @@ namespace BuildingThemes.GUI
 
         public void ChangeSpawnRate(int spawnRate)
         {
+            CreateBuilding(selectedBuilding);
+
             spawnRate = Mathf.Clamp(spawnRate, 0, 100);
             if(selectedBuilding.building.spawnRate != spawnRate)
             {
                 selectedBuilding.building.spawnRate = spawnRate;
                 selectedBuilding.building.isBuiltIn = false;
                 m_isDistrictThemesDirty = true;
+            }
+        }
+
+        private void CreateBuilding(BuildingItem item)
+        {
+            if (item.building != null) return;
+
+            Configuration.Building building = new Configuration.Building(item.name);
+            building.baseName = BuildingVariationManager.instance.GetBasePrefabName(item.name);
+            building.include = false;
+
+            if (!selectedTheme.containsBuilding(building.name))
+            {
+                selectedTheme.buildings.Add(building);
+                item.building = building;
             }
         }
 

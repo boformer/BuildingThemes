@@ -224,26 +224,30 @@ namespace BuildingThemes.GUI
             m_include.isVisible = true;
             m_include.isChecked = m_item.included;
 
-            if (m_item.included == false) return;
-
+            m_spawnRate.text = "10";
             m_spawnRate.parent.isVisible = true;
-            m_spawnRate.text = m_item.building.spawnRate.ToString();
 
-            m_upgradeName.parent.isVisible = m_item.level < m_item.maxLevel;
             m_upgradeName.text = "";
             m_upgradeBuilding = null;
+            m_upgradeName.parent.isVisible = m_item.level < m_item.maxLevel;
 
-            if (m_item.building.upgradeName != null && m_item.level < m_item.maxLevel)
+            if (m_item.building != null)
             {
-                m_upgradeBuilding = UIThemeManager.instance.GetBuildingItem(m_item.building.upgradeName);
-                if (m_upgradeBuilding != null) m_upgradeName.text = m_upgradeBuilding.displayName;
-            }
+                m_spawnRate.text = m_item.building.spawnRate.ToString();
 
-            if (m_item.building.baseName != null)
-            {
-                m_baseBuilding = UIThemeManager.instance.GetBuildingItem(m_item.building.baseName);
-                if (m_baseBuilding != null) m_baseName.text = m_baseBuilding.displayName;
-                m_baseName.parent.isVisible = true;
+
+                if (m_item.building.upgradeName != null && m_item.level < m_item.maxLevel)
+                {
+                    m_upgradeBuilding = UIThemeManager.instance.GetBuildingItem(m_item.building.upgradeName);
+                    if (m_upgradeBuilding != null) m_upgradeName.text = m_upgradeBuilding.displayName;
+                }
+
+                if (m_item.building.baseName != null)
+                {
+                    m_baseBuilding = UIThemeManager.instance.GetBuildingItem(m_item.building.baseName);
+                    if (m_baseBuilding != null) m_baseName.text = m_baseBuilding.displayName;
+                    m_baseName.parent.isVisible = true;
+                }
             }
         }
 
