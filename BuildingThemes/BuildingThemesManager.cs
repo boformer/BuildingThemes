@@ -118,6 +118,7 @@ namespace BuildingThemes
             if (existingTheme == null)
             {
                 existingTheme = new Configuration.Theme(theme.name);
+                _configuration.themes.Add(existingTheme);
             }
                 
             existingTheme.isBuiltIn = true;
