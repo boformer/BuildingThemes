@@ -165,7 +165,12 @@ namespace BuildingThemes
                     {
                         var newTheme = new Theme(theme.name);
 
-                        foreach (var building in theme.buildings.Where(building => (building.builtInBuilding == null && building.include) || !building.Equals(building.builtInBuilding)))
+                        foreach (var building in theme.buildings.Where(building => 
+                            // a user-added building has to be included, or we don't need it in the config
+                            (building.builtInBuilding == null && building.include) 
+
+                            // a built-in building that was modified by the user: Only add it to the config if the modification differs
+                            || (building.builtInBuilding != null && !building.Equals(building.builtInBuilding))))
                         {
                             newTheme.buildings.Add(building);
                         }
