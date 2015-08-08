@@ -82,6 +82,16 @@ namespace BuildingThemes.GUI
             m_spawnRate.tooltip = "The higher the number, the more the building is likely to spawn.\nDefault value is 10. Maximum value is 100.";
             m_spawnRate.relativePosition = new Vector3(width - 70, 0);
 
+            m_spawnRate.eventTextSubmitted += (c, s) =>
+            {
+                int spawnRate;
+                if(int.TryParse(m_spawnRate.text, out spawnRate))
+                {
+                    UIThemeManager.instance.ChangeSpawnRate(spawnRate);
+                }
+                m_spawnRate.text = m_item.building.spawnRate.ToString();
+            };
+
             // Upgrade Name
             UIPanel upgradeNamePanel = AddUIComponent<UIPanel>();
             upgradeNamePanel.height = 50;

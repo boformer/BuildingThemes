@@ -232,6 +232,17 @@ namespace BuildingThemes.GUI
             m_isDistrictThemesDirty = true;
         }
 
+        public void ChangeSpawnRate(int spawnRate)
+        {
+            spawnRate = Mathf.Clamp(spawnRate, 0, 100);
+            if(selectedBuilding.building.spawnRate != spawnRate)
+            {
+                selectedBuilding.building.spawnRate = spawnRate;
+                selectedBuilding.building.isBuiltIn = false;
+                m_isDistrictThemesDirty = true;
+            }
+        }
+
         public void UpdateBuildingInfo(BuildingItem item)
         {
             m_buildingPreview.Show(item);
