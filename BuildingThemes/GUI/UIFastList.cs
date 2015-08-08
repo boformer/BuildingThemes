@@ -35,6 +35,7 @@ namespace BuildingThemes.GUI
         bool enabled { get; set; }
         Vector3 relativePosition { get; set; }
         event MouseEventHandler eventClick;
+        event MouseEventHandler eventMouseEnter;
         #endregion
     }
 
@@ -87,6 +88,7 @@ namespace BuildingThemes.GUI
         private bool m_lock = false;
         private bool m_updateContent = true;
         private bool m_autoHideScrollbar = false;
+        private UIComponent m_lastMouseEnter;
         #endregion
 
         /// <summary>
@@ -286,6 +288,9 @@ namespace BuildingThemes.GUI
             }
         }
 
+        public bool selectOnMouseEnter
+        { get; set; }
+
         /// <summary>
         /// The number of pixels moved at each scroll step
         /// When set to 0 or less, rowHeight is used instead.
@@ -417,6 +422,9 @@ namespace BuildingThemes.GUI
                 listPosition = m_pos - p.wheelDelta * m_stepSize / m_rowHeight;
             else
                 listPosition = m_pos - p.wheelDelta;
+
+            if (selectOnMouseEnter)
+                OnRowClicked(m_lastMouseEnter, p);
         }
         #endregion
 
@@ -424,6 +432,8 @@ namespace BuildingThemes.GUI
 
         protected void OnRowClicked(UIComponent component, UIMouseEventParameter p)
         {
+            if (selectOnMouseEnter) m_lastMouseEnter = component;
+
             int max = Mathf.Min(m_rowsData.m_size, m_rows.m_size);
             for (int i = 0; i < max; i++)
             {
@@ -453,7 +463,8 @@ namespace BuildingThemes.GUI
                 for (int i = m_rows.m_size; i < nbRows; i++)
                 {
                     m_rows.Add(m_panel.AddUIComponent(m_rowType) as IUIFastListRow);
-                    if (m_canSelect) m_rows[i].eventClick += OnRowClicked;
+                    if (m_canSelect && !selectOnMouseEnter) m_rows[i].eventClick += OnRowClicked;
+                    else if (m_canSelect) m_rows[i].eventMouseEnter += OnRowClicked;
                 }
             }
             else if (m_rows.m_size > nbRows)

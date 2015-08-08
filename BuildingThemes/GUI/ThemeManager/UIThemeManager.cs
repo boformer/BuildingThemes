@@ -221,6 +221,17 @@ namespace BuildingThemes.GUI
             m_themeSelection.Refresh();
         }
 
+        public void ChangeUpgradeBuilding(BuildingItem building)
+        {
+            if (building == null)
+                selectedBuilding.building.upgradeName = null;
+            else
+                selectedBuilding.building.upgradeName = building.name;
+
+            selectedBuilding.building.isBuiltIn = false;
+            m_isDistrictThemesDirty = true;
+        }
+
         public void UpdateBuildingInfo(BuildingItem item)
         {
             m_buildingPreview.Show(item);
@@ -257,7 +268,7 @@ namespace BuildingThemes.GUI
             {
                 if (item.included)
                 {
-                    if (item.level == "L1") l1Count++;
+                    if (item.level == 1) l1Count++;
                     if (item.prefab == null) validity |= ThemeValidity.BuildingNotLoaded;
                 }
             }
@@ -569,6 +580,30 @@ namespace BuildingThemes.GUI
         }
 
         #region Filtering/Sorting
+        public FastList<object> GetBuildingsFiltered(Category category, int level, string name)
+        {
+            List<BuildingItem> list = m_themes[selectedTheme];
+            FastList<object> filtered = new FastList<object>();
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                BuildingItem item = (BuildingItem)list[i];
+
+                // Category
+                if (category != Category.None && item.category != category) continue;
+
+                // Level
+                if (item.level != level) continue;
+
+                // Name
+                if (!item.name.ToLower().Contains(name.ToLower())) continue;
+
+                filtered.Add(item);
+            }
+
+            return filtered;
+        }
+
         private FastList<object> Filter(List<BuildingItem> list)
         {
             List<BuildingItem> filtered = new List<BuildingItem>();
@@ -579,13 +614,14 @@ namespace BuildingThemes.GUI
                 // Origin
                 if (m_filter.buildingOrigin == Origin.Default && item.isCustomAsset) continue;
                 if (m_filter.buildingOrigin == Origin.Custom && !item.isCustomAsset) continue;
+                if (m_filter.buildingOrigin == Origin.Cloned && (item.building == null || item.building.baseName == null)) continue;
 
                 // Status
                 if (m_filter.buildingStatus == Status.Included && !item.included) continue;
                 if (m_filter.buildingStatus == Status.Excluded && item.included) continue;
 
                 // Level
-                string level = "L" + (int)(m_filter.buildingLevel + 1);
+                int level = (int)(m_filter.buildingLevel + 1);
                 if (m_filter.buildingLevel != ItemClass.Level.None && item.level != level) continue;
 
                 // size

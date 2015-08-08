@@ -9,7 +9,8 @@ namespace BuildingThemes.GUI
     {
         All,
         Default,
-        Custom
+        Custom,
+        Cloned
     }
 
     public enum Status

@@ -129,22 +129,7 @@ namespace BuildingThemes.GUI
 
                 m_name.text = m_item.displayName;
 
-                int maxLevel = 3;
-                
-                switch(m_item.category)
-                {
-                    case Category.None:
-                    case Category.ResidentialHigh:
-                    case Category.ResidentialLow:
-                        maxLevel = 5;
-                        break;
-                    case Category.Farming:
-                    case Category.Forestry:
-                    case Category.Oil:
-                    case Category.Ore:
-                        maxLevel = 1;
-                        break;
-                }
+                int maxLevel = m_item.maxLevel;
                 
                 m_level.items = new string[0];
                 for (int i = 1; i <= maxLevel; i++ )
@@ -152,9 +137,7 @@ namespace BuildingThemes.GUI
                     m_level.AddItem("Level " + i);
                 }
 
-                int level = 0;
-                if (m_item.level != null) int.TryParse(m_item.level.Replace("L", ""), out level);
-                m_level.selectedIndex = (level < maxLevel) ? level : 0;
+                m_level.selectedIndex = (m_item.level < maxLevel) ? m_item.level : 0;
 
                 if (modalEffect != null)
                 {

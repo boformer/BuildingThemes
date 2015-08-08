@@ -11,7 +11,7 @@ namespace BuildingThemes.GUI
         private string m_name;
         private string m_displayName;
         private string m_steamID;
-        private string m_level;
+        private int m_level = -1;
         private string m_size;
 
         public BuildingInfo prefab;
@@ -75,25 +75,47 @@ namespace BuildingThemes.GUI
             }
         }
 
-        public string level
+        public int level
         {
             get
             {
-                if(m_level == null)
+                if(m_level == -1)
                 {
+                    m_level = 0;
                     if (prefab != null)
                     {
                         if (prefab.m_class.m_subService >= ItemClass.SubService.IndustrialForestry && prefab.m_class.m_subService <= ItemClass.SubService.IndustrialOre)
-                            m_level = "L1";
+                            m_level = 1;
                         else
-                            m_level = "L" + ((int)prefab.m_class.m_level + 1);
+                            m_level = (int)prefab.m_class.m_level + 1;
                     }
                     else
                     {
-                        m_level = Regex.Match(name, @"[HL]\d").Value.Replace("H", "L");
+                        int.TryParse(Regex.Match(name, @"(?<=[HL])\d").Value, out m_level);
                     }
                 }
                 return m_level;
+            }
+        }
+
+        public int maxLevel
+        {
+            get
+            {
+                switch (category)
+                {
+                    case Category.None:
+                    case Category.ResidentialHigh:
+                    case Category.ResidentialLow:
+                        return 5;
+                    case Category.Farming:
+                    case Category.Forestry:
+                    case Category.Oil:
+                    case Category.Ore:
+                        return 1;
+                }
+
+                return 3;
             }
         }
 
@@ -146,6 +168,9 @@ namespace BuildingThemes.GUI
                 return new Color32(128, 128, 128, 255);
             if (prefab == null)
                 return new Color32(255, 255, 0, 255);
+            if (building != null && building.baseName != null)
+                return new Color32(50, 230, 255, 255);
+
 
             return new Color32(255, 255, 255, 255);
         }

@@ -52,27 +52,25 @@ namespace BuildingThemes.GUI
             m_policyCheckBox.size = new Vector2(363f, 44f);
             m_policyCheckBox.relativePosition = new Vector3(0f, -2f, 0f);
             m_policyCheckBox.clipChildren = true;
-            //policyCheckBox.objectUserData = theme;
-
-            // Check if theme is enabled in selected district and set the checkbox
-            var districtId = ToolsModifierControl.policiesPanel.targetDistrict;
-            var districtThemes = BuildingThemesManager.instance.GetDistrictThemes(districtId, true);
-            //policyCheckBox.isChecked = districtThemes.Contains(theme);
 
             // Connect the checkbox with our theme manager
             m_policyCheckBox.eventCheckChanged += delegate(UIComponent component, bool isChecked)
             {
                 lock (component)
                 {
-                    var districtId1 = ToolsModifierControl.policiesPanel.targetDistrict;
+                    var districtId = ToolsModifierControl.policiesPanel.targetDistrict;
+                    var districtThemes = BuildingThemesManager.instance.GetDistrictThemes(districtId, true);
+
+                    if (isChecked == districtThemes.Contains(m_theme)) return;
 
                     if (isChecked)
                     {
-                        BuildingThemesManager.instance.EnableTheme(districtId1, m_theme);
+                        BuildingThemesManager.instance.EnableTheme(districtId, m_theme);
                     }
                     else
                     {
-                        BuildingThemesManager.instance.DisableTheme(districtId1, m_theme);
+                        BuildingThemesManager.instance.DisableTheme(districtId, m_theme);
+                        m_policyCheckBox.enabled = (tooltip == null);
                     }
                 }
 
@@ -112,11 +110,15 @@ namespace BuildingThemes.GUI
             m_policyButton.text = m_theme.name;
             m_policyCheckBox.objectUserData = m_theme;
 
+            var districtId = ToolsModifierControl.policiesPanel.targetDistrict;
+            var districtThemes = BuildingThemesManager.instance.GetDistrictThemes(districtId, true);
+            m_policyCheckBox.isChecked = districtThemes.Contains(m_theme);
+
             if (UIThemeManager.instance != null)
             {
                 string validityError = UIThemeManager.instance.ThemeValidityError(m_theme);
 
-                m_policyCheckBox.enabled = (validityError == null);
+                m_policyCheckBox.enabled = (validityError == null || m_policyCheckBox.isChecked);
                 tooltip = validityError;
             }
         }

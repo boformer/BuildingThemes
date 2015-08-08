@@ -92,6 +92,8 @@ namespace BuildingThemes.GUI
 
         public void Show(BuildingItem item)
         {
+            if (m_item == item) return;
+
             m_item = item;
             m_renderPrefab = (m_item == null) ? null : m_item.prefab;
 
@@ -139,9 +141,9 @@ namespace BuildingThemes.GUI
             }
 
             // Level
-            if (m_item.level != "")
+            if (m_item.level != 0)
             {
-                m_level.text = m_item.level.Replace("L", "Level ");
+                m_level.text = "Level " + m_item.level;
                 m_level.isVisible = true;
             }
 

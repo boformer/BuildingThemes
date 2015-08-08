@@ -136,6 +136,7 @@ namespace BuildingThemes.GUI
             origin.AddItem("All");
             origin.AddItem("Default");
             origin.AddItem("Custom");
+            origin.AddItem("Cloned");
             origin.selectedIndex = 0;
             origin.relativePosition = new Vector3(display.relativePosition.x + display.width + 5, 40);
 
