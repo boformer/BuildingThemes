@@ -96,12 +96,7 @@ namespace BuildingThemes
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;
 
-            public override bool Equals(object other)
-            {
-                return Equals(other as Building);
-            }
-
-            public virtual bool Equals(Building other)
+            public bool Equals(Building other)
             {
                 if (other == null) { return false; }
                 if (object.ReferenceEquals(this, other)) { return true; }
