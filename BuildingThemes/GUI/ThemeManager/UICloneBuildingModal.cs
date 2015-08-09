@@ -108,8 +108,8 @@ namespace BuildingThemes.GUI
             {
                 int.TryParse(m_level.selectedValue.Replace("Level ", ""), out m_selectedLevel);
 
-                string prefix = (m_item.isCloned) ? prefix = "{{" + m_item.building.baseName + "}}." : "{{" + m_item.name + "}}.";
-                string suffix = " L" + m_selectedLevel + " " + UIThemeManager.instance.selectedBuilding.sizeAsString;
+                string prefix = "{{" + UIThemeManager.instance.selectedTheme.name + "}}.";
+                string suffix = " L" + m_selectedLevel + " " + m_item.sizeAsString;
 
                 m_cloneName = prefix + BuildingItem.CleanName(m_name.text) + suffix;
 

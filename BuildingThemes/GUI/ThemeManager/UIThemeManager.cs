@@ -564,7 +564,9 @@ namespace BuildingThemes.GUI
                     BuildingItem item = new BuildingItem();
                     item.prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
                     buildingDictionary.Add(item.name, item);
-                    list.Add(item);
+
+                    if (!BuildingVariationManager.instance.IsVariation(item.name))
+                        list.Add(item);
                 }
             }
 
@@ -577,6 +579,8 @@ namespace BuildingThemes.GUI
                     // Associate building with prefab
                     BuildingItem item = buildingDictionary[buildings[i].name];
                     item.building = buildings[i];
+
+                    if (!list.Contains(item)) list.Add(item);
                 }
                 else
                 {
