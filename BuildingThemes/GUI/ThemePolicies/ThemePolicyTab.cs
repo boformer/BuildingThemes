@@ -66,7 +66,7 @@ namespace BuildingThemes.GUI
             UICheckBox blacklistModeCheckBox = CreateCheckBox(controls);
             blacklistModeCheckBox.name = "Blacklist Mode Checkbox";
             blacklistModeCheckBox.gameObject.AddComponent<BlacklistModeCheckboxContainer>();
-            blacklistModeCheckBox.text = "Only allow buildings not in selected themes";
+            blacklistModeCheckBox.text = "Allow buildings which are not in any theme";
             blacklistModeCheckBox.isChecked = false;
 
             blacklistModeCheckBox.eventCheckChanged += delegate(UIComponent component, bool isChecked)
