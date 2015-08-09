@@ -1,42 +1,116 @@
-[h1]This mod makes possible to apply building themes to a district or the whole city. Only buildings which are contained in one of the selected themes will grow in a district.[/h1]
+[h1]This mod makes possible to apply building themes to a district or the whole city. Only buildings which are contained in one of the selected themes will grow in a district. You can subscribe to theme mods from the workshop, or create your own themes in the game.[/h1]
 
-[h1]What this mod does:[/h1]
+[h1]Incompatibilities[/h1]
+
+This mod is [u]not[/u] compatible with:
 [list]
-[*] Adds 'Themes' tab to districts policies panel
-[*] Filters buildings in districts by districts' active themes.
+[*]81 Tiles
+[*]Runways and Taxiways (mod is completely broken, use [url=http://steamcommunity.com/sharedfiles/filedetails/?id=465127441]Airport Roads[/url] instead)
+[*]Building Simulation Overhaul
+[/list]
+
+[h1]What This Mod Does[/h1]
+[list]
+[*] Adds 'Themes' tab to districts policies panel where you can select a theme for a district or the whole city. The mod unlocks the panel from the start.
+[*] Adds Building Theme Manager (accessible from the 'Themes' tab) where you can edit existing themes and create your own themes
 [*] Provides two built-in themes, 'European' and 'International'
-[*] Stores building themes in an XML file ({Steam folder}\steamapps\common\Cities_Skylines\BuildingThemes.xml)
-[*] Allows adding custom themes and extending built-in themes via the XML configuration file (Later this will be possible with UI - see 'Upcoming features' section)
-[*] Saves district data in XML files for each saved game (buildingThemesSave_{ID}.xml). They can be found in {Steam folder}\steamapps\common\Cities_Skylines\Cities_Data. Cloud saves supported too. To clear themes assignment just delete those files.
+[*] Improves the building footprint selection (important for themes with only small buildings)
 [/list]
 
 Use 'Themes' tab to enable or disable district's themes. You can specify any number of active themes. If no theme is active for district it will mean that any growable is allowed.
 
-Biome's native theme will be active by default ('European' theme for 'European' biome, 'International' theme for 'Boreal', 'Temperate' or 'Tropical' biome).
+By default no theme will be activated. If you use this mod together with the European Buildings Unlocker mod (which is recommended), both International and European buildings will spawn in your city by default!
 
-Themes specified city-wide will be applied to each new district you add automatically.
+By default, districts will use the city-wide theme setting. You can check the 'Enable Theme Managament for this district' checkbox to control the theme setting for a district separately
 
 If you redraw district's borders the buildings not belonging to district's theme won't disappear. When it's time for them to upgrade they will level up to a building that is allowed in the district.
 
-[h1]What this mod doesn't do:[/h1]
+If you want to allow custom workshop assets in a district, you can either add them with the Theme Manager (see below) or check the 'Allow buildings which are not in any theme' checkbox.
+
+[h1]What This Mod Doesn't Do[/h1]
 [list]
-[*] It won't corrupt your save games if you disable it
+[*] It won't corrupt your save games if you disable it (though cloned buildings will disappear)
 [*] It doesn't unlock European growables for non-European biomes or vice versa. Use [b]European Buildings Unlocker[/b] for that.
 [/list]
 
-[h1]Upcoming features:[/h1]
+[h1]How To Add Custom Themes And Modify The Built In Themes: Theme Manager[/h1]
+
+You can open the Theme Manager in the 'Themes' tab. 
+
+On the left is the list of themes. Select a theme and add and remove buildings. There is a live preview (which can be rotated) on the right!
+
+Click on a building in the list to select it. There are 2 advanced options which can be controlled: 
+The [b]spawn rate[/b] controls the chance that a building appears. Note that it only works when you add multiple buildings with the same zone type, level and footprint size.
+The [b]upgrade building[/b] can be set if you want the building to upgrade to a specific building (like the same building model with a pool and solar panels).
+
+It is important to understand how the simulation works:
+
+When you create a new empty zone, a level 1 building will spawn first (so you have to include one in your theme). This building will upgrade to a level 2 building when certain requirements are met. The level 2 building needs to have the same width, and a length which is equal or smaller. Example: [b]L1 2x3[/b] low-density residential will upgrade to: [b]L2 2x3[/b] or [b]L2 2x2[/b] or [b]L2 2x1[/b] low-density residential.
+
+If there is enough space, the game will expand the front- or backyard of a building to a maximum length of 4 cells (e.g. a 2x2 building will spawn as 2x4). This mod changes the behavior a little bit, which can be used by asset creators: If there are no props or trees in the expanded backyard, the size will be set back to the original size. That way it is possible to create neighbourhoods with only 4 cells wide blocks. The UK Terraced Housing theme uses this feature.
+
+[h1]Asset Cloning[/h1]
+
+The Theme Manager also allows you to clone buildings and assign different levels to them. This can be used if you don't have enough buildings for all wealth levels, or if you just want more variety by assigning all buildings to all levels. To clone a building, select it in the list and press the 'Clone Building' button in the bottom right. Enter a name to identify your clone in the building list and select the wealth level. The clone will appear in the building list. 
+
+[u]Important:[/u] Clones will be created during the level loading process. You have to go back to the main menu and reload your save to generate the clones.
+
+[u]Important:[/u] When you delete the theme that contains clones, these buildings will disappear when you load your city the next time! The same happens when you disable the mod, or when the mod fails to load. But: Your save files are not broken.
+
+The cloning feature can be disabled completely in the mod settings.
+
+[h1]How To Add Custom Themes: Theme Mods[/h1]
+
+We created some "Theme Mods" which automatically add new themes. These mods do not include the required building models! Subscribe to the Building Collection that is mentioned in the mod description! You will find the new themes in the 'Themes' policy tab.
+
+[quote]
+[h1]Building Theme: UK Terraced Housing[/h1]
+
+Adds a British row houses building theme. Don't forget to upvote rik4000's creations! Without his excellent work, this theme would not have been possible!
+
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=452704398]► Required Building Collection[/url]
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=470539837]► Theme Mod[/url]
+[/quote]
+[quote]
+[h1]Building Theme: Neo-eclectic Homes[/h1]
+
+Adds an American low-density homes building theme. Don't forget to upvote Gutattos's creations! Without his excellent work, this theme would not have been possible!
+
+[url=https://steamcommunity.com//sharedfiles/filedetails/?id=464133310]► Required Building Collection[/url]
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=471015559]► Theme Mod[/url]
+[/quote]
+[quote]
+[h1]Building Theme: American Trailer Homes[/h1]
+
+Adds an American low-density homes building theme. Don't forget to upvote DethKwok's creations! Without his excellent work, this theme would not have been possible!
+
+[url=https://steamcommunity.com//sharedfiles/filedetails/?id=437051479]► Required Building Collection[/url]
+[url=https://steamcommunity.com/sharedfiles/filedetails/?id=471183698]► Theme Mod[/url]
+[/quote]
+
+[h1]How the mod saves your data[/h1]
 [list]
-[*] Building Themes Manager UI: Allows you to create your own themes (supporting vanilla and custom assets)
+[*] Custom Building Themes and options are stored in an XML file ({Steam folder}\steamapps\common\Cities_Skylines\BuildingThemes.xml)
+[*] District data is saved in XML files for each saved game (buildingThemesSave_{ID}.xml). They can be found in {Steam folder}\steamapps\common\Cities_Skylines\Cities_Data. Cloud saves supported too. To clear themes assignment just delete those files.
 [/list]
 
-This mod should be 100% compatible with all other mods. If it's not just tell us.
-Recommended mods to use together with this one:
+You do not have to edit these files! Everything can be configured in the game.
 
+[h1]Upcoming Features[/h1]
 [list]
-[*] [url=http://steamcommunity.com/sharedfiles/filedetails/?id=456408505]European Buildings Unlocker (+vice versa)[/url]
-[*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=410535198]Control Building Level Up[/url]
+[*] Theme sharing option: Upload your theme to the workshop with two clicks
+[*] More cloning options: Change the zone type, color variation or density of a building
+[*] A better 'No High Rises' policy which checks the building height
 [/list]
 
 Feel free to comment. If you have any errors/exceptions please don't paste them or output_log to comments. Use dropbox, pastebin or similar tool.
 
 [url=https://github.com/boformer/BuildingThemes]Source Code[/url]
+
+[quote]
+[h1]Warning[/h1]
+
+There is a bug in the "European Buildings Unlocker" Mod (not related to this mod) that causes the game toolbar to look like [url=http://i.imgur.com/liqSEhf.jpg]this[/url] when you load a city or when create a new one. 
+
+If that happens, press ESC, then [b]Quit To Main Menu[/b], then load the city again. 
+[/quote]
