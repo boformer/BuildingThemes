@@ -2,6 +2,7 @@
 using ColossalFramework.UI;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace BuildingThemes.GUI
 {
@@ -103,11 +104,34 @@ namespace BuildingThemes.GUI
 
         private void CheckValidity()
         {
-            int.TryParse(m_level.selectedValue.Replace("Level ", ""), out m_selectedLevel);
-            m_cloneName = m_name.text + " L" + m_selectedLevel + " " + UIThemeManager.instance.selectedBuilding.size;
-            BuildingItem item = UIThemeManager.instance.GetBuildingItem(m_cloneName);
+            if (!m_name.text.IsNullOrWhiteSpace())
+            {
+                int.TryParse(m_level.selectedValue.Replace("Level ", ""), out m_selectedLevel);
 
-            m_ok.isEnabled = !m_name.text.IsNullOrWhiteSpace() && item == null;
+                string prefix = (m_item.isCloned) ? prefix = "{{" + m_item.building.baseName + "}}." : "{{" + m_item.name + "}}.";
+                string suffix = " L" + m_selectedLevel + " " + UIThemeManager.instance.selectedBuilding.sizeAsString;
+
+                m_cloneName = prefix + BuildingItem.CleanName(m_name.text) + suffix;
+
+                m_ok.isEnabled = !UIThemeManager.instance.selectedTheme.containsBuilding(m_cloneName) && m_selectedLevel != m_item.level;
+
+                if (m_ok.isEnabled && m_item.isCloned)
+                {
+                    BuildingItem baseItem = UIThemeManager.instance.GetBuildingItem(m_item.building.baseName);
+                    m_ok.isEnabled = baseItem != null && baseItem.level != m_selectedLevel;
+                }
+
+                if (m_ok.isEnabled)
+                    m_ok.tooltip = null;
+                else
+                    m_ok.tooltip = "Building already exists with that level";
+            }
+            else
+            {
+                m_ok.isEnabled = false;
+                m_ok.tooltip = "Please enter a name";
+            }
+
         }
 
         protected override void OnVisibilityChanged()
@@ -127,17 +151,16 @@ namespace BuildingThemes.GUI
 
                 m_item = UIThemeManager.instance.selectedBuilding;
 
+                // Name
                 m_name.text = m_item.displayName;
 
+                // Level
                 int maxLevel = m_item.maxLevel;
-                
                 m_level.items = new string[0];
-                for (int i = 1; i <= maxLevel; i++ )
-                {
-                    m_level.AddItem("Level " + i);
-                }
-
+                for (int i = 1; i <= maxLevel; i++ ) m_level.AddItem("Level " + i);
                 m_level.selectedIndex = (m_item.level < maxLevel) ? m_item.level : 0;
+
+                CheckValidity();
 
                 if (modalEffect != null)
                 {

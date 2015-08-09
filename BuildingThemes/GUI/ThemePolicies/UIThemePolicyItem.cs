@@ -13,6 +13,21 @@ namespace BuildingThemes.GUI
 
         private Configuration.Theme m_theme;
 
+        public static bool showWarning
+        {
+            get
+            {
+                return BuildingThemesManager.instance.Configuration.ThemeValidityWarning;
+            }
+            set
+            {
+                if (BuildingThemesManager.instance.Configuration.ThemeValidityWarning == value) return;
+
+                BuildingThemesManager.instance.Configuration.ThemeValidityWarning = value;
+                BuildingThemesManager.instance.SaveConfig();
+            }
+        }
+
         private void SetupControls()
         {
             if (m_policyButton != null) return;
@@ -70,7 +85,6 @@ namespace BuildingThemes.GUI
                     else
                     {
                         BuildingThemesManager.instance.DisableTheme(districtId, m_theme);
-                        m_policyCheckBox.enabled = (tooltip == null);
                     }
                 }
 
@@ -88,6 +102,18 @@ namespace BuildingThemes.GUI
             ((UISprite)m_policyCheckBox.checkedBoxObject).spriteName = "ToggleBaseFocused";
             m_policyCheckBox.checkedBoxObject.size = new Vector2(16f, 16f);
             m_policyCheckBox.checkedBoxObject.relativePosition = Vector3.zero;
+        }
+
+        protected override void OnClick(UIMouseEventParameter p)
+        {
+            if(showWarning && m_policyCheckBox.isChecked && tooltip != null)
+            {
+                UIWarningModal.instance.message = "This theme might not work like expected:\n\n" + tooltip;
+                UIView.PushModal(UIWarningModal.instance);
+                UIWarningModal.instance.Show(true);
+            }
+
+            base.OnClick(p);
         }
 
         protected override void OnSizeChanged()
@@ -117,8 +143,6 @@ namespace BuildingThemes.GUI
             if (UIThemeManager.instance != null)
             {
                 string validityError = UIThemeManager.instance.ThemeValidityError(m_theme);
-
-                m_policyCheckBox.enabled = (validityError == null || m_policyCheckBox.isChecked);
                 tooltip = validityError;
             }
         }

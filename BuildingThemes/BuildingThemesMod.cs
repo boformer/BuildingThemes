@@ -23,7 +23,8 @@ namespace BuildingThemes
             group.AddCheckbox("Unlock Policies Panel From Start", PolicyPanelEnabler.Unlock, delegate(bool c) { PolicyPanelEnabler.Unlock = c; });
             group.AddCheckbox("Create Prefab Duplicates (required for some themes)", BuildingVariationManager.Enabled, delegate(bool c) { BuildingVariationManager.Enabled = c; });
             group.AddGroup("Warning: When you disable this option, spawned duplicates will disappear!");
-            group.AddSpace(1);
+
+            group.AddCheckbox("Warning message when selecting an invalid theme", UIThemePolicyItem.showWarning, delegate(bool c) { UIThemePolicyItem.showWarning = c; });
             group.AddCheckbox("Generate Debug Output", Debugger.Enabled, delegate(bool c) { Debugger.Enabled = c; });
             
         }

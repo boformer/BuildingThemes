@@ -242,7 +242,7 @@ namespace BuildingThemes.GUI
                     if (m_upgradeBuilding != null) m_upgradeName.text = m_upgradeBuilding.displayName;
                 }
 
-                if (m_item.building.baseName != null)
+                if (m_item.isCloned)
                 {
                     m_baseBuilding = UIThemeManager.instance.GetBuildingItem(m_item.building.baseName);
                     if (m_baseBuilding != null) m_baseName.text = m_baseBuilding.displayName;
@@ -254,7 +254,7 @@ namespace BuildingThemes.GUI
         public void ShowDropDown()
         {
             Category category = m_item.category;
-            if (category == Category.None && m_item.building.baseName != null)
+            if (category == Category.None && m_item.isCloned)
             {
                 BuildingItem item = UIThemeManager.instance.GetBuildingItem(m_item.building.baseName);
                 if (item != null) category = item.category;

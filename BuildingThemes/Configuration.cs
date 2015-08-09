@@ -14,6 +14,9 @@ namespace BuildingThemes
         public bool UnlockPolicyPanel = true;
 
         public bool CreateBuildingDuplicates = true;
+
+        [DefaultValue(true)]
+        public bool ThemeValidityWarning = true;
         
         [XmlArray(ElementName = "Themes")]
         [XmlArrayItem(ElementName = "Theme")]
@@ -160,6 +163,7 @@ namespace BuildingThemes
 
                     configCopy.UnlockPolicyPanel = config.UnlockPolicyPanel;
                     configCopy.CreateBuildingDuplicates = config.CreateBuildingDuplicates;
+                    configCopy.ThemeValidityWarning = config.ThemeValidityWarning;
 
                     foreach (var theme in config.themes)
                     {

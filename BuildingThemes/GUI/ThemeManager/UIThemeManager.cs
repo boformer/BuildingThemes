@@ -160,36 +160,29 @@ namespace BuildingThemes.GUI
 
             if (!theme.containsBuilding(cloneName))
             {
-                Debug.Log("1");
                 Configuration.Building clone = new Configuration.Building(cloneName);
-                clone.baseName = (item.building == null || item.building.baseName.IsNullOrWhiteSpace()) ? item.name : item.building.baseName;
+                clone.baseName = item.isCloned ? item.building.baseName : item.name;
                 clone.level = level;
-                Debug.Log("2");
 
                 selectedTheme.buildings.Add(clone);
                 m_isDistrictThemesDirty = true;
-                Debug.Log("3");
 
                 // Refresh building list
                 List<BuildingItem> list = GetBuildingItemList(theme);
                 m_themes[theme] = list;
-                Debug.Log("4");
 
                 m_buildingSelection.selectedIndex = -1;
                 m_buildingSelection.rowsData = Filter(list);
-                Debug.Log("5");
 
                 // Select cloned item if displayed
                 for (int i = 0; i < m_buildingSelection.rowsData.m_size; i++)
                 {
                     BuildingItem buildingItem = m_buildingSelection.rowsData.m_buffer[i] as BuildingItem;
-                    Debug.Log("6");
                     if (buildingItem.building == clone)
                     {
                         m_buildingSelection.selectedIndex = i;
                         m_buildingSelection.DisplayAt(i);
                         UpdateBuildingInfo(list[i]);
-                        Debug.Log("7");
                         break;
                     }
                 }
@@ -204,6 +197,8 @@ namespace BuildingThemes.GUI
             item.building.include = include;
 
             m_isDistrictThemesDirty = true;
+
+            m_themeSelection.Refresh();
             m_buildingSelection.Refresh();
         }
 
@@ -253,7 +248,7 @@ namespace BuildingThemes.GUI
 
         public BuildingItem GetBuildingItem(string name)
         {
-            List<BuildingItem> list = m_themes[m_themeSelection.selectedItem as Configuration.Theme];
+            List<BuildingItem> list = m_themes[selectedTheme];
             for(int i = 0; i< list.Count; i++)
             {
                 if (list[i].name == name) return list[i];
@@ -279,21 +274,25 @@ namespace BuildingThemes.GUI
             }
 
             List<BuildingItem> list = m_themes[theme];
-            ThemeValidity validity = list.Count == 0 ? ThemeValidity.Empty : ThemeValidity.Valid;
+            ThemeValidity validity = ThemeValidity.Valid;
 
+            int includedCount = 0;
             int l1Count = 0;
 
             foreach (BuildingItem item in list)
             {
                 if (item.included)
                 {
+                    includedCount++;
                     if (item.level == 1) l1Count++;
                     if (item.prefab == null) validity |= ThemeValidity.BuildingNotLoaded;
                 }
             }
 
+            if (includedCount == 0) validity |= ThemeValidity.Empty;
             if (l1Count == 0) validity |= ThemeValidity.MissingL1;
-            else if (validity == 0) return null;
+
+            if (validity == 0) return null;
 
             StringBuilder errorMessage = new StringBuilder();
             if ((validity & ThemeValidity.Empty) == ThemeValidity.Empty)
@@ -456,19 +455,20 @@ namespace BuildingThemes.GUI
 
             m_buildingSelection.rowsData = new FastList<object>();
 
-            BuildingItem selectedItem = null;
             m_buildingSelection.eventSelectedIndexChanged += (c, i) =>
             {
-                selectedItem = m_buildingSelection.selectedItem as BuildingItem;
-                m_cloneBuilding.isEnabled = selectedItem != null && selectedItem.prefab != null;
+                m_cloneBuilding.isEnabled = selectedBuilding != null && selectedBuilding.prefab != null;
+
+                if (selectedBuilding != null && selectedBuilding.isCloned)
+                {
+                    BuildingItem item = GetBuildingItem(selectedBuilding.building.baseName);
+                    m_cloneBuilding.isEnabled = item != null && item.prefab != null;
+                }
             };
 
             m_buildingSelection.eventMouseLeave += (c, p) =>
             {
-                if (selectedItem != null)
-                    UpdateBuildingInfo(selectedItem);
-                else
-                    UpdateBuildingInfo(null);
+                UpdateBuildingInfo(selectedBuilding);
             };
 
             // Include buttons
@@ -630,7 +630,7 @@ namespace BuildingThemes.GUI
                 // Origin
                 if (m_filter.buildingOrigin == Origin.Default && item.isCustomAsset) continue;
                 if (m_filter.buildingOrigin == Origin.Custom && !item.isCustomAsset) continue;
-                if (m_filter.buildingOrigin == Origin.Cloned && (item.building == null || item.building.baseName == null)) continue;
+                if (m_filter.buildingOrigin == Origin.Cloned && !item.isCloned) continue;
 
                 // Status
                 if (m_filter.buildingStatus == Status.Included && !item.included) continue;
