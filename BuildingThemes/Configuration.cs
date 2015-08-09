@@ -14,6 +14,9 @@ namespace BuildingThemes
         public bool UnlockPolicyPanel = true;
 
         public bool CreateBuildingDuplicates = true;
+
+        [DefaultValue(true)]
+        public bool ThemeValidityWarning = true;
         
         [XmlArray(ElementName = "Themes")]
         [XmlArrayItem(ElementName = "Theme")]
@@ -40,16 +43,6 @@ namespace BuildingThemes
             [XmlArrayItem(ElementName = "Building")]
             public List<Building> buildings = new List<Building>();
 
-            public void addAll(string[] buildingNames, bool builtIn)
-            {
-                foreach (string b in buildingNames)
-                {
-                    if (!containsBuilding(b))
-                    {
-                        buildings.Add(new Building(b, builtIn));
-                    }
-                }
-            }
             public bool containsBuilding(string name)
             {
                 foreach (Building building in buildings)
@@ -89,7 +82,7 @@ namespace BuildingThemes
             public string name;
 
             [XmlIgnoreAttribute]
-            public bool isBuiltIn = false;
+            public Building builtInBuilding = null;
 
             [XmlAttribute("level"), DefaultValue(-1)]
             public int level = -1;
@@ -106,15 +99,33 @@ namespace BuildingThemes
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;
 
+            public bool Equals(Building other)
+            {
+                if (other == null) { return false; }
+                if (object.ReferenceEquals(this, other)) { return true; }
+                return this.name == other.name 
+                    && this.level == other.level 
+                    && this.upgradeName == other.upgradeName 
+                    && this.baseName == other.baseName 
+                    && this.spawnRate == other.spawnRate 
+                    && this.include == other.include;
+            }
+
             public Building(string name)
             {
                 this.name = name;
             }
 
-            public Building(string name, bool isBuiltIn)
+            public Building(Building builtInBuilding)
             {
-                this.name = name;
-                this.isBuiltIn = isBuiltIn;
+                this.builtInBuilding = builtInBuilding;
+
+                this.name = builtInBuilding.name;
+                this.level = builtInBuilding.level;
+                this.upgradeName = builtInBuilding.upgradeName;
+                this.baseName = builtInBuilding.baseName;
+                this.spawnRate = builtInBuilding.spawnRate;
+                this.include = builtInBuilding.include;
             }
 
             public Building()
@@ -152,12 +163,18 @@ namespace BuildingThemes
 
                     configCopy.UnlockPolicyPanel = config.UnlockPolicyPanel;
                     configCopy.CreateBuildingDuplicates = config.CreateBuildingDuplicates;
+                    configCopy.ThemeValidityWarning = config.ThemeValidityWarning;
 
                     foreach (var theme in config.themes)
                     {
                         var newTheme = new Theme(theme.name);
 
-                        foreach (var building in theme.buildings.Where(building => !building.isBuiltIn || !building.include))
+                        foreach (var building in theme.buildings.Where(building => 
+                            // a user-added building has to be included, or we don't need it in the config
+                            (building.builtInBuilding == null && building.include) 
+
+                            // a built-in building that was modified by the user: Only add it to the config if the modification differs
+                            || (building.builtInBuilding != null && !building.Equals(building.builtInBuilding))))
                         {
                             newTheme.buildings.Add(building);
                         }

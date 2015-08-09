@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using ColossalFramework.UI;
 
+using System.Text;
+
 namespace BuildingThemes.GUI
 {
     public class UIThemePolicyItem : UIPanel, IUIFastListRow
@@ -10,6 +12,21 @@ namespace BuildingThemes.GUI
         private UISprite m_sprite;
 
         private Configuration.Theme m_theme;
+
+        public static bool showWarning
+        {
+            get
+            {
+                return BuildingThemesManager.instance.Configuration.ThemeValidityWarning;
+            }
+            set
+            {
+                if (BuildingThemesManager.instance.Configuration.ThemeValidityWarning == value) return;
+
+                BuildingThemesManager.instance.Configuration.ThemeValidityWarning = value;
+                BuildingThemesManager.instance.SaveConfig();
+            }
+        }
 
         private void SetupControls()
         {
@@ -50,27 +67,24 @@ namespace BuildingThemes.GUI
             m_policyCheckBox.size = new Vector2(363f, 44f);
             m_policyCheckBox.relativePosition = new Vector3(0f, -2f, 0f);
             m_policyCheckBox.clipChildren = true;
-            //policyCheckBox.objectUserData = theme;
-
-            // Check if theme is enabled in selected district and set the checkbox
-            var districtId = ToolsModifierControl.policiesPanel.targetDistrict;
-            var districtThemes = BuildingThemesManager.instance.GetDistrictThemes(districtId, true);
-            //policyCheckBox.isChecked = districtThemes.Contains(theme);
 
             // Connect the checkbox with our theme manager
             m_policyCheckBox.eventCheckChanged += delegate(UIComponent component, bool isChecked)
             {
                 lock (component)
                 {
-                    var districtId1 = ToolsModifierControl.policiesPanel.targetDistrict;
+                    var districtId = ToolsModifierControl.policiesPanel.targetDistrict;
+                    var districtThemes = BuildingThemesManager.instance.GetDistrictThemes(districtId, true);
+
+                    if (isChecked == districtThemes.Contains(m_theme)) return;
 
                     if (isChecked)
                     {
-                        BuildingThemesManager.instance.EnableTheme(districtId1, m_theme);
+                        BuildingThemesManager.instance.EnableTheme(districtId, m_theme);
                     }
                     else
                     {
-                        BuildingThemesManager.instance.DisableTheme(districtId1, m_theme);
+                        BuildingThemesManager.instance.DisableTheme(districtId, m_theme);
                     }
                 }
 
@@ -88,6 +102,18 @@ namespace BuildingThemes.GUI
             ((UISprite)m_policyCheckBox.checkedBoxObject).spriteName = "ToggleBaseFocused";
             m_policyCheckBox.checkedBoxObject.size = new Vector2(16f, 16f);
             m_policyCheckBox.checkedBoxObject.relativePosition = Vector3.zero;
+        }
+
+        protected override void OnClick(UIMouseEventParameter p)
+        {
+            if(showWarning && m_policyCheckBox.isChecked && tooltip != null)
+            {
+                UIWarningModal.instance.message = "This theme might not work like expected:\n\n" + tooltip;
+                UIView.PushModal(UIWarningModal.instance);
+                UIWarningModal.instance.Show(true);
+            }
+
+            base.OnClick(p);
         }
 
         protected override void OnSizeChanged()
@@ -109,6 +135,16 @@ namespace BuildingThemes.GUI
             m_theme = data as Configuration.Theme;
             m_policyButton.text = m_theme.name;
             m_policyCheckBox.objectUserData = m_theme;
+
+            var districtId = ToolsModifierControl.policiesPanel.targetDistrict;
+            var districtThemes = BuildingThemesManager.instance.GetDistrictThemes(districtId, true);
+            m_policyCheckBox.isChecked = districtThemes.Contains(m_theme);
+
+            if (UIThemeManager.instance != null)
+            {
+                string validityError = UIThemeManager.instance.ThemeValidityError(m_theme);
+                tooltip = validityError;
+            }
         }
 
         public void Select(bool isRowOdd) { }

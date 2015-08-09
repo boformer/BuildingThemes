@@ -60,6 +60,11 @@ namespace BuildingThemes.GUI
             m_name.text = m_theme.name;
             UIUtils.TruncateLabel(m_name, parent.width - 30);
 
+            string validityError = UIThemeManager.instance.ThemeValidityError(m_theme);
+
+            m_name.textColor = (validityError == null) ? new Color32(255, 255, 255, 255) : new Color32(255, 255, 0, 255); ;
+            tooltip = validityError;
+
             if (isRowOdd)
             {
                 background.backgroundSprite = "UnlockingItemBackground";

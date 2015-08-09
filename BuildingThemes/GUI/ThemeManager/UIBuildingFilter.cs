@@ -15,20 +15,6 @@ namespace BuildingThemes.GUI
         public UIDropDown sizeFilterY;
         public UITextField nameFilter;
 
-        public enum Origin
-        {
-            All,
-            Default,
-            Custom
-        }
-
-        public enum Status
-        {
-            All,
-            Included,
-            Excluded
-        }
-
         public bool IsZoneSelected(Category zone)
         {
             return zoningToggles[(int)zone].isChecked;
@@ -85,19 +71,10 @@ namespace BuildingThemes.GUI
 
             // Zoning
             zoningToggles = new UICheckBox[10];
-            zoningToggles[(int)Category.ResidentialLow] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningResidentialLow", "ZoningResidentialLowDisabled");
-            zoningToggles[(int)Category.ResidentialHigh] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningResidentialHigh", "ZoningResidentialHighDisabled");
-            zoningToggles[(int)Category.CommercialLow] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningCommercialLow", "ZoningCommercialLowDisabled");
-            zoningToggles[(int)Category.CommercialHigh] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningCommercialHigh", "ZoningCommercialHighDisabled");
-            zoningToggles[(int)Category.Industrial] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningIndustrial", "ZoningIndustrialDisabled");
-            zoningToggles[(int)Category.Farming] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyFarming", "IconPolicyFarmingDisabled");
-            zoningToggles[(int)Category.Forestry] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyForest", "IconPolicyForestDisabled");
-            zoningToggles[(int)Category.Oil] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyOil", "IconPolicyOilDisabled");
-            zoningToggles[(int)Category.Ore] = UIUtils.CreateIconToggle(this, "Ingame", "IconPolicyOre", "IconPolicyOreDisabled");
-            zoningToggles[(int)Category.Office] = UIUtils.CreateIconToggle(this, "Thumbnails", "ZoningOffice", "ZoningOfficeDisabled");
-
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++ )
             {
+                zoningToggles[i] = UIUtils.CreateIconToggle(this, CategoryIcons.atlases[i], CategoryIcons.spriteNames[i], CategoryIcons.spriteNames[i] + "Disabled");
+                zoningToggles[i].tooltip = CategoryIcons.tooltips[i];
                 zoningToggles[i].relativePosition = new Vector3(40 * i, 0);
                 zoningToggles[i].isChecked = true;
                 zoningToggles[i].readOnly = true;
@@ -159,6 +136,7 @@ namespace BuildingThemes.GUI
             origin.AddItem("All");
             origin.AddItem("Default");
             origin.AddItem("Custom");
+            origin.AddItem("Cloned");
             origin.selectedIndex = 0;
             origin.relativePosition = new Vector3(display.relativePosition.x + display.width + 5, 40);
 

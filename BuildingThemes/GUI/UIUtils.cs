@@ -114,6 +114,7 @@ namespace BuildingThemes.GUI
             textField.selectionSprite = "EmptySprite";
             textField.selectionBackgroundColor = new Color32(0, 172, 234, 255);
             textField.normalBgSprite = "TextFieldPanelHovered";
+            textField.disabledBgSprite = "TextFieldPanel";
             textField.textColor = new Color32(0, 0, 0, 255);
             textField.disabledTextColor = new Color32(0, 0, 0, 128);
             textField.color = new Color32(255, 255, 255, 255);
