@@ -53,6 +53,9 @@ namespace BuildingThemes
             try { Detour.BuildingManagerDetour.Deploy(); }
             catch (Exception e) { Debugger.LogException(e); }
 
+            try { Detour.DistrictManagerDetour.Deploy(); }
+            catch (Exception e) { Debugger.LogException(e); }
+
             try { Detour.ZoneBlockDetour.Deploy(); }
             catch (Exception e) { Debugger.LogException(e); }
 
@@ -118,6 +121,7 @@ namespace BuildingThemes
             {
                 Detour.BuildingInfoDetour.Revert();
                 Detour.BuildingManagerDetour.Revert();
+                Detour.DistrictManagerDetour.Revert();
                 Detour.ZoneBlockDetour.Revert();
                 Detour.ImmaterialResourceManagerDetour.Revert();
                 Detour.PrivateBuildingAIDetour<ResidentialBuildingAI>.Revert();
