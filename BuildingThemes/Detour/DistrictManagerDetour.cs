@@ -48,9 +48,9 @@ namespace BuildingThemes.Detour
 
         private void ReleaseDistrictImplementation(byte district, ref District data)
         {
-            BuildingThemesManager.instance.ToggleThemeManagement(district, false);
             if (data.m_flags == District.Flags.None)
                 return;
+            BuildingThemesManager.instance.ToggleThemeManagement(district, false);
             Singleton<InstanceManager>.instance.ReleaseInstance(new InstanceID()
             {
                 District = district
