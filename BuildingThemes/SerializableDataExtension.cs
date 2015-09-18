@@ -93,6 +93,9 @@ namespace BuildingThemes
 
             foreach (var district in configuration.Districts)
             {
+                //skip districts which do not exist
+                if (DistrictManager.instance.m_districts.m_buffer[district.id].m_flags == District.Flags.None) continue;
+                
                 var themes = new HashSet<Configuration.Theme>();
                 
                 foreach (var themeName in district.themes)
