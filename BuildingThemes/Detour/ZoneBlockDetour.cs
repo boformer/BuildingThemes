@@ -727,12 +727,19 @@ namespace BuildingThemes.Detour
                 {
                     ZoneBlock.GetIndustryType(vector6, out subService, out level);
                 }
+                else if (zone == ItemClass.Zone.CommercialLow || zone == ItemClass.Zone.CommercialHigh)
+                {
+                    ZoneBlock.GetCommercialType(vector6, zone, width, length, out subService, out level);
+                }
+
+                byte district2 = instance2.GetDistrict(vector6);
+                ushort style = instance2.m_districts.m_buffer[(int)district2].m_Style;
 
                 // begin mod
 
                 // Here we are calling a custom getRandomBuildingInfo method
 
-                buildingInfo = BuildingManagerDetour.GetRandomBuildingInfo_Spawn(vector6, ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3);
+                buildingInfo = BuildingManagerDetour.GetRandomBuildingInfo_Spawn(vector6, ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3, style);
 
                 // end mod
 
@@ -842,6 +849,18 @@ namespace BuildingThemes.Detour
                     case ItemClass.Service.Office:
                         zoneManager.m_actualWorkplaceDemand = Mathf.Max(0, zoneManager.m_actualWorkplaceDemand - 5);
                         break;
+                }
+
+                switch (zone)
+                {
+                    case ItemClass.Zone.ResidentialHigh:
+                    case ItemClass.Zone.CommercialHigh:
+                        {
+                            Building[] expr_FD7_cp_0 = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
+                            ushort expr_FD7_cp_1 = num31;
+                            expr_FD7_cp_0[(int)expr_FD7_cp_1].m_flags = (expr_FD7_cp_0[(int)expr_FD7_cp_1].m_flags | Building.Flags.HighDensity);
+                            break;
+                        }
                 }
             }
             zoneManager.m_goodAreaFound[(int)zone] = 1024;

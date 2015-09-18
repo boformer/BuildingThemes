@@ -48,6 +48,9 @@ namespace BuildingThemes.Detour
 
             Randomizer randomizer = new Randomizer((int)buildingID);
             ItemClass.Level level = info.m_class.m_level + 1;
+            DistrictManager instance = Singleton<DistrictManager>.instance;
+            byte district = instance.GetDistrict(data.m_position);
+            ushort style = instance.m_districts.m_buffer[(int)district].m_Style;
 
             /*
             return Singleton<BuildingManager>.instance.GetRandomBuildingInfo(ref randomizer, info.m_class.m_service,
@@ -55,7 +58,7 @@ namespace BuildingThemes.Detour
             */
 
             return BuildingManagerDetour.GetRandomBuildingInfo_Upgrade(data.m_position, data.m_infoIndex,
-                ref randomizer, info.m_class.m_service, info.m_class.m_subService, level, data.Width, data.Length, info.m_zoningMode);
+                ref randomizer, info.m_class.m_service, info.m_class.m_subService, level, data.Width, data.Length, info.m_zoningMode, style);
         }
     }
 }
