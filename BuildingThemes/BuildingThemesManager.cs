@@ -60,6 +60,10 @@ namespace BuildingThemes
         internal void ImportStylesAsThemes()
         {
             var styles = DistrictManager.instance.m_Styles;
+            if (styles == null)
+            {
+                return;
+            }
             foreach (var style in styles)
             {
                 var theme = new Configuration.Theme
@@ -69,14 +73,18 @@ namespace BuildingThemes
                     isBuiltIn = style.BuiltIn,
                     buildings = new List<Configuration.Building>()
                 };
-                foreach (var buildingInfo in style.GetBuildingInfos())
+                var buildingInfos = style.GetBuildingInfos();
+                if (buildingInfos != null)
                 {
-                    var building = new Configuration.Building
+                    foreach (var buildingInfo in buildingInfos)
                     {
-                        name = buildingInfo.name
-                    };
-                    theme.buildings.Add(building);
+                        var building = new Configuration.Building
+                        {
+                            name = buildingInfo.name
+                        };
+                        theme.buildings.Add(building);
 
+                    }
                 }
                 _configuration.themes.Add(theme);
             }
