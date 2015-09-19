@@ -67,7 +67,7 @@ namespace BuildingThemes
             {
                 var theme = new Configuration.Theme
                 {
-                    name = string.Format("[Style] {0}", style.Name.Substring(0, style.Name.LastIndexOf("_", StringComparison.Ordinal))),
+                    name = string.Format("[Style] {0}", style.BuiltIn ? style.Name.Substring(0, style.Name.LastIndexOf("_", StringComparison.Ordinal)) : style.Name),
                     sourceStyle = style,
                     isBuiltIn = true,
                     buildings = new List<Configuration.Building>()
@@ -85,6 +85,8 @@ namespace BuildingThemes
 
                     }
                 }
+                Debugger.LogFormat("Imported style \"{0}\" as theme \"{1}\". Buildings in style: {2}. Buildings in theme: {3} ",
+                    style.FullName, theme.name, buildingInfos!=null?buildingInfos.Length:0, theme.buildings.Count);
                 _configuration.themes.Add(theme);
             }
         }
