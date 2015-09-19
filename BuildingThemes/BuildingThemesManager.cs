@@ -113,7 +113,6 @@ namespace BuildingThemes
                             else
                             {
                                 theme.buildings.Add(building);
-                                theme.buildings[index].fromStyle = false;
                             }
                         }
                     }
