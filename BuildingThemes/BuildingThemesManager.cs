@@ -18,7 +18,7 @@ namespace BuildingThemes
         private class DistrictThemeInfo
         {
             public bool blacklistMode = false;
-            
+
             public readonly HashSet<Configuration.Theme> themes = new HashSet<Configuration.Theme>();
 
             // similar to BuildingManager.m_areaBuildings, but separate for every district
@@ -27,7 +27,7 @@ namespace BuildingThemes
             // building upgrade mapping (prefabLevel1 --> prefabLevel2) for realistic building upgrades
             public readonly Dictionary<ushort, ushort> upgradeBuildings = new Dictionary<ushort, ushort>();
         }
-        
+
         private const string userConfigPath = "BuildingThemes.xml";
         private Configuration _configuration;
         internal Configuration Configuration
@@ -39,6 +39,7 @@ namespace BuildingThemes
                     _configuration = Configuration.Deserialize(userConfigPath);
 
                     searchBuildingThemeMods();
+                    ImportStylesAsThemes();
 
                     if (Debugger.Enabled)
                     {
@@ -56,14 +57,39 @@ namespace BuildingThemes
             }
         }
 
+        internal void ImportStylesAsThemes()
+        {
+            var styles = DistrictManager.instance.m_Styles;
+            foreach (var style in styles)
+            {
+                var theme = new Configuration.Theme
+                {
+                    name = string.Format("[Style] {0}", style.Name),
+                    sourceStyle = style,
+                    isBuiltIn = style.BuiltIn,
+                    buildings = new List<Configuration.Building>()
+                };
+                foreach (var buildingInfo in style.GetBuildingInfos())
+                {
+                    var building = new Configuration.Building
+                    {
+                        name = buildingInfo.name
+                    };
+                    theme.buildings.Add(building);
+
+                }
+                _configuration.themes.Add(theme);
+            }
+        }
+
         internal void SaveConfig()
         {
-            if(_configuration != null) Configuration.Serialize(userConfigPath, _configuration);
+            if (_configuration != null) Configuration.Serialize(userConfigPath, _configuration);
         }
 
         public void Reset()
         {
-            for (int d = 0; d < districtThemeInfos.Length; d++) 
+            for (int d = 0; d < districtThemeInfos.Length; d++)
             {
                 districtThemeInfos[d] = null;
             }
@@ -120,9 +146,9 @@ namespace BuildingThemes
                 existingTheme = new Configuration.Theme(theme.name);
                 _configuration.themes.Add(existingTheme);
             }
-                
+
             existingTheme.isBuiltIn = true;
-                
+
             foreach (var builtInBuilding in theme.buildings)
             {
                 Configuration.Building existingBuilding = existingTheme.getBuilding(builtInBuilding.name);
@@ -144,7 +170,7 @@ namespace BuildingThemes
         public void EnableTheme(byte districtId, Configuration.Theme theme)
         {
             if (!IsThemeManagementEnabled(districtId)) return;
-            
+
             if (Debugger.Enabled)
             {
                 Debugger.LogFormat("Building Themes: BuildingThemesManager. Enabling theme {0} for district {1}.", theme.name, districtId);
@@ -166,7 +192,7 @@ namespace BuildingThemes
         public void DisableTheme(byte districtId, Configuration.Theme theme)
         {
             if (!IsThemeManagementEnabled(districtId)) return;
-            
+
             if (Debugger.Enabled)
             {
                 Debugger.LogFormat("Building Themes: BuildingThemesManager. Disabling theme {0} for district {1}.", theme.name, districtId);
@@ -184,13 +210,13 @@ namespace BuildingThemes
             CompileDistrictThemes(districtId);
         }
 
-        public void RefreshDistrictThemeInfos() 
+        public void RefreshDistrictThemeInfos()
         {
-            for (byte d = 0; d < districtThemeInfos.Length; d++) 
+            for (byte d = 0; d < districtThemeInfos.Length; d++)
             {
                 var info = districtThemeInfos[d];
-                if(info == null) continue;
-                
+                if (info == null) continue;
+
                 // Remove themes which are no longer listed in the configuration
                 info.themes.RemoveWhere(theme => !Configuration.themes.Contains(theme));
 
@@ -222,7 +248,7 @@ namespace BuildingThemes
         }
 
         //TODO move this method to DistrictThemeInfo class?
-        public void CompileDistrictThemes(byte districtId) 
+        public void CompileDistrictThemes(byte districtId)
         {
             var info = districtThemeInfos[districtId];
 
@@ -237,9 +263,9 @@ namespace BuildingThemes
                 blacklistedThemes.ExceptWith(info.themes);
             }
 
-            if (Debugger.Enabled) 
-            { 
-                Debugger.LogFormat("Compiling theme data for district {0}. Enabled Themes: {1}, Blacklist Themes: {2}", 
+            if (Debugger.Enabled)
+            {
+                Debugger.LogFormat("Compiling theme data for district {0}. Enabled Themes: {1}, Blacklist Themes: {2}",
                     districtId, enabledThemes.Count, blacklistedThemes == null ? 0 : blacklistedThemes.Count);
             }
 
@@ -250,14 +276,14 @@ namespace BuildingThemes
             info.upgradeBuildings.Clear();
             foreach (var theme in enabledThemes)
             {
-                foreach (var building in theme.buildings) 
+                foreach (var building in theme.buildings)
                 {
                     if (building.upgradeName == null) continue;
-                    
+
                     var fromPrefab = PrefabCollection<BuildingInfo>.FindLoaded(building.name);
                     var toPrefab = PrefabCollection<BuildingInfo>.FindLoaded(building.upgradeName);
 
-                    if (fromPrefab != null && toPrefab != null && !info.upgradeBuildings.ContainsKey((ushort)fromPrefab.m_prefabDataIndex)) 
+                    if (fromPrefab != null && toPrefab != null && !info.upgradeBuildings.ContainsKey((ushort)fromPrefab.m_prefabDataIndex))
                     {
                         info.upgradeBuildings.Add((ushort)fromPrefab.m_prefabDataIndex, (ushort)toPrefab.m_prefabDataIndex);
                     }
@@ -301,11 +327,11 @@ namespace BuildingThemes
         {
             var info = districtThemeInfos[districtId];
 
-            if(info != null)
+            if (info != null)
             {
                 return info.blacklistMode;
             }
-            else if(districtId != 0) 
+            else if (districtId != 0)
             {
                 return IsBlacklistModeEnabled(0);
             }
@@ -329,32 +355,32 @@ namespace BuildingThemes
             {
                 return null;
             }
-            
+
             return PrefabCollection<BuildingInfo>.GetPrefab(upgradePrefabIndex);
         }
 
         private void RefreshAreaBuildings(FastList<ushort>[] m_areaBuildings, HashSet<Configuration.Theme> enabledThemes, HashSet<Configuration.Theme> blacklistedThemes, bool includeVariations)
-	    {
-			int areaBuildingsLength = m_areaBuildings.Length;
-			for (int i = 0; i < areaBuildingsLength; i++)
-			{
-				m_areaBuildings[i] = null;
-			}
-			int prefabCount = PrefabCollection<BuildingInfo>.PrefabCount();
-			for (int j = 0; j < prefabCount; j++)
-			{
-				BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab((uint)j);
-				if (prefab != null && prefab.m_class.m_service != ItemClass.Service.None && prefab.m_placementStyle == ItemClass.Placement.Automatic && prefab.m_class.m_service <= ItemClass.Service.Office)
-				{
-					if (prefab.m_cellWidth < 1 || prefab.m_cellWidth > 4 || prefab.m_cellLength < 1 || prefab.m_cellLength > 4)
-					{
+        {
+            int areaBuildingsLength = m_areaBuildings.Length;
+            for (int i = 0; i < areaBuildingsLength; i++)
+            {
+                m_areaBuildings[i] = null;
+            }
+            int prefabCount = PrefabCollection<BuildingInfo>.PrefabCount();
+            for (int j = 0; j < prefabCount; j++)
+            {
+                BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab((uint)j);
+                if (prefab != null && prefab.m_class.m_service != ItemClass.Service.None && prefab.m_placementStyle == ItemClass.Placement.Automatic && prefab.m_class.m_service <= ItemClass.Service.Office)
+                {
+                    if (prefab.m_cellWidth < 1 || prefab.m_cellWidth > 4 || prefab.m_cellLength < 1 || prefab.m_cellLength > 4)
+                    {
                         continue;
-					}
-					else
-					{
-						// mod begin
+                    }
+                    else
+                    {
+                        // mod begin
                         if (!includeVariations && BuildingVariationManager.instance.IsVariation(prefab.name)) continue;
-                        
+
                         int spawnRateSum = 0;
                         int hits = 0;
 
@@ -379,10 +405,10 @@ namespace BuildingThemes
                             hits = 1;
                         }
 
-                        if (hits == 0 && blacklistedThemes != null) 
+                        if (hits == 0 && blacklistedThemes != null)
                         {
                             bool onBlacklist = false;
-                            
+
                             foreach (var theme in blacklistedThemes)
                             {
                                 var building = theme.getBuilding(prefab.name);
@@ -405,65 +431,65 @@ namespace BuildingThemes
                             }
                         }
 
-                        if (hits == 0 || spawnRateSum == 0) 
+                        if (hits == 0 || spawnRateSum == 0)
                         {
                             continue;
                         }
 
                         // mod end
-                        
+
                         int areaIndex = GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
-						if (m_areaBuildings[areaIndex] == null)
-						{
-							m_areaBuildings[areaIndex] = new FastList<ushort>();
-						}
+                        if (m_areaBuildings[areaIndex] == null)
+                        {
+                            m_areaBuildings[areaIndex] = new FastList<ushort>();
+                        }
 
                         // mod begin
                         int spawnRate = spawnRateSum / hits;
                         for (uint s = 0; s < spawnRate; s++)
                         {
-                        // mod end
+                            // mod end
                             m_areaBuildings[areaIndex].Add((ushort)j);
-                        // mod begin
+                            // mod begin
                         }
                         // mod end
-					}
-				}
-			}
-			int num3 = 17;
-			for (int k = 0; k < num3; k++)
-			{
-				for (int l = 0; l < 5; l++)
-				{
-					for (int m = 0; m < 4; m++)
-					{
-						for (int n = 1; n < 4; n++)
-						{
-							int num4 = k;
-							num4 = num4 * 5 + l;
-							num4 = num4 * 4 + m;
-							num4 = num4 * 4 + n;
-							num4 *= 2;
-							FastList<ushort> fastList = m_areaBuildings[num4];
-							FastList<ushort> fastList2 = m_areaBuildings[num4 - 2];
-							if (fastList2 != null)
-							{
-								if (fastList == null)
-								{
-									m_areaBuildings[num4] = fastList2;
-								}
-								else
-								{
-									for (int num5 = 0; num5 < fastList2.m_size; num5++)
-									{
-										fastList.Add(fastList2.m_buffer[num5]);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+                    }
+                }
+            }
+            int num3 = 17;
+            for (int k = 0; k < num3; k++)
+            {
+                for (int l = 0; l < 5; l++)
+                {
+                    for (int m = 0; m < 4; m++)
+                    {
+                        for (int n = 1; n < 4; n++)
+                        {
+                            int num4 = k;
+                            num4 = num4 * 5 + l;
+                            num4 = num4 * 4 + m;
+                            num4 = num4 * 4 + n;
+                            num4 *= 2;
+                            FastList<ushort> fastList = m_areaBuildings[num4];
+                            FastList<ushort> fastList2 = m_areaBuildings[num4 - 2];
+                            if (fastList2 != null)
+                            {
+                                if (fastList == null)
+                                {
+                                    m_areaBuildings[num4] = fastList2;
+                                }
+                                else
+                                {
+                                    for (int num5 = 0; num5 < fastList2.m_size; num5++)
+                                    {
+                                        fastList.Add(fastList2.m_buffer[num5]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public static int GetAreaIndex(ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
@@ -493,10 +519,10 @@ namespace BuildingThemes
             return areaIndex;
         }
 
-        public FastList<ushort> GetAreaBuildings(byte districtId, int areaIndex) 
+        public FastList<ushort> GetAreaBuildings(byte districtId, int areaIndex)
         {
             var info = districtThemeInfos[districtId];
-            
+
             // Theme management enabled in district? return custom fastlist for district
             if (info != null)
             {
@@ -510,7 +536,7 @@ namespace BuildingThemes
             // Theme management not enabled in city-wide district? return fastlist of the game
             else
             {
-                if (m_areaBuildingsDirty) 
+                if (m_areaBuildingsDirty)
                 {
                     RefreshAreaBuildings(m_areaBuildings, null, null, false);
                     m_areaBuildingsDirty = false;

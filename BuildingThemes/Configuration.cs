@@ -33,6 +33,8 @@ namespace BuildingThemes
 
         public class Theme
         {
+            [XmlIgnoreAttribute] public DistrictStyle sourceStyle = null;
+            
             [XmlAttribute("name")]
             public string name;
 
@@ -167,6 +169,11 @@ namespace BuildingThemes
 
                     foreach (var theme in config.themes)
                     {
+                        if (theme.sourceStyle != null)
+                        {
+                            //TODO(earalov): update style?
+                             continue;
+                        }
                         var newTheme = new Theme(theme.name);
 
                         foreach (var building in theme.buildings.Where(building => 
