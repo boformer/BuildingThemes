@@ -86,8 +86,8 @@ namespace BuildingThemes
                         theme.buildings.Add(building);
                     }
                 }
-                var existingTheme = _configuration.themes.FirstOrDefault((t) => t.stylePackage == style.PackageName);
-                if (existingTheme == null)
+                var existingThemeIndex = _configuration.themes.FindIndex((t) => t.stylePackage == style.PackageName);
+                if (existingThemeIndex < 0)
                 {
                     Debugger.LogFormat(
                         "Imported style \"{0}\" as theme \"{1}\". Buildings in style: {2}. Buildings in theme: {3} ",
@@ -97,7 +97,7 @@ namespace BuildingThemes
                 }
                 else
                 {
-                    existingTheme.isBuiltIn = true;
+                    var existingTheme = _configuration.themes[existingThemeIndex];
                     if (existingTheme.buildings != null)
                     {
                         foreach (var building in existingTheme.buildings)
@@ -116,6 +116,7 @@ namespace BuildingThemes
                             }
                         }
                     }
+                    _configuration.themes[existingThemeIndex] = theme;
                 }
             }
         }
