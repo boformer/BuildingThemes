@@ -93,6 +93,7 @@ namespace BuildingThemes
             Debugger.AppendThemeList();
 
             PolicyPanelEnabler.UnlockPolicyToolbarButton();
+            BuildingThemesManager.instance.ImportStylesAsThemes();
             UIThemeManager.Initialize();
         }
 

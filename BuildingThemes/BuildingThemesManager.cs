@@ -39,7 +39,6 @@ namespace BuildingThemes
                     _configuration = Configuration.Deserialize(userConfigPath);
 
                     searchBuildingThemeMods();
-                    ImportStylesAsThemes();
 
                     if (Debugger.Enabled)
                     {
@@ -57,7 +56,7 @@ namespace BuildingThemes
             }
         }
 
-        internal void ImportStylesAsThemes()
+        public void ImportStylesAsThemes()
         {
             var styles = DistrictManager.instance.m_Styles;
             if (styles == null)
@@ -68,9 +67,9 @@ namespace BuildingThemes
             {
                 var theme = new Configuration.Theme
                 {
-                    name = string.Format("[Style] {0}", style.Name),
+                    name = string.Format("[Style] {0}", style.Name.Substring(0, style.Name.LastIndexOf("_", StringComparison.Ordinal))),
                     sourceStyle = style,
-                    isBuiltIn = style.BuiltIn,
+                    isBuiltIn = true,
                     buildings = new List<Configuration.Building>()
                 };
                 var buildingInfos = style.GetBuildingInfos();
