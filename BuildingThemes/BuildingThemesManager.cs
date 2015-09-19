@@ -68,9 +68,9 @@ namespace BuildingThemes
                 var theme = new Configuration.Theme
                 {
                     name = string.Format("[Style] {0}", style.BuiltIn ? style.Name.Substring(0, style.Name.LastIndexOf("_", StringComparison.Ordinal)) : style.Name),
-                    sourceStyle = style,
+                    stylePackage = style.PackageName,
                     isBuiltIn = true,
-                    buildings = new List<Configuration.Building>()
+                    buildings = new List<Configuration.Building>(),
                 };
                 var buildingInfos = style.GetBuildingInfos();
                 if (buildingInfos != null)
@@ -79,15 +79,45 @@ namespace BuildingThemes
                     {
                         var building = new Configuration.Building
                         {
-                            name = buildingInfo.name
+                            name = buildingInfo.name,
+                            fromStyle = true
                         };
+                        building.builtInBuilding = building;
                         theme.buildings.Add(building);
-
                     }
                 }
-                Debugger.LogFormat("Imported style \"{0}\" as theme \"{1}\". Buildings in style: {2}. Buildings in theme: {3} ",
-                    style.FullName, theme.name, buildingInfos!=null?buildingInfos.Length:0, theme.buildings.Count);
-                _configuration.themes.Add(theme);
+                var existingTheme = _configuration.themes.FirstOrDefault((t) => t.stylePackage == style.PackageName);
+                if (existingTheme == null)
+                {
+                    Debugger.LogFormat(
+                        "Imported style \"{0}\" as theme \"{1}\". Buildings in style: {2}. Buildings in theme: {3} ",
+                        style.FullName, theme.name, buildingInfos != null ? buildingInfos.Length : 0,
+                        theme.buildings.Count);
+                    _configuration.themes.Add(theme);
+                }
+                else
+                {
+                    existingTheme.isBuiltIn = true;
+                    if (existingTheme.buildings != null)
+                    {
+                        foreach (var building in existingTheme.buildings)
+                        {
+                            var index = theme.buildings.FindIndex(b => b.name == building.name);
+                            if (index > -1)
+                            {
+                                var builtInBuilding = theme.buildings[index];
+                                theme.buildings[index] = building;
+                                theme.buildings[index].fromStyle = true;
+                                theme.buildings[index].builtInBuilding = builtInBuilding;
+                            }
+                            else
+                            {
+                                theme.buildings.Add(building);
+                                theme.buildings[index].fromStyle = false;
+                            }
+                        }
+                    }
+                }
             }
         }
 

@@ -33,13 +33,14 @@ namespace BuildingThemes
 
         public class Theme
         {
-            [XmlIgnoreAttribute] public DistrictStyle sourceStyle = null;
-            
             [XmlAttribute("name")]
             public string name;
 
             [XmlIgnoreAttribute]
             public bool isBuiltIn = false;
+
+            [XmlAttribute("style-package"), DefaultValue(null)]
+            public string stylePackage = null;
 
             [XmlArray(ElementName = "Buildings")]
             [XmlArrayItem(ElementName = "Building")]
@@ -85,6 +86,9 @@ namespace BuildingThemes
 
             [XmlIgnoreAttribute]
             public Building builtInBuilding = null;
+
+            [XmlIgnoreAttribute()]
+            public bool fromStyle = false;
 
             [XmlAttribute("level"), DefaultValue(-1)]
             public int level = -1;
@@ -169,23 +173,32 @@ namespace BuildingThemes
 
                     foreach (var theme in config.themes)
                     {
-                        if (theme.sourceStyle != null)
-                        {
-                            //TODO(earalov): update style?
-                             continue;
-                        }
                         var newTheme = new Theme(theme.name);
-
-                        foreach (var building in theme.buildings.Where(building => 
-                            // a user-added building has to be included, or we don't need it in the config
-                            (building.builtInBuilding == null && building.include) 
-
-                            // a built-in building that was modified by the user: Only add it to the config if the modification differs
-                            || (building.builtInBuilding != null && !building.Equals(building.builtInBuilding))))
+                        if (theme.stylePackage == null)
                         {
-                            newTheme.buildings.Add(building);
-                        }
+                            foreach (var building in theme.buildings.Where(building =>
+                                // a user-added building has to be included, or we don't need it in the config
+                                (building.builtInBuilding == null && building.include)
 
+                                    // a built-in building that was modified by the user: Only add it to the config if the modification differs
+                                || (building.builtInBuilding != null && !building.Equals(building.builtInBuilding))))
+                            {
+                                newTheme.buildings.Add(building);
+                            }
+                        }
+                        else
+                        {
+                            newTheme.stylePackage = theme.stylePackage;
+                             foreach (var building in theme.buildings.Where(building =>
+                                // a building excluded from style
+                                (!building.include)
+
+                                    // a building that's included in style Only add it to the config if the modification differs
+                                || (building.include && !building.Equals(building.builtInBuilding))))
+                            {
+                                newTheme.buildings.Add(building);
+                            }
+                        }
                         if (!theme.isBuiltIn || newTheme.buildings.Count > 0)
                         {
                             configCopy.themes.Add(newTheme);
