@@ -413,7 +413,14 @@ namespace BuildingThemes
                         // mod end
                         
                         int areaIndex = GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
-						if (m_areaBuildings[areaIndex] == null)
+
+                        //TODO(earalov): remove that later. It's just for debugging
+                        if (areaIndex < 0 || areaIndex >= m_areaBuildings.Length)
+                        {
+                            UnityEngine.Debug.LogErrorFormat("Wrong area index: {0}. Area buildings length: {1}", areaIndex, m_areaBuildings.Length);
+                        }
+                        
+                        if (m_areaBuildings[areaIndex] == null)
 						{
 							m_areaBuildings[areaIndex] = new FastList<ushort>();
 						}
