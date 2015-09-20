@@ -12,7 +12,7 @@ namespace BuildingThemes
     {
         private readonly DistrictThemeInfo[] districtThemeInfos = new DistrictThemeInfo[128];
 
-        private readonly FastList<ushort>[] m_areaBuildings = new FastList<ushort>[2720];
+        private readonly FastList<ushort>[] m_areaBuildings = new FastList<ushort>[3040];
         private bool m_areaBuildingsDirty = true;
 
         private class DistrictThemeInfo
@@ -22,7 +22,7 @@ namespace BuildingThemes
             public readonly HashSet<Configuration.Theme> themes = new HashSet<Configuration.Theme>();
 
             // similar to BuildingManager.m_areaBuildings, but separate for every district
-            public readonly FastList<ushort>[] areaBuildings = new FastList<ushort>[2720];
+            public readonly FastList<ushort>[] areaBuildings = new FastList<ushort>[3040];
 
             // building upgrade mapping (prefabLevel1 --> prefabLevel2) for realistic building upgrades
             public readonly Dictionary<ushort, ushort> upgradeBuildings = new Dictionary<ushort, ushort>();
@@ -533,29 +533,10 @@ namespace BuildingThemes
 
         public static int GetAreaIndex(ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode)
         {
-            int areaIndex;
-            if (subService != ItemClass.SubService.None)
-            {
-                areaIndex = 8 + subService - ItemClass.SubService.ResidentialLow;
-            }
-            else
-            {
-                areaIndex = service - ItemClass.Service.Residential;
-            }
-            areaIndex = (int)(areaIndex * 5 + level);
-            if (zoningMode == BuildingInfo.ZoningMode.CornerRight)
-            {
-                areaIndex = areaIndex * 4 + length - 1;
-                areaIndex = areaIndex * 4 + width - 1;
-                areaIndex = areaIndex * 2 + 1;
-            }
-            else
-            {
-                areaIndex = areaIndex * 4 + width - 1;
-                areaIndex = areaIndex * 4 + length - 1;
-                areaIndex = (int)(areaIndex * 2 + zoningMode);
-            }
-            return areaIndex;
+            int privateSubServiceIndex = ItemClass.GetPrivateSubServiceIndex(subService);
+            int num = (int)((privateSubServiceIndex == -1 ? ItemClass.GetPrivateServiceIndex(service) : 8 + privateSubServiceIndex) * 5 + level);
+            return zoningMode != BuildingInfo.ZoningMode.CornerRight ? (int)(((num * 4 + width - 1) * 4 + length - 1) * 2 + zoningMode) : ((num * 4 + length - 1) * 4 + width - 1) * 2 + 1;
+
         }
 
         public FastList<ushort> GetAreaBuildings(byte districtId, int areaIndex)
