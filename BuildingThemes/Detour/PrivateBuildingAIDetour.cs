@@ -47,6 +47,11 @@ namespace BuildingThemes.Detour
             BuildingInfo info = data.Info;
 
             Randomizer randomizer = new Randomizer((int)buildingID);
+            for (int i = 0; i <= (int)info.m_class.m_level; i++)
+            {
+                randomizer.Int32(1000u);
+            }
+
             ItemClass.Level level = info.m_class.m_level + 1;
             DistrictManager instance = Singleton<DistrictManager>.instance;
             byte district = instance.GetDistrict(data.m_position);
