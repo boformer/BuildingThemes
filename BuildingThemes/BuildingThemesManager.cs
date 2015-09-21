@@ -10,8 +10,8 @@ namespace BuildingThemes
 {
     public class BuildingThemesManager : Singleton<BuildingThemesManager>
     {
+        private const string ModConfigPath = "BuildingThemes.xml";
         private readonly DistrictThemeInfo[] districtThemeInfos = new DistrictThemeInfo[128];
-
         private readonly FastList<ushort>[] m_areaBuildings = new FastList<ushort>[3040];
         private bool m_areaBuildingsDirty = true;
 
@@ -38,7 +38,7 @@ namespace BuildingThemes
                 {
                     _configuration = Configuration.Deserialize(userConfigPath);
 
-                    searchBuildingThemeMods();
+                    ImportThemesFromThemeMods();
 
                     if (Debugger.Enabled)
                     {
@@ -65,58 +65,14 @@ namespace BuildingThemes
             }
             foreach (var style in styles)
             {
-                var theme = new Configuration.Theme
+                try
                 {
-                    name = string.Format("[Style] {0}", style.BuiltIn ? style.Name.Substring(0, style.Name.LastIndexOf("_", StringComparison.Ordinal)) : style.Name),
-                    stylePackage = style.PackageName,
-                    isBuiltIn = true,
-                    buildings = new List<Configuration.Building>(),
-                };
-                var buildingInfos = style.GetBuildingInfos();
-                if (buildingInfos != null)
-                {
-                    foreach (var buildingInfo in buildingInfos)
-                    {
-                        var building = new Configuration.Building
-                        {
-                            name = buildingInfo.name,
-                            fromStyle = true
-                        };
-                        building.builtInBuilding = building;
-                        theme.buildings.Add(building);
-                    }
+                    AddStyleTheme(style);
                 }
-                var existingThemeIndex = _configuration.themes.FindIndex((t) => t.stylePackage == style.PackageName);
-                if (existingThemeIndex < 0)
+                catch (Exception e)
                 {
-                    Debugger.LogFormat(
-                        "Imported style \"{0}\" as theme \"{1}\". Buildings in style: {2}. Buildings in theme: {3} ",
-                        style.FullName, theme.name, buildingInfos != null ? buildingInfos.Length : 0,
-                        theme.buildings.Count);
-                    _configuration.themes.Add(theme);
-                }
-                else
-                {
-                    var existingTheme = _configuration.themes[existingThemeIndex];
-                    if (existingTheme.buildings != null)
-                    {
-                        foreach (var building in existingTheme.buildings)
-                        {
-                            var index = theme.buildings.FindIndex(b => b.name == building.name);
-                            if (index > -1)
-                            {
-                                var builtInBuilding = theme.buildings[index];
-                                theme.buildings[index] = building;
-                                theme.buildings[index].fromStyle = true;
-                                theme.buildings[index].builtInBuilding = builtInBuilding;
-                            }
-                            else
-                            {
-                                theme.buildings.Add(building);
-                            }
-                        }
-                    }
-                    _configuration.themes[existingThemeIndex] = theme;
+                    Debugger.Log("Error while importing style " + style.FullName);
+                    Debugger.LogException(e);
                 }
             }
         }
@@ -142,22 +98,18 @@ namespace BuildingThemes
             m_areaBuildingsDirty = true;
         }
 
-        private const string modConfigPath = "BuildingThemes.xml";
-        private void searchBuildingThemeMods()
-        {
-            foreach (var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo())
-            {
-                if (!pluginInfo.isEnabled) continue;
 
+        private void ImportThemesFromThemeMods()
+        {
+            foreach (var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo().Where(pluginInfo => pluginInfo.isEnabled))
+            {
                 try
                 {
-                    Configuration config = Configuration.Deserialize(Path.Combine(pluginInfo.modPath, modConfigPath));
-
+                    var config = Configuration.Deserialize(Path.Combine(pluginInfo.modPath, ModConfigPath));
                     if (config == null)
                     {
                         continue;
                     }
-
                     foreach (var theme in config.themes)
                     {
                         AddModTheme(theme, pluginInfo.name);
@@ -166,44 +118,79 @@ namespace BuildingThemes
                 catch (Exception e)
                 {
                     Debugger.Log("Error while parsing BuildingThemes.xml of mod " + pluginInfo.name);
-                    Debugger.Log(e.ToString());
+                    Debugger.LogException(e);
                 }
             }
         }
 
-        private void AddModTheme(Configuration.Theme theme, string modName)
+        private void AddModTheme(Configuration.Theme modTheme, string modName)
         {
-            if (theme == null)
+            if (modTheme == null)
             {
                 return;
             }
+            Configuration.Theme theme;
+            AddImportedTheme(modTheme.buildings, modTheme.name, null, out theme);
+            Debugger.LogFormat(
+                "Imported theme from mod \"{0}\" as theme \"{1}\". Buildings in mod: {2}. Buildings in theme: {3} ",
+                modTheme.buildings.Count,
+                modName, theme.name, theme.buildings != null ? theme.buildings.Count : 0
+                );
+        }
 
-            var existingTheme = _configuration.getTheme(theme.name);
 
-            if (existingTheme == null)
+        private void AddStyleTheme(DistrictStyle style)
+        {
+            var buildingInfos = style.GetBuildingInfos();
+            List<Configuration.Building> buildings = null;
+            if (buildingInfos != null)
             {
-                existingTheme = new Configuration.Theme(theme.name);
-                _configuration.themes.Add(existingTheme);
+                buildings = buildingInfos.Select(buildingInfo => new Configuration.Building
+                {
+                    name = buildingInfo.name, fromStyle = true
+                }).ToList();
             }
+            Configuration.Theme theme;
+            AddImportedTheme(buildings,
+                string.Format("[Style] {0}", style.BuiltIn ? style.Name.Substring(0, style.Name.LastIndexOf("_", StringComparison.Ordinal)) : style.Name),
+                style.PackageName, out theme);
+            Debugger.LogFormat(
+                "Imported style \"{0}\" as theme \"{1}\". Buildings in style: {2}. Buildings in theme: {3} ",
+                style.FullName, theme.name, buildingInfos != null ? buildingInfos.Length : 0,
+                theme.buildings != null ? theme.buildings.Count : 0);
+        }
 
-            existingTheme.isBuiltIn = true;
-
-            foreach (var builtInBuilding in theme.buildings)
+        private void AddImportedTheme(List<Configuration.Building> builtInBuildings, string themeName, string stylePackage, out Configuration.Theme theme)
+        {
+            theme = _configuration.getTheme(themeName);
+            if (theme == null)
             {
-                Configuration.Building existingBuilding = existingTheme.getBuilding(builtInBuilding.name);
-
-                if (existingBuilding == null)
+                theme = new Configuration.Theme
                 {
-                    var building = new Configuration.Building(builtInBuilding);
-                    existingTheme.buildings.Add(building);
-                }
-                else if (existingBuilding.builtInBuilding == null)
-                {
-                    existingBuilding.builtInBuilding = builtInBuilding;
-                }
+                    name = themeName,
+                    stylePackage = stylePackage
+                };
+                _configuration.themes.Add(theme);
             }
-
-            Debugger.LogFormat("Building Themes: Theme {0} added by mod {1}", theme.name, modName);
+            theme.isBuiltIn = true;
+            if (builtInBuildings == null)
+            {
+                return;
+            }
+            foreach (var builtInBuilding in builtInBuildings)
+            {
+                var building = theme.getBuilding(builtInBuilding.name);
+                if (building == null)
+                {
+                    building= new Configuration.Building(builtInBuilding);
+                    theme.buildings.Add(building);
+                }
+                else if (building.builtInBuilding == null)
+                {
+                    building.builtInBuilding = builtInBuilding;
+                }
+                building.fromStyle = builtInBuilding.fromStyle;
+            }
         }
 
         public void EnableTheme(byte districtId, Configuration.Theme theme)

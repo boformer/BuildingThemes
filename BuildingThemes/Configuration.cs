@@ -68,15 +68,6 @@ namespace BuildingThemes
                 }
                 return null;
             }
-
-            public Theme(string name)
-            {
-                this.name = name;
-            }
-
-            public Theme()
-            {
-            }
         }
 
         public class Building
