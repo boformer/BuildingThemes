@@ -134,7 +134,7 @@ namespace BuildingThemes
             Debugger.LogFormat(
                 "Imported theme from mod \"{0}\" as theme \"{1}\". Buildings in mod: {2}. Buildings in theme: {3} ",
                 modTheme.buildings.Count,
-                modName, theme.name, theme.buildings != null ? theme.buildings.Count : 0
+                modName, theme.name, theme.buildings.Count
                 );
         }
 
@@ -152,12 +152,12 @@ namespace BuildingThemes
             }
             Configuration.Theme theme;
             AddImportedTheme(buildings,
-                string.Format("[Style] {0}", style.BuiltIn ? style.Name.Substring(0, style.Name.LastIndexOf("_", StringComparison.Ordinal)) : style.Name),
+                style.BuiltIn ? style.Name.Substring(0, style.Name.LastIndexOf("_", StringComparison.Ordinal)) : style.Name,
                 style.PackageName, out theme);
             Debugger.LogFormat(
                 "Imported style \"{0}\" as theme \"{1}\". Buildings in style: {2}. Buildings in theme: {3} ",
                 style.FullName, theme.name, buildingInfos != null ? buildingInfos.Length : 0,
-                theme.buildings != null ? theme.buildings.Count : 0);
+                theme.buildings.Count);
         }
 
         private void AddImportedTheme(List<Configuration.Building> builtInBuildings, string themeName, string stylePackage, out Configuration.Theme theme)

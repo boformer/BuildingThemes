@@ -164,31 +164,19 @@ namespace BuildingThemes
 
                     foreach (var theme in config.themes)
                     {
-                        var newTheme = new Theme(theme.name);
-                        if (theme.stylePackage == null)
+                        var newTheme = new Theme
                         {
-                            foreach (var building in theme.buildings.Where(building =>
-                                // a user-added building has to be included, or we don't need it in the config
-                                (building.builtInBuilding == null && building.include)
+                            name = theme.name,
+                            stylePackage = theme.stylePackage
+                        };
+                        foreach (var building in theme.buildings.Where(building =>
+                            // a user-added building has to be included, or we don't need it in the config
+                            (building.builtInBuilding == null && building.include)
 
-                                    // a built-in building that was modified by the user: Only add it to the config if the modification differs
-                                || (building.builtInBuilding != null && !building.Equals(building.builtInBuilding))))
-                            {
-                                newTheme.buildings.Add(building);
-                            }
-                        }
-                        else
+                                // a built-in building that was modified by the user: Only add it to the config if the modification differs
+                            || (building.builtInBuilding != null && !building.Equals(building.builtInBuilding))))
                         {
-                            newTheme.stylePackage = theme.stylePackage;
-                             foreach (var building in theme.buildings.Where(building =>
-                                // a building excluded from style
-                                (!building.include)
-
-                                    // a building that's included in style Only add it to the config if the modification differs
-                                || (building.include && !building.Equals(building.builtInBuilding))))
-                            {
-                                newTheme.buildings.Add(building);
-                            }
+                            newTheme.buildings.Add(building);
                         }
                         if (!theme.isBuiltIn || newTheme.buildings.Count > 0)
                         {

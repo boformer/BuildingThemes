@@ -107,32 +107,33 @@ namespace BuildingThemes.GUI
             }
         }
 
-        public void CreateTheme(string name)
+        public void CreateTheme(string themeName)
         {
-            if (BuildingThemesManager.instance.GetThemeByName(name) == null)
+            if (BuildingThemesManager.instance.GetThemeByName(themeName) != null) return;
+            var newTheme = new Configuration.Theme()
             {
-                Configuration.Theme newTheme = new Configuration.Theme(name);
+                name = themeName
+            };
 
-                BuildingThemesManager.instance.Configuration.themes.Add(newTheme);
-                m_isDistrictThemesDirty = true;
+            BuildingThemesManager.instance.Configuration.themes.Add(newTheme);
+            m_isDistrictThemesDirty = true;
 
-                InitBuildingLists();
+            InitBuildingLists();
 
-                m_themeSelection.selectedIndex = -1;
-                m_themeSelection.rowsData.m_buffer = m_themes.Keys.ToArray();
-                m_themeSelection.rowsData.m_size = m_themeSelection.rowsData.m_buffer.Length;
+            m_themeSelection.selectedIndex = -1;
+            m_themeSelection.rowsData.m_buffer = m_themes.Keys.ToArray();
+            m_themeSelection.rowsData.m_size = m_themeSelection.rowsData.m_buffer.Length;
 
-                for (int i = 0; i < m_themeSelection.rowsData.m_buffer.Length; i++)
+            for (int i = 0; i < m_themeSelection.rowsData.m_buffer.Length; i++)
+            {
+                if (m_themeSelection.rowsData.m_buffer[i] == newTheme)
                 {
-                    if (m_themeSelection.rowsData.m_buffer[i] == newTheme)
-                    {
-                        m_themeSelection.DisplayAt(i);
-                        m_themeSelection.selectedIndex = i;
-                    }
+                    m_themeSelection.DisplayAt(i);
+                    m_themeSelection.selectedIndex = i;
                 }
-
-                ThemePolicyTab.RefreshThemesContainer();
             }
+
+            ThemePolicyTab.RefreshThemesContainer();
         }
 
         public void DeleteTheme(Configuration.Theme theme)
