@@ -75,6 +75,22 @@ namespace BuildingThemes
                     Debugger.LogException(e);
                 }
             }
+            for (byte districtId = 0; districtId < DistrictManager.instance.m_districts.m_buffer.Length; ++districtId)
+            {
+                var district = DistrictManager.instance.m_districts.m_buffer[districtId];
+                if (district.m_flags == District.Flags.None || district.m_Style <= 0)
+                {
+                    continue;
+                }
+                var style = DistrictManager.instance.m_Styles[district.m_Style-1];
+                var stylePackage = style.PackageName;
+                Singleton<DistrictManager>.instance.m_districts.m_buffer[districtId].m_Style = 0;
+                ToggleThemeManagement(districtId, true);
+                var theme = GetThemeByStylePackage(stylePackage);
+                EnableTheme(districtId, theme);
+                Debugger.LogFormat("Theme \"{0}\" was enabled for districtId={1} instead of style \"{2}\" (packageName={3})",
+                    theme.name, districtId, style.Name, style.PackageName);
+            }
         }
 
         internal void SaveConfig()
@@ -614,8 +630,12 @@ namespace BuildingThemes
 
         public Configuration.Theme GetThemeByName(string themeName)
         {
-            var themes = Configuration.themes.Where(theme => theme.name == themeName).ToList();
-            return themes.Count == 0 ? null : themes[0];
+            return Configuration.themes.FirstOrDefault(theme => theme.name == themeName);
+        }
+
+        private Configuration.Theme GetThemeByStylePackage(string stylePackage)
+        {
+            return Configuration.themes.FirstOrDefault(theme => theme.stylePackage == stylePackage);
         }
     }
 }
