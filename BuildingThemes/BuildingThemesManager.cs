@@ -168,7 +168,7 @@ namespace BuildingThemes
             }
             Configuration.Theme theme;
             AddImportedTheme(buildings,
-                style.BuiltIn ? style.Name.Substring(0, style.Name.LastIndexOf("_", StringComparison.Ordinal)) : style.Name,
+                (style.BuiltIn && style.Name == DistrictStyle.kEuropeanStyleName) ? "European" : style.Name,
                 style.PackageName, out theme);
             Debugger.LogFormat(
                 "Imported style \"{0}\" as theme \"{1}\". Buildings in style: {2}. Buildings in theme: {3} ",
@@ -635,7 +635,7 @@ namespace BuildingThemes
 
         private Configuration.Theme GetThemeByStylePackage(string stylePackage)
         {
-            return Configuration.themes.FirstOrDefault(theme => theme.stylePackage == stylePackage);
+            return Configuration.themes.FirstOrDefault(theme => (theme.stylePackage == stylePackage || (stylePackage == DistrictStyle.kEuropeanStyleName && theme.name == "European")));
         }
     }
 }
