@@ -3,6 +3,7 @@ using ColossalFramework;
 using UnityEngine;
 using System;
 using BuildingThemes.GUI;
+using ColossalFramework.UI;
 
 namespace BuildingThemes
 {
@@ -95,6 +96,8 @@ namespace BuildingThemes
             PolicyPanelEnabler.UnlockPolicyToolbarButton();
             BuildingThemesManager.instance.ImportStylesAsThemes();
             UIThemeManager.Initialize();
+
+            UIView.Find<UIDropDown>("StyleDropdown").Hide();
         }
 
         public override void OnLevelUnloading()
