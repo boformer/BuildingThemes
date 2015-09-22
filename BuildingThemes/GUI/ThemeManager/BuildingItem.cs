@@ -65,6 +65,8 @@ namespace BuildingThemes.GUI
                 if (itemClass.m_subService == ItemClass.SubService.ResidentialHigh) return Category.ResidentialHigh;
                 if (itemClass.m_subService == ItemClass.SubService.CommercialLow) return Category.CommercialLow;
                 if (itemClass.m_subService == ItemClass.SubService.CommercialHigh) return Category.CommercialHigh;
+                if (itemClass.m_subService == ItemClass.SubService.CommercialLeisure) return Category.CommercialLeisure;
+                if (itemClass.m_subService == ItemClass.SubService.CommercialTourist) return Category.CommercialTourism;
                 if (itemClass.m_subService == ItemClass.SubService.IndustrialGeneric) return Category.Industrial;
                 if (itemClass.m_subService == ItemClass.SubService.IndustrialFarming) return Category.Farming;
                 if (itemClass.m_subService == ItemClass.SubService.IndustrialForestry) return Category.Forestry;
@@ -85,7 +87,8 @@ namespace BuildingThemes.GUI
                     m_level = 0;
                     if (prefab != null)
                     {
-                        if (prefab.m_class.m_subService >= ItemClass.SubService.IndustrialForestry && prefab.m_class.m_subService <= ItemClass.SubService.IndustrialOre)
+                        if ((prefab.m_class.m_subService >= ItemClass.SubService.IndustrialForestry && prefab.m_class.m_subService <= ItemClass.SubService.IndustrialOre) ||
+                            (prefab.m_class.m_subService >= ItemClass.SubService.CommercialLeisure && prefab.m_class.m_subService <= ItemClass.SubService.CommercialTourist))
                             m_level = 1;
                         else
                             m_level = (int)prefab.m_class.m_level + 1;
@@ -114,6 +117,8 @@ namespace BuildingThemes.GUI
                     case Category.Forestry:
                     case Category.Oil:
                     case Category.Ore:
+                    case Category.CommercialLeisure:
+                    case Category.CommercialTourism:
                         return 1;
                 }
 

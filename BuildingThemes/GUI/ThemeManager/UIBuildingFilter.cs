@@ -5,6 +5,7 @@ namespace BuildingThemes.GUI
 {
     public class UIBuildingFilter : UIPanel
     {
+        private const int NumOfCategories = 12;
         public UICheckBox[] zoningToggles;
         public UIButton allZones;
         public UIButton noZones;
@@ -26,6 +27,8 @@ namespace BuildingThemes.GUI
                 zoningToggles[(int)Category.ResidentialHigh].isChecked &&
                 zoningToggles[(int)Category.CommercialLow].isChecked &&
                 zoningToggles[(int)Category.CommercialHigh].isChecked &&
+                zoningToggles[(int)Category.CommercialLeisure].isChecked &&
+                zoningToggles[(int)Category.CommercialTourism].isChecked &&
                 zoningToggles[(int)Category.Industrial].isChecked &&
                 zoningToggles[(int)Category.Farming].isChecked &&
                 zoningToggles[(int)Category.Forestry].isChecked &&
@@ -70,8 +73,8 @@ namespace BuildingThemes.GUI
             base.Start();
 
             // Zoning
-            zoningToggles = new UICheckBox[10];
-            for (int i = 0; i < 10; i++ )
+            zoningToggles = new UICheckBox[NumOfCategories];
+            for (int i = 0; i < NumOfCategories; i++)
             {
                 zoningToggles[i] = UIUtils.CreateIconToggle(this, CategoryIcons.atlases[i], CategoryIcons.spriteNames[i], CategoryIcons.spriteNames[i] + "Disabled");
                 zoningToggles[i].tooltip = CategoryIcons.tooltips[i];
@@ -88,7 +91,7 @@ namespace BuildingThemes.GUI
 
                 zoningToggles[i].eventDoubleClick += (c, p) =>
                 {
-                    for (int j = 0; j < 10; j++)
+                    for (int j = 0; j < NumOfCategories; j++)
                         zoningToggles[j].isChecked = false;
                     ((UICheckBox)c).isChecked = true;
 
@@ -99,11 +102,11 @@ namespace BuildingThemes.GUI
             allZones = UIUtils.CreateButton(this);
             allZones.width = 55;
             allZones.text = "All";
-            allZones.relativePosition = new Vector3(400, 5);
+            allZones.relativePosition = new Vector3(480, 5);
 
             allZones.eventClick += (c, p) =>
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < NumOfCategories; i++)
                 {
                     zoningToggles[i].isChecked = true;
                 }
@@ -113,11 +116,11 @@ namespace BuildingThemes.GUI
             noZones = UIUtils.CreateButton(this);
             noZones.width = 55;
             noZones.text = "None";
-            noZones.relativePosition = new Vector3(460, 5);
+            noZones.relativePosition = new Vector3(540, 5);
 
             noZones.eventClick += (c, p) =>
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < NumOfCategories; i++)
                 {
                     zoningToggles[i].isChecked = false;
                 }
