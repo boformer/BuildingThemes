@@ -13,7 +13,7 @@ namespace BuildingThemes
     {
         public bool UnlockPolicyPanel = true;
 
-        public bool CreateBuildingDuplicates = true;
+        public bool CreateBuildingDuplicates = false;
 
         [DefaultValue(true)]
         public bool ThemeValidityWarning = true;
