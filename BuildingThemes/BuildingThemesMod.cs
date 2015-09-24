@@ -152,6 +152,8 @@ namespace BuildingThemes
 
             Debugger.Log("ON_RELEASED");
 
+            BuildingVariationManager.instance.Reset();
+
             Debugger.Log("Building Themes: Reverting detoured methods...");
 
             Singleton<BuildingThemesManager>.instance.Reset();

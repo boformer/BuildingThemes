@@ -6,7 +6,7 @@ namespace BuildingThemes
 {
     public class BuildingVariationManager : Singleton<BuildingVariationManager>
     {
-        private readonly Dictionary<string, BuildingInfo> variations = new Dictionary<string, BuildingInfo>();
+        private readonly Dictionary<string, BuildingInfo> variationToBase = new Dictionary<string, BuildingInfo>();
 
         public static bool Enabled
         {
@@ -23,19 +23,28 @@ namespace BuildingThemes
 
         public void Reset() 
         {
-            variations.Clear();
+            foreach (Transform child in transform)
+            {
+                BuildingInfo info = child.gameObject.GetComponent<BuildingInfo>();
+
+                if (info != null) info.DestroyPrefab();
+
+                GameObject.Destroy(child.gameObject);
+            }
+
+            variationToBase.Clear();
         }
         
         public bool IsVariation(string prefabName) 
         {
-            return variations.ContainsKey(prefabName);
+            return variationToBase.ContainsKey(prefabName);
         }
 
         public string GetBasePrefabName(string prefabName)
         {
-            if(variations.ContainsKey(prefabName))
+            if(variationToBase.ContainsKey(prefabName))
             {
-                return variations[prefabName].name;
+                return variationToBase[prefabName].name;
             }
 
             return null;
@@ -64,13 +73,23 @@ namespace BuildingThemes
                         variationClass.m_subService = prefab.m_class.m_subService;
                         variationClass.m_level = (ItemClass.Level)(variation.level - 1);
 
-                        BuildingInfo prefabVariation = BuildingInfo.Instantiate(prefab);
+                        var prefabVariation = BuildingInfo.Instantiate(prefab);
                         prefabVariation.name = variation.name;
                         prefabVariation.m_class = variationClass;
 
-                        prefabVariations.Add(variation.name, prefabVariation);
+                        // also clone generatedInfo (else this would be shared between original and clone = problem)
+                        prefabVariation.m_generatedInfo = BuildingInfoGen.Instantiate(prefab.m_generatedInfo);
+                        prefabVariation.m_generatedInfo.name = variation.name + " (GeneratedInfo)";
+                        prefabVariation.m_generatedInfo.m_buildingInfo = null;
 
-                        variations.Add(variation.name, prefab);
+                        // disable rendering of the buildinginfo
+                        prefabVariation.gameObject.SetActive(false);
+
+                        // This line is evil and removing it is killing the game's performances
+                        prefabVariation.transform.parent = prefab.transform;
+
+                        variationToBase.Remove(variation.name);
+                        variationToBase.Add(variation.name, prefab);
                     }
                 }
             }
