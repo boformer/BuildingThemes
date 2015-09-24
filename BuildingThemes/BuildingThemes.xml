@@ -3,6 +3,16 @@
   <Themes>
     <Theme name="European">
       <Buildings>
+        <Building name="L1 1x1 Detached" />
+        <Building name="L1 2x2 Detached01" />
+        <Building name="L1 3x3 Detached 1a" />
+        <Building name="L2 1x1 detached01" />
+        <Building name="L3 1x1 Detached" />
+        <Building name="L5 1x1 Detached" />
+        <Building name="L5 1x1 DetachedEF" />
+        <Building name="L4 1x1 Villa04" />
+        <Building name="L4 2x2 Villa07" />
+        <Building name="L4 4x4 Villa08a" />
         <Building name="L3 1x1 Shop" />
         <Building name="L3 2x2 Shop03" />
         <Building name="L1 4x3 Shop06a" />
@@ -388,7 +398,18 @@
     </Theme>
     <Theme name="International">
       <Buildings>
-                <Building name="H1 1x1 Tenement" />
+        <Building name="L1 1x1 Detached" />
+        <Building name="L1 2x2 Detached01" />
+        <Building name="L1 3x3 Detached 1a" />
+        <Building name="L2 1x1 detached01" />
+        <Building name="L3 1x1 Detached" />
+        <Building name="L3 1x1 Detached14" />
+        <Building name="L5 1x1 Detached" />
+        <Building name="L5 1x1 DetachedEF" />
+        <Building name="L4 1x1 Villa04" />
+        <Building name="L4 2x2 Villa07" />
+        <Building name="L4 4x4 Villa08a" />
+        <Building name="H1 1x1 Tenement" />
         <Building name="H5 3x3 Tenement03" />
         <Building name="H5 2x3 Tenement06" />
         <Building name="H5 3x3 Tenement05" />
