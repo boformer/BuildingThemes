@@ -3,6 +3,8 @@ using ColossalFramework;
 using UnityEngine;
 using System;
 using BuildingThemes.GUI;
+using ColossalFramework.UI;
+using Object = UnityEngine.Object;
 
 namespace BuildingThemes
 {
@@ -77,6 +79,9 @@ namespace BuildingThemes
             try { Detour.PoliciesPanelDetour.Deploy(); }
             catch (Exception e) { Debugger.LogException(e); }
 
+            try { Detour.DistrictWorldInfoPanelDetour.Deploy(); }
+            catch (Exception e) { Debugger.LogException(e); }
+
             Debugger.Log("Building Themes: Mod successfully intialized.");
         }
 
@@ -93,7 +98,9 @@ namespace BuildingThemes
             Debugger.AppendThemeList();
 
             PolicyPanelEnabler.UnlockPolicyToolbarButton();
+            BuildingThemesManager.instance.ImportStylesAsThemes();
             UIThemeManager.Initialize();
+            UIStyleButtonReplacer.ReplaceStyleButton();
         }
 
         public override void OnLevelUnloading()
@@ -129,6 +136,7 @@ namespace BuildingThemes
                 Detour.PrivateBuildingAIDetour<IndustrialBuildingAI>.Revert();
                 Detour.PrivateBuildingAIDetour<OfficeBuildingAI>.Revert();
                 Detour.PoliciesPanelDetour.Revert();
+                Detour.DistrictWorldInfoPanelDetour.Revert();
             }
             catch (Exception e) 
             { 
