@@ -12,7 +12,7 @@ namespace BuildingThemes
     {
         public string Name
         {
-            get { return "Building Themes"; }
+            get { return "Building Themes (After Dark compatible)"; }
         }
         public string Description
         {
