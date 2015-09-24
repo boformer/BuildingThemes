@@ -318,6 +318,10 @@ namespace BuildingThemes.GUI
                 BuildingThemesManager.instance.SaveConfig();
                 m_isDistrictThemesDirty = false;
             }
+            if (BuildingVariationManager.Enabled != m_cloneBuilding.isVisible)
+            {
+                m_cloneBuilding.isVisible = BuildingVariationManager.Enabled;
+            }
         }
 
         public override void Start()
