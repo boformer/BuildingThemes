@@ -35,6 +35,8 @@ namespace BuildingThemes
         {
             base.OnCreated(loading);
 
+            int currentConfigVersion = BuildingThemesManager.instance.Configuration.version;
+
             Debugger.Initialize();
 
             Debugger.Log("ON_CREATED");
@@ -48,8 +50,35 @@ namespace BuildingThemes
 
             if (BuildingVariationManager.Enabled)
             {
-                try { Detour.BuildingInfoDetour.Deploy(); }
-                catch (Exception e) { Debugger.LogException(e); }
+                bool cloneFeatureUsed = false;
+
+                if (BuildingThemesManager.instance.Configuration.version == 0)
+                {
+
+                    foreach (var theme in BuildingThemesManager.instance.Configuration.themes)
+                    {
+                        foreach (var building in theme.buildings)
+                        {
+                            if (building.baseName != null)
+                            {
+                                cloneFeatureUsed = true;
+                                break;
+                            }
+                        }
+
+                        if (cloneFeatureUsed) break;
+                    }
+                }
+                else cloneFeatureUsed = true;
+
+                if(cloneFeatureUsed) {
+                    try { Detour.BuildingInfoDetour.Deploy(); }
+                    catch (Exception e) { Debugger.LogException(e); }
+                }
+                else 
+                {
+                    BuildingVariationManager.Enabled = false;
+                }
             }
 
             try { Detour.BuildingManagerDetour.Deploy(); }
@@ -81,6 +110,9 @@ namespace BuildingThemes
 
             try { Detour.DistrictWorldInfoPanelDetour.Deploy(); }
             catch (Exception e) { Debugger.LogException(e); }
+
+            BuildingThemesManager.instance.Configuration.version = 1;
+            BuildingThemesManager.instance.SaveConfig();
 
             Debugger.Log("Building Themes: Mod successfully intialized.");
         }
