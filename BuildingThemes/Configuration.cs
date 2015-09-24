@@ -11,6 +11,8 @@ namespace BuildingThemes
 {
     public class Configuration
     {
+        public int version = 0;
+        
         public bool UnlockPolicyPanel = true;
 
         public bool CreateBuildingDuplicates = false;
@@ -158,6 +160,7 @@ namespace BuildingThemes
                 {
                     var configCopy = new Configuration();
 
+                    configCopy.version = config.version;
                     configCopy.UnlockPolicyPanel = config.UnlockPolicyPanel;
                     configCopy.CreateBuildingDuplicates = config.CreateBuildingDuplicates;
                     configCopy.ThemeValidityWarning = config.ThemeValidityWarning;
