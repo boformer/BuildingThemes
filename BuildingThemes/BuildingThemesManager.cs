@@ -414,91 +414,95 @@ namespace BuildingThemes
                 BuildingInfo prefab = PrefabCollection<BuildingInfo>.GetPrefab((uint)j);
                 if (prefab != null && prefab.m_class.m_service != ItemClass.Service.None && prefab.m_placementStyle == ItemClass.Placement.Automatic && prefab.m_class.m_service <= ItemClass.Service.Office)
                 {
-                    if (prefab.m_cellWidth < 1 || prefab.m_cellWidth > 4 || prefab.m_cellLength < 1 || prefab.m_cellLength > 4)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        // mod begin
-                        if (!includeVariations && BuildingVariationManager.instance.IsVariation(prefab.name)) continue;
+                    int privateServiceIndex = ItemClass.GetPrivateServiceIndex(prefab.m_class.m_service);
 
-                        int spawnRateSum = 0;
-                        int hits = 0;
-
-                        if (enabledThemes != null && enabledThemes.Count > 0)
-                        {
-                            foreach (var theme in enabledThemes)
-                            {
-                                var building = theme.getBuilding(prefab.name);
-
-                                if (building != null && building.include)
-                                {
-                                    hits++;
-                                    // limit spawn rate to 50
-                                    spawnRateSum += Mathf.Clamp(building.spawnRate, 0, 100);
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            spawnRateSum = 1;
-                            hits = 1;
-                        }
-
-                        if (hits == 0 && blacklistedThemes != null)
-                        {
-                            bool onBlacklist = false;
-
-                            foreach (var theme in blacklistedThemes)
-                            {
-                                var building = theme.getBuilding(prefab.name);
-
-                                if (building != null && building.include)
-                                {
-                                    onBlacklist = true;
-                                    break;
-                                }
-                            }
-
-                            if (onBlacklist)
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                spawnRateSum = 10;
-                                hits = 1;
-                            }
-                        }
-
-                        if (hits == 0 || spawnRateSum == 0)
+                    if (privateServiceIndex != -1) {
+                        if (prefab.m_cellWidth < 1 || prefab.m_cellWidth > 4 || prefab.m_cellLength < 1 || prefab.m_cellLength > 4)
                         {
                             continue;
                         }
-
-                        // mod end
-
-                        int areaIndex = GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
-                        if (m_areaBuildings[areaIndex] == null)
+                        else
                         {
-                            m_areaBuildings[areaIndex] = new FastList<ushort>();
-                        }
-
-                        // mod begin
-                        int spawnRate = spawnRateSum / hits;
-                        for (uint s = 0; s < spawnRate; s++)
-                        {
-                            // mod end
-                            m_areaBuildings[areaIndex].Add((ushort)j);
                             // mod begin
+                            if (!includeVariations && BuildingVariationManager.instance.IsVariation(prefab.name)) continue;
+
+                            int spawnRateSum = 0;
+                            int hits = 0;
+
+                            if (enabledThemes != null && enabledThemes.Count > 0)
+                            {
+                                foreach (var theme in enabledThemes)
+                                {
+                                    var building = theme.getBuilding(prefab.name);
+
+                                    if (building != null && building.include)
+                                    {
+                                        hits++;
+                                        // limit spawn rate to 50
+                                        spawnRateSum += Mathf.Clamp(building.spawnRate, 0, 100);
+                                        break;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                spawnRateSum = 1;
+                                hits = 1;
+                            }
+
+                            if (hits == 0 && blacklistedThemes != null)
+                            {
+                                bool onBlacklist = false;
+
+                                foreach (var theme in blacklistedThemes)
+                                {
+                                    var building = theme.getBuilding(prefab.name);
+
+                                    if (building != null && building.include)
+                                    {
+                                        onBlacklist = true;
+                                        break;
+                                    }
+                                }
+
+                                if (onBlacklist)
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    spawnRateSum = 10;
+                                    hits = 1;
+                                }
+                            }
+
+                            if (hits == 0 || spawnRateSum == 0)
+                            {
+                                continue;
+                            }
+
+                            // mod end
+
+                            int areaIndex = GetAreaIndex(prefab.m_class.m_service, prefab.m_class.m_subService, prefab.m_class.m_level, prefab.m_cellWidth, prefab.m_cellLength, prefab.m_zoningMode);
+                            if (m_areaBuildings[areaIndex] == null)
+                            {
+                                m_areaBuildings[areaIndex] = new FastList<ushort>();
+                            }
+
+                            // mod begin
+                            int spawnRate = spawnRateSum / hits;
+                            for (uint s = 0; s < spawnRate; s++)
+                            {
+                                // mod end
+                                m_areaBuildings[areaIndex].Add((ushort)j);
+                                // mod begin
+                            }
+                            // mod end
                         }
-                        // mod end
                     }
                 }
             }
-            int num3 = 17;
+            int num3 = 19;
             for (int k = 0; k < num3; k++)
             {
                 for (int l = 0; l < 5; l++)
