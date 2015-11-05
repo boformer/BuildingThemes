@@ -23,6 +23,8 @@ namespace BuildingThemes
 
         public void Reset() 
         {
+            if (transform == null) return;
+            
             foreach (Transform child in transform)
             {
                 BuildingInfo info = child.gameObject.GetComponent<BuildingInfo>();
@@ -90,6 +92,7 @@ namespace BuildingThemes
 
                         variationToBase.Remove(variation.name);
                         variationToBase.Add(variation.name, prefab);
+                        prefabVariations.Add(variation.name, prefabVariation);
                     }
                 }
             }
