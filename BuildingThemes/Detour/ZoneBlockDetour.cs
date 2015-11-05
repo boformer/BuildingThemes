@@ -159,7 +159,7 @@ namespace BuildingThemes.Detour
                             _CheckBlock.Invoke(zoneBlock, new object[] { zoneManager.m_blocks.m_buffer[(int)num9], tmpXBuffer, zone, vector3, xDirection, zDirection, quad });
                         }
                         num9 = zoneManager.m_blocks.m_buffer[(int)num9].m_nextGridBlock;
-                        if (++num10 >= 32768)
+                        if (++num10 >= 49152)
                         {
                             CODebugBase<LogChannel>.Error(LogChannel.Core, "Invalid list detected!\n" + Environment.StackTrace);
                             break;
