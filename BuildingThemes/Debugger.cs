@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Plugins;
+using ColossalFramework.UI;
 using ICities;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,14 @@ namespace BuildingThemes
 {
     public static class Debugger
     {
-        private const string logFilePath = "BuildingThemes_log.txt";
-
         private static bool initialized = false;
 
         private static bool _enabled = false;
+
+
+        private static bool loaded = false;
+        private static string exceptions = "";
+
         public static bool Enabled 
         { 
             get 
@@ -54,6 +58,8 @@ namespace BuildingThemes
             if (initialized)
             {
                 initialized = false;
+                exceptions = "";
+                loaded = false;
             }
         }
 
@@ -70,9 +76,45 @@ namespace BuildingThemes
             Log(String.Format(format, args));
         }
 
+        public static void LogError(string error)
+        {
+            Debug.LogError(error);
+        }
+
         public static void LogException(Exception e)
         {
-            Debug.Log("ERROR: " + e.Message + "\n" + e.StackTrace);
+            string message = "ERROR: " + e.Message + "\n" + e.StackTrace  + "\n";
+            
+            Debug.LogException(e);
+
+            exceptions += message; 
+
+            if (loaded) ShowExceptions();
+        }
+
+        public static void OnLevelLoaded()
+        {
+            loaded = true;
+
+            ShowExceptions();
+        }
+
+        public static void OnLevelUnloading()
+        {
+            loaded = false;
+        }
+
+        private static void ShowExceptions()
+        {
+            if (exceptions != "")
+            {
+                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
+                    "Building Themes Error",
+                    "Please report this error on the Building Themes workshop page:\n" + exceptions,
+                    true);
+
+                exceptions = "";
+            }
         }
 
         public static void AppendModList()

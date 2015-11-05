@@ -36,19 +36,26 @@ namespace BuildingThemes
             {
                 if (_configuration == null)
                 {
-                    _configuration = Configuration.Deserialize(userConfigPath);
-
-                    ImportThemesFromThemeMods();
-
-                    if (Debugger.Enabled)
+                    try
                     {
-                        Debugger.Log("Building Themes: User Configuration loaded.");
+                        _configuration = Configuration.Deserialize(userConfigPath);
+
+                        ImportThemesFromThemeMods();
+
+                        if (Debugger.Enabled)
+                        {
+                            Debugger.Log("Building Themes: User Configuration loaded.");
+                        }
+
+                        if (_configuration == null)
+                        {
+                            _configuration = new Configuration();
+                            SaveConfig();
+                        }
                     }
-
-                    if (_configuration == null)
+                    catch (Exception e) 
                     {
-                        _configuration = new Configuration();
-                        SaveConfig();
+                        Debugger.LogException(e);
                     }
                 }
 

@@ -12,7 +12,7 @@ namespace BuildingThemes
     {
         public string Name
         {
-            get { return "Building Themes (After Dark compatible)"; }
+            get { return "Building Themes"; }
         }
         public string Description
         {
@@ -129,6 +129,8 @@ namespace BuildingThemes
             Debugger.AppendModList();
             Debugger.AppendThemeList();
 
+            Debugger.OnLevelLoaded();
+
             PolicyPanelEnabler.UnlockPolicyToolbarButton();
             BuildingThemesManager.instance.ImportStylesAsThemes();
             UIThemeManager.Initialize();
@@ -142,6 +144,8 @@ namespace BuildingThemes
             BuildingThemesManager.instance.Reset();
 
             Debugger.Log("ON_LEVEL_UNLOADING");
+
+            Debugger.OnLevelUnloading();
 
             UIThemeManager.Destroy();
         }
