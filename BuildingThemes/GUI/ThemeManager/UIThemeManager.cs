@@ -1,4 +1,5 @@
 ﻿using ColossalFramework;
+using ColossalFramework.Steamworks;
 using ColossalFramework.UI;
 using System;
 using System.Collections.Generic;
@@ -590,6 +591,9 @@ namespace BuildingThemes.GUI
                 else
                 {
                     // Prefab not found, adding building without prefab
+
+                    if (buildings[i].dlc != null && !Steam.IsDlcInstalled(Convert.ToUInt32(buildings[i].dlc))) continue;
+
                     BuildingItem item = new BuildingItem();
                     item.building = buildings[i];
                     list.Add(item);

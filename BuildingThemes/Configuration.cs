@@ -12,14 +12,14 @@ namespace BuildingThemes
     public class Configuration
     {
         public int version = 0;
-        
+
         public bool UnlockPolicyPanel = true;
 
         public bool CreateBuildingDuplicates = false;
 
         [DefaultValue(true)]
         public bool ThemeValidityWarning = true;
-        
+
         [XmlArray(ElementName = "Themes")]
         [XmlArrayItem(ElementName = "Theme")]
         public List<Theme> themes = new List<Theme>();
@@ -57,7 +57,7 @@ namespace BuildingThemes
                 return false;
             }
 
-            public IEnumerable<Building> getVariations(string baseName) 
+            public IEnumerable<Building> getVariations(string baseName)
             {
                 return from building in buildings where building.baseName == baseName select building;
             }
@@ -98,15 +98,18 @@ namespace BuildingThemes
             [XmlAttribute("include"), DefaultValue(true)]
             public bool include = true;
 
+            [XmlAttribute("dlc"), DefaultValue(null)]
+            public string dlc = null;
+
             public bool Equals(Building other)
             {
                 if (other == null) { return false; }
                 if (object.ReferenceEquals(this, other)) { return true; }
-                return this.name == other.name 
-                    && this.level == other.level 
-                    && this.upgradeName == other.upgradeName 
-                    && this.baseName == other.baseName 
-                    && this.spawnRate == other.spawnRate 
+                return this.name == other.name
+                    && this.level == other.level
+                    && this.upgradeName == other.upgradeName
+                    && this.baseName == other.baseName
+                    && this.spawnRate == other.spawnRate
                     && this.include == other.include;
             }
 
@@ -125,6 +128,7 @@ namespace BuildingThemes
                 this.baseName = builtInBuilding.baseName;
                 this.spawnRate = builtInBuilding.spawnRate;
                 this.include = builtInBuilding.include;
+                this.dlc = builtInBuilding.dlc;
             }
 
             public Building()

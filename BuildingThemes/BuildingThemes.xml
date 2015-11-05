@@ -354,46 +354,46 @@
         <Building name="Oil2x2" />
         <Building name="Oil 1x1 processing" />
         <Building name="Oil 2x2 Processing" />
-        <Building name="2x2_Restaurant2" />
-        <Building name="2x2_Beauty Salon" />
-        <Building name="2x2_Karaoke Bar" />
-        <Building name="2x2_PrivatePool" />
-        <Building name="2x2_Beach Bar2" />
-        <Building name="2x2_Restaurant" />
-        <Building name="2x2_Souvenir Shop" />
-        <Building name="4x3_Beach Hotel2" />
-        <Building name="1x1_cafe" />
-        <Building name="2x2_Pub" />
-        <Building name="3x2_Bowling Alley" />
-        <Building name="3x2_Gym" />
-        <Building name="4x3_Beach Hotel3" />
-        <Building name="4x4_Tourist Hotel3" />
-        <Building name="4x4_Tourist Hotel2" />
-        <Building name="2x3 Game Arcade" />
-        <Building name="3x4 Game Arcade" />
-        <Building name="3x2_Beach restaurant2" />
-        <Building name="3x4_Nightclub a" />
-        <Building name="3x4_Nightclub b" />
-        <Building name="4x3_Beach Hotel" />
-        <Building name="4x4_Tourist Hotel" />
-        <Building name="2x2_Comedy Club" />
-        <Building name="2x2_Beach restaurant" />
-        <Building name="1x1_Restaurant01" />
-        <Building name="1x1_beach_restaurant2" />
-        <Building name="2x2_Hotel01" />
-        <Building name="3x2_Hotel01" />
-        <Building name="1x1_Hotel01" />
-        <Building name="2x3_Night_club_a" />
-        <Building name="2x3_Nightclub01" />
-        <Building name="2x2_Gym" />
-        <Building name="3x2_Cafe01" />
-        <Building name="1x1_terrace01" />
-        <Building name="2x2_terrace01" />
-        <Building name="2x2_terrace02" />
-        <Building name="1x1_terrace02" />
-        <Building name="1x1_Souvenir Shop" />
-        <Building name="1x1_Restaurant02" />
-        <Building name="3x2_Hotel02" />
+        <Building name="2x2_Restaurant2" dlc="369150" />
+        <Building name="2x2_Beauty Salon" dlc="369150" />
+        <Building name="2x2_Karaoke Bar" dlc="369150" />
+        <Building name="2x2_PrivatePool" dlc="369150" />
+        <Building name="2x2_Beach Bar2" dlc="369150" />
+        <Building name="2x2_Restaurant" dlc="369150" />
+        <Building name="2x2_Souvenir Shop" dlc="369150" />
+        <Building name="4x3_Beach Hotel2" dlc="369150" />
+        <Building name="1x1_cafe" dlc="369150" />
+        <Building name="2x2_Pub" dlc="369150" />
+        <Building name="3x2_Bowling Alley" dlc="369150" />
+        <Building name="3x2_Gym" dlc="369150" />
+        <Building name="4x3_Beach Hotel3" dlc="369150" />
+        <Building name="4x4_Tourist Hotel3" dlc="369150" />
+        <Building name="4x4_Tourist Hotel2" dlc="369150" />
+        <Building name="2x3 Game Arcade" dlc="369150" />
+        <Building name="3x4 Game Arcade" dlc="369150" />
+        <Building name="3x2_Beach restaurant2" dlc="369150" />
+        <Building name="3x4_Nightclub a" dlc="369150" />
+        <Building name="3x4_Nightclub b" dlc="369150" />
+        <Building name="4x3_Beach Hotel" dlc="369150" />
+        <Building name="4x4_Tourist Hotel" dlc="369150" />
+        <Building name="2x2_Comedy Club" dlc="369150" />
+        <Building name="2x2_Beach restaurant" dlc="369150" />
+        <Building name="1x1_Restaurant01" dlc="369150" />
+        <Building name="1x1_beach_restaurant2" dlc="369150" />
+        <Building name="2x2_Hotel01" dlc="369150" />
+        <Building name="3x2_Hotel01" dlc="369150" />
+        <Building name="1x1_Hotel01" dlc="369150" />
+        <Building name="2x3_Night_club_a" dlc="369150" />
+        <Building name="2x3_Nightclub01" dlc="369150" />
+        <Building name="2x2_Gym" dlc="369150" />
+        <Building name="3x2_Cafe01" dlc="369150" />
+        <Building name="1x1_terrace01" dlc="369150" />
+        <Building name="2x2_terrace01" dlc="369150" />
+        <Building name="2x2_terrace02" dlc="369150" />
+        <Building name="1x1_terrace02" dlc="369150" />
+        <Building name="1x1_Souvenir Shop" dlc="369150" />
+        <Building name="1x1_Restaurant02" dlc="369150" />
+        <Building name="3x2_Hotel02" dlc="369150" />
       </Buildings>
     </Theme>
     <Theme name="International">
@@ -842,46 +842,46 @@
         <Building name="L5 4x3 Villa07" />
         <Building name="L5 4x4 Villa03" />
         <Building name="L5 4x4 Villa08a" />
-        <Building name="2x2_Restaurant2" />
-        <Building name="2x2_Beauty Salon" />
-        <Building name="2x2_Karaoke Bar" />
-        <Building name="2x2_PrivatePool" />
-        <Building name="2x2_Beach Bar2" />
-        <Building name="2x2_Restaurant" />
-        <Building name="2x2_Souvenir Shop" />
-        <Building name="4x3_Beach Hotel2" />
-        <Building name="1x1_cafe" />
-        <Building name="2x2_Pub" />
-        <Building name="3x2_Bowling Alley" />
-        <Building name="3x2_Gym" />
-        <Building name="4x3_Beach Hotel3" />
-        <Building name="4x4_Tourist Hotel3" />
-        <Building name="4x4_Tourist Hotel2" />
-        <Building name="2x3 Game Arcade" />
-        <Building name="3x4 Game Arcade" />
-        <Building name="3x2_Beach restaurant2" />
-        <Building name="3x4_Nightclub a" />
-        <Building name="3x4_Nightclub b" />
-        <Building name="4x3_Beach Hotel" />
-        <Building name="4x4_Tourist Hotel" />
-        <Building name="2x2_Comedy Club" />
-        <Building name="2x2_Beach restaurant" />
-        <Building name="1x1_Restaurant01" />
-        <Building name="1x1_beach_restaurant2" />
-        <Building name="2x2_Hotel01" />
-        <Building name="3x2_Hotel01" />
-        <Building name="1x1_Hotel01" />
-        <Building name="2x3_Night_club_a" />
-        <Building name="2x3_Nightclub01" />
-        <Building name="2x2_Gym" />
-        <Building name="3x2_Cafe01" />
-        <Building name="1x1_terrace01" />
-        <Building name="2x2_terrace01" />
-        <Building name="2x2_terrace02" />
-        <Building name="1x1_terrace02" />
-        <Building name="1x1_Souvenir Shop" />
-        <Building name="1x1_Restaurant02" />
-        <Building name="3x2_Hotel02" />
+        <Building name="2x2_Restaurant2" dlc="369150" />
+        <Building name="2x2_Beauty Salon" dlc="369150" />
+        <Building name="2x2_Karaoke Bar" dlc="369150" />
+        <Building name="2x2_PrivatePool" dlc="369150" />
+        <Building name="2x2_Beach Bar2" dlc="369150" />
+        <Building name="2x2_Restaurant" dlc="369150" />
+        <Building name="2x2_Souvenir Shop" dlc="369150" />
+        <Building name="4x3_Beach Hotel2" dlc="369150" />
+        <Building name="1x1_cafe" dlc="369150" />
+        <Building name="2x2_Pub" dlc="369150" />
+        <Building name="3x2_Bowling Alley" dlc="369150" />
+        <Building name="3x2_Gym" dlc="369150" />
+        <Building name="4x3_Beach Hotel3" dlc="369150" />
+        <Building name="4x4_Tourist Hotel3" dlc="369150" />
+        <Building name="4x4_Tourist Hotel2" dlc="369150" />
+        <Building name="2x3 Game Arcade" dlc="369150" />
+        <Building name="3x4 Game Arcade" dlc="369150" />
+        <Building name="3x2_Beach restaurant2" dlc="369150" />
+        <Building name="3x4_Nightclub a" dlc="369150" />
+        <Building name="3x4_Nightclub b" dlc="369150" />
+        <Building name="4x3_Beach Hotel" dlc="369150" />
+        <Building name="4x4_Tourist Hotel" dlc="369150" />
+        <Building name="2x2_Comedy Club" dlc="369150" />
+        <Building name="2x2_Beach restaurant" dlc="369150" />
+        <Building name="1x1_Restaurant01" dlc="369150" />
+        <Building name="1x1_beach_restaurant2" dlc="369150" />
+        <Building name="2x2_Hotel01" dlc="369150" />
+        <Building name="3x2_Hotel01" dlc="369150" />
+        <Building name="1x1_Hotel01" dlc="369150" />
+        <Building name="2x3_Night_club_a" dlc="369150" />
+        <Building name="2x3_Nightclub01" dlc="369150" />
+        <Building name="2x2_Gym" dlc="369150" />
+        <Building name="3x2_Cafe01" dlc="369150" />
+        <Building name="1x1_terrace01" dlc="369150" />
+        <Building name="2x2_terrace01" dlc="369150" />
+        <Building name="2x2_terrace02" dlc="369150" />
+        <Building name="1x1_terrace02" dlc="369150" />
+        <Building name="1x1_Souvenir Shop" dlc="369150" />
+        <Building name="1x1_Restaurant02" dlc="369150" />
+        <Building name="3x2_Hotel02" dlc="369150" />
       </Buildings>
     </Theme>
   </Themes>
