@@ -87,11 +87,7 @@ namespace BuildingThemes.GUI
                     m_level = 0;
                     if (prefab != null)
                     {
-                        if ((prefab.m_class.m_subService >= ItemClass.SubService.IndustrialForestry && prefab.m_class.m_subService <= ItemClass.SubService.IndustrialOre) ||
-                            (prefab.m_class.m_subService >= ItemClass.SubService.CommercialLeisure && prefab.m_class.m_subService <= ItemClass.SubService.CommercialTourist))
-                            m_level = 1;
-                        else
-                            m_level = (int)prefab.m_class.m_level + 1;
+                        m_level = (int)prefab.m_class.m_level + 1;
                     }
                     else
                     {
