@@ -185,7 +185,7 @@ namespace BuildingThemes
 
         private void AddImportedTheme(List<Configuration.Building> builtInBuildings, string themeName, string stylePackage, out Configuration.Theme theme)
         {
-            theme = _configuration.getTheme(themeName);
+            theme = Configuration.getTheme(themeName);
             if (theme == null)
             {
                 theme = new Configuration.Theme
@@ -193,7 +193,7 @@ namespace BuildingThemes
                     name = themeName,
                     stylePackage = stylePackage
                 };
-                _configuration.themes.Add(theme);
+                Configuration.themes.Add(theme);
             }
             theme.isBuiltIn = true;
             if (builtInBuildings == null)
