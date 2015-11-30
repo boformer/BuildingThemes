@@ -19,7 +19,6 @@ namespace BuildingThemes
 
         // support for legacy data
         public static string LegacyDataId = "BuildingThemes";
-        private static Timer _legacyTimer;
 
         public void OnCreated(ISerializableData serializableData)
         {
@@ -60,10 +59,56 @@ namespace BuildingThemes
 
                     if (legacyData != null)
                     {
-                        _legacyTimer = new Timer(2000);
-                        // Hook up the Elapsed event for the timer. 
-                        _legacyTimer.Elapsed += LegacyOnLoadDataTimed;
-                        _legacyTimer.Enabled = true;
+                        if (Debugger.Enabled)
+                        {
+                            Debugger.Log("Building Themes: Loading Legacy Save Data...");
+                        }
+
+                        var UniqueId = 0u;
+
+                        for (var i = 0; i < legacyData.Length - 3; i++)
+                        {
+                            UniqueId = BitConverter.ToUInt32(legacyData, i);
+                        }
+
+                        Debug.Log(UniqueId);
+
+                        var filepath = Path.Combine(Application.dataPath, String.Format("buildingThemesSave_{0}.xml", UniqueId));
+
+                        Debug.Log(filepath);
+
+                        if (!File.Exists(filepath))
+                        {
+                            if (Debugger.Enabled)
+                            {
+                                Debugger.Log(filepath + " not found!");
+                            }
+                            return;
+                        }
+
+                        DistrictsConfiguration configuration;
+
+                        var serializer = new XmlSerializer(typeof(DistrictsConfiguration));
+                        try
+                        {
+                            using (var reader = new StreamReader(filepath))
+                            {
+                                configuration = (DistrictsConfiguration)serializer.Deserialize(reader);
+                            }
+                        }
+                        catch
+                        {
+                            configuration = null;
+                        }
+
+                        ApplyConfiguration(configuration);
+                    }
+                    else
+                    { 
+                        if (Debugger.Enabled)
+                        {
+                            Debugger.Log("No legacy save data found!");
+                        }
                     }
                 }
             }
@@ -178,58 +223,6 @@ namespace BuildingThemes
                 }
 
                 buildingThemesManager.setThemeInfo(district.id, themes, district.blacklistMode);
-            }
-        }
-
-
-        // Legacy Save Loading
-        private static void LegacyOnLoadDataTimed(System.Object source, ElapsedEventArgs e)
-        {
-            if (Debugger.Enabled)
-            {
-                Debugger.Log("Building Themes: Loading Legacy Save Data...");
-            }
-            
-            try
-            {
-                byte[] data = SerializableData.LoadData(LegacyDataId);
-
-                var UniqueId = 0u;
-
-                for (var i = 0; i < data.Length - 3; i++)
-                {
-                    UniqueId = BitConverter.ToUInt32(data, i);
-                }
-
-                var filepath = Path.Combine(Application.dataPath, String.Format("buildingThemesSave_{0}.xml", UniqueId));
-                _legacyTimer.Enabled = false;
-
-                if (!File.Exists(filepath))
-                {
-                    return;
-                }
-
-                DistrictsConfiguration configuration;
-
-                var serializer = new XmlSerializer(typeof(DistrictsConfiguration));
-                try
-                {
-                    using (var reader = new StreamReader(filepath))
-                    {
-                        configuration = (DistrictsConfiguration)serializer.Deserialize(reader);
-                    }
-                }
-                catch
-                {
-                    configuration = null;
-                }
-
-                ApplyConfiguration(configuration);
-            }
-            catch (Exception ex)
-            {
-                Debugger.LogError("Building Themes: Error loading legacy theme data");
-                Debugger.LogException(ex);
             }
         }
     }
