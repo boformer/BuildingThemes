@@ -15,31 +15,34 @@ namespace BuildingThemes.Detour
 
         public static void Deploy()
         {
-            if (!deployed)
+            if (deployed || Util.IsModActive(BuildingThemesMod.EIGHTY_ONE_MOD))
             {
-                _ImmaterialResourceManager_AddResource_original = typeof(ImmaterialResourceManager).GetMethod("AddResource",
-                    new[] { typeof(ImmaterialResourceManager.Resource), typeof(int), typeof(Vector3), typeof(float) });
-                _ImmaterialResourceManager_AddResource_detour = typeof(ImmaterialResourceManagerDetour).GetMethod("AddResource", BindingFlags.Instance | BindingFlags.Public);
-                _ImmaterialResourceManager_AddResource_state = RedirectionHelper.RedirectCalls(_ImmaterialResourceManager_AddResource_original, _ImmaterialResourceManager_AddResource_detour);
-
-                deployed = true;
-
-                Debugger.Log("Building Themes: ImmaterialResourceManager Methods detoured!");
+                Debugger.Log("Building Themes: ImmaterialResourceManager Methods won't be detoured: 81 Tiles detected");
+                return;
             }
+            _ImmaterialResourceManager_AddResource_original = typeof(ImmaterialResourceManager).GetMethod("AddResource",
+                new[] { typeof(ImmaterialResourceManager.Resource), typeof(int), typeof(Vector3), typeof(float) });
+            _ImmaterialResourceManager_AddResource_detour = typeof(ImmaterialResourceManagerDetour).GetMethod("AddResource", BindingFlags.Instance | BindingFlags.Public);
+            _ImmaterialResourceManager_AddResource_state = RedirectionHelper.RedirectCalls(_ImmaterialResourceManager_AddResource_original, _ImmaterialResourceManager_AddResource_detour);
+
+            deployed = true;
+
+            Debugger.Log("Building Themes: ImmaterialResourceManager Methods detoured!");
         }
 
         public static void Revert()
         {
-            if (deployed)
+            if (!deployed)
             {
-                RedirectionHelper.RevertRedirect(_ImmaterialResourceManager_AddResource_original, _ImmaterialResourceManager_AddResource_state);
-                _ImmaterialResourceManager_AddResource_original = null;
-                _ImmaterialResourceManager_AddResource_detour = null;
-
-                deployed = false;
-
-                Debugger.Log("Building Themes: ImmaterialResourceManager Methods restored!");
+                return;
             }
+            RedirectionHelper.RevertRedirect(_ImmaterialResourceManager_AddResource_original, _ImmaterialResourceManager_AddResource_state);
+            _ImmaterialResourceManager_AddResource_original = null;
+            _ImmaterialResourceManager_AddResource_detour = null;
+
+            deployed = false;
+
+            Debugger.Log("Building Themes: ImmaterialResourceManager Methods restored!");
         }
 
         private static int debugCounter = 0;
@@ -57,7 +60,7 @@ namespace BuildingThemes.Detour
             // Catch the position of the abandoned building
             if (resource == ImmaterialResourceManager.Resource.Abandonment)
             {
-                BuildingManagerDetour.position = positionArg;
+                BuildingThemesMod.position = positionArg;
             }
 
             // Call the original method

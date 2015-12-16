@@ -21,7 +21,6 @@ namespace BuildingThemes.Detour
         private static int _zoneGridHalfResolution = ZoneManager.ZONEGRID_RESOLUTION / 2;
         private static readonly int EIGHTY_ONE_ZONEGRID_RESOLUTION = 270;
         private static readonly int EIGHTY_ONE_HALF_ZONEGRID_RESOLUTION = EIGHTY_ONE_ZONEGRID_RESOLUTION / 2;
-        private static readonly string EIGHTY_ONE_MOD = "81 Tiles(Fixed for C:S 1.2+)";
 
         public static void Deploy()
         {
@@ -34,7 +33,7 @@ namespace BuildingThemes.Detour
                 _CheckBlock = typeof(ZoneBlock).GetMethod("CheckBlock", BindingFlags.NonPublic | BindingFlags.Instance);
                 _IsGoodPlace = typeof(ZoneBlock).GetMethod("IsGoodPlace", BindingFlags.NonPublic | BindingFlags.Instance);
 
-                if (Util.IsModActive(EIGHTY_ONE_MOD))
+                if (Util.IsModActive(BuildingThemesMod.EIGHTY_ONE_MOD))
                 {
                     _zoneGridHalfResolution = EIGHTY_ONE_ZONEGRID_RESOLUTION;
                     _zoneGridHalfResolution = EIGHTY_ONE_HALF_ZONEGRID_RESOLUTION;
