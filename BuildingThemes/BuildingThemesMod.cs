@@ -1,23 +1,15 @@
 ﻿using ICities;
 using ColossalFramework;
-using UnityEngine;
 using System;
 using BuildingThemes.GUI;
-using ColossalFramework.UI;
-using Object = UnityEngine.Object;
 
 namespace BuildingThemes
 {
     public class BuildingThemesMod : LoadingExtensionBase, IUserMod
     {
-        public string Name
-        {
-            get { return "Building Themes"; }
-        }
-        public string Description
-        {
-            get { return "Create building themes and apply them to cities and districts."; }
-        }
+        public string Name => "Building Themes";
+
+        public string Description => "Create building themes and apply them to cities and districts.";
 
         public void OnSettingsUI(UIHelperBase helper)
         {

@@ -7,7 +7,7 @@ using UnityEngine;
 namespace BuildingThemes.Detour
 {
     // This detour contains the modified plot calculation algorithm
-    public class ZoneBlockDetour
+    public struct ZoneBlockDetour
     {
         private static bool deployed = false;
 
@@ -17,17 +17,28 @@ namespace BuildingThemes.Detour
 
         private static MethodInfo _CheckBlock;
         private static MethodInfo _IsGoodPlace;
+        private static int _zoneGridResolution = ZoneManager.ZONEGRID_RESOLUTION;
+        private static int _zoneGridHalfResolution = ZoneManager.ZONEGRID_RESOLUTION / 2;
+        private static readonly int EIGHTY_ONE_ZONEGRID_RESOLUTION = 270;
+        private static readonly int EIGHTY_ONE_HALF_ZONEGRID_RESOLUTION = EIGHTY_ONE_ZONEGRID_RESOLUTION / 2;
+        private static readonly string EIGHTY_ONE_MOD = "81 Tiles(Fixed for C:S 1.2+)";
 
         public static void Deploy()
         {
             if (!deployed)
             {
                 _ZoneBlock_SimulationStep_original = typeof(ZoneBlock).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
-                _ZoneBlock_SimulationStep_detour = typeof(ZoneBlockDetour).GetMethod("SimulationStep", BindingFlags.Instance | BindingFlags.Public);
+                _ZoneBlock_SimulationStep_detour = typeof(ZoneBlockDetour).GetMethod("SimulationStep", BindingFlags.Static | BindingFlags.Public);
                 _ZoneBlock_SimulationStep_state = RedirectionHelper.RedirectCalls(_ZoneBlock_SimulationStep_original, _ZoneBlock_SimulationStep_detour);
 
                 _CheckBlock = typeof(ZoneBlock).GetMethod("CheckBlock", BindingFlags.NonPublic | BindingFlags.Instance);
                 _IsGoodPlace = typeof(ZoneBlock).GetMethod("IsGoodPlace", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                if (Util.IsModActive(EIGHTY_ONE_MOD))
+                {
+                    _zoneGridHalfResolution = EIGHTY_ONE_ZONEGRID_RESOLUTION;
+                    _zoneGridHalfResolution = EIGHTY_ONE_HALF_ZONEGRID_RESOLUTION;
+                }
 
                 deployed = true;
 
@@ -56,12 +67,10 @@ namespace BuildingThemes.Detour
 
         // Detours
 
-        public void SimulationStep(ushort blockID)
+        public static void SimulationStep(ref ZoneBlock zoneBlock, ushort blockID)
         {
             // This is the decompiled ZoneBlock.SimulationStep() method
             // Segments which were changed are marked with "begin mod" and "end mod"
-
-            var zoneBlock = Singleton<ZoneManager>.instance.m_blocks.m_buffer[blockID];
 
             if (Debugger.Enabled && debugCount < 10)
             {
@@ -138,15 +147,19 @@ namespace BuildingThemes.Detour
             quad.d = a - 4f * xDirection + ((float)spawnpointRow + 2f) * zDirection;
             Vector2 vector4 = quad.Min();
             Vector2 vector5 = quad.Max();
-            int num5 = Mathf.Max((int)((vector4.x - 46f) / 64f + 75f), 0);
-            int num6 = Mathf.Max((int)((vector4.y - 46f) / 64f + 75f), 0);
-            int num7 = Mathf.Min((int)((vector5.x + 46f) / 64f + 75f), 149);
-            int num8 = Mathf.Min((int)((vector5.y + 46f) / 64f + 75f), 149);
+            //begin mod
+            int num5 = Mathf.Max((int)((vector4.x - 46f) / 64f + _zoneGridHalfResolution), 0);
+            int num6 = Mathf.Max((int)((vector4.y - 46f) / 64f + _zoneGridHalfResolution), 0);
+            int num7 = Mathf.Min((int)((vector5.x + 46f) / 64f + _zoneGridHalfResolution), _zoneGridResolution - 1);
+            int num8 = Mathf.Min((int)((vector5.y + 46f) / 64f + _zoneGridHalfResolution), _zoneGridResolution - 1);
+            //end mod
             for (int j = num6; j <= num8; j++)
             {
                 for (int k = num5; k <= num7; k++)
                 {
-                    ushort num9 = zoneManager.m_zoneGrid[j * 150 + k];
+                    //begin mod
+                    ushort num9 = zoneManager.m_zoneGrid[j * _zoneGridResolution + k];
+                    //end mod
                     int num10 = 0;
                     while (num9 != 0)
                     {
@@ -365,18 +378,18 @@ namespace BuildingThemes.Detour
             }
             num15++;
             num16--;
-        Block_34:
+            Block_34:
             goto IL_891;
-        Block_36:
+            Block_36:
             num15++;
-        Block_38:
+            Block_38:
             goto IL_891;
-        Block_40:
+            Block_40:
             num16--;
-        Block_42:
-        Block_45:
-        IL_884:
-        IL_891:
+            Block_42:
+            Block_45:
+            IL_884:
+            IL_891:
             int num19;
             int num20;
             if (num14 == 1 && num16 - num15 >= 1)
@@ -718,10 +731,10 @@ namespace BuildingThemes.Detour
                     default:
                         goto IL_D6A;
                 }
-            IL_DF0:
+                IL_DF0:
                 num28++;
                 continue;
-            IL_D6A:
+                IL_D6A:
                 vector6 = m_position + VectorUtils.X_Y(((float)length * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                 if (zone == ItemClass.Zone.Industrial)
                 {
