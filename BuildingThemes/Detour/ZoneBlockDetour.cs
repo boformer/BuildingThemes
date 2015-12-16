@@ -35,7 +35,7 @@ namespace BuildingThemes.Detour
 
                 if (Util.IsModActive(BuildingThemesMod.EIGHTY_ONE_MOD))
                 {
-                    _zoneGridHalfResolution = EIGHTY_ONE_ZONEGRID_RESOLUTION;
+                    _zoneGridResolution = EIGHTY_ONE_ZONEGRID_RESOLUTION;
                     _zoneGridHalfResolution = EIGHTY_ONE_HALF_ZONEGRID_RESOLUTION;
                 }
 
@@ -146,6 +146,7 @@ namespace BuildingThemes.Detour
             quad.d = a - 4f * xDirection + ((float)spawnpointRow + 2f) * zDirection;
             Vector2 vector4 = quad.Min();
             Vector2 vector5 = quad.Max();
+
             //begin mod
             int num5 = Mathf.Max((int)((vector4.x - 46f) / 64f + _zoneGridHalfResolution), 0);
             int num6 = Mathf.Max((int)((vector4.y - 46f) / 64f + _zoneGridHalfResolution), 0);
