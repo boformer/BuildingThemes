@@ -33,12 +33,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL"/>
-    <Reference Include="ColossalManaged, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL"/>
-    <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"/>
-    <Reference Include="System"/>
-    <Reference Include="System.Xml"/>
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL"/>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="ColossalManaged, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="ICities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildingThemesManager.cs" />
@@ -75,10 +75,12 @@
     <Compile Include="GUI\ThemeManager\UIThemeManager.cs" />
     <Compile Include="GUI\UITitleBar.cs" />
     <Compile Include="GUI\UIUtils.cs" />
+    <Compile Include="LoadingExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Detour\RedirectionHelper.cs" />
     <Compile Include="SerializableDataExtension.cs" />
     <Compile Include="GUI\ThemePolicies\ThemePolicyContainer.cs" />
+    <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="BuildingThemes.xml">

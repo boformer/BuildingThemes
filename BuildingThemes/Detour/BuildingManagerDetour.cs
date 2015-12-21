@@ -13,9 +13,6 @@ namespace BuildingThemes.Detour
         private static MethodInfo _BuildingManager_GetRandomBuildingInfo_original;
         private static MethodInfo _BuildingManager_GetRandomBuildingInfo_detour;
 
-        // we'll use this variable to pass the building position to GetRandomBuildingInfo method
-        public static Vector3 position;
-
         public static void Deploy()
         {
             if (!deployed)
@@ -51,7 +48,7 @@ namespace BuildingThemes.Detour
         // The only method that still points here is the "Downgrade" method which resets abandoned buildings to L1
         public BuildingInfo GetRandomBuildingInfo(ref Randomizer r, ItemClass.Service service, ItemClass.SubService subService, ItemClass.Level level, int width, int length, BuildingInfo.ZoningMode zoningMode, int style)
         {
-            return GetRandomBuildingInfo_Spawn(position, ref r, service, subService, level, width, length, zoningMode, style);
+            return GetRandomBuildingInfo_Spawn(BuildingThemesMod.position, ref r, service, subService, level, width, length, zoningMode, style);
         }
 
         // called before a new building spawns on empty land (ZoneBlock.SimulationStep)
