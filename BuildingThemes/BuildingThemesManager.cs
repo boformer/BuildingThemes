@@ -14,6 +14,7 @@ namespace BuildingThemes
         private readonly DistrictThemeInfo[] districtThemeInfos = new DistrictThemeInfo[128];
         private readonly FastList<ushort>[] m_areaBuildings = new FastList<ushort>[3040];
         private bool m_areaBuildingsDirty = true;
+        private bool imported = false;
 
         private class DistrictThemeInfo
         {
@@ -40,8 +41,6 @@ namespace BuildingThemes
                     {
                         _configuration = Configuration.Deserialize(userConfigPath);
 
-                        ImportThemesFromThemeMods();
-
                         if (Debugger.Enabled)
                         {
                             Debugger.Log("Building Themes: User Configuration loaded.");
@@ -63,7 +62,65 @@ namespace BuildingThemes
             }
         }
 
-        public void ImportStylesAsThemes()
+        internal void SaveConfig()
+        {
+            if (_configuration != null) Configuration.Serialize(userConfigPath, _configuration);
+        }
+
+        public void Reset()
+        {
+            for (int d = 0; d < districtThemeInfos.Length; d++)
+            {
+                districtThemeInfos[d] = null;
+            }
+
+            for (int i = 0; i < m_areaBuildings.Length; i++)
+            {
+                m_areaBuildings[i] = null;
+            }
+
+            _configuration = null;
+            m_areaBuildingsDirty = true;
+            imported = false;
+
+        }
+
+        public void ImportThemes() 
+        {
+            if (!imported) 
+            { 
+                ImportThemesFromThemeMods();
+                ImportStylesAsThemes();
+                imported = true;
+            }
+        }
+
+
+        private void ImportThemesFromThemeMods()
+        {
+            foreach (var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo().Where(pluginInfo => pluginInfo.isEnabled))
+            {
+                try
+                {
+                    var config = Configuration.Deserialize(Path.Combine(pluginInfo.modPath, ModConfigPath));
+                    if (config == null)
+                    {
+                        continue;
+                    }
+                    foreach (var theme in config.themes)
+                    {
+                        AddModTheme(theme, pluginInfo.name);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debugger.Log("Error while parsing BuildingThemes.xml of mod " + pluginInfo.name);
+                    Debugger.LogException(e);
+                }
+            }
+        }
+
+        private void ImportStylesAsThemes()
         {
             var styles = DistrictManager.instance.m_Styles;
             if (styles == null)
@@ -89,7 +146,7 @@ namespace BuildingThemes
                 {
                     continue;
                 }
-                var style = DistrictManager.instance.m_Styles[district.m_Style-1];
+                var style = DistrictManager.instance.m_Styles[district.m_Style - 1];
                 var stylePackage = style.PackageName;
                 Singleton<DistrictManager>.instance.m_districts.m_buffer[districtId].m_Style = 0;
                 ToggleThemeManagement(districtId, true);
@@ -97,52 +154,6 @@ namespace BuildingThemes
                 EnableTheme(districtId, theme);
                 Debugger.LogFormat("Theme \"{0}\" was enabled for districtId={1} instead of style \"{2}\" (packageName={3})",
                     theme.name, districtId, style.Name, style.PackageName);
-            }
-        }
-
-        internal void SaveConfig()
-        {
-            if (_configuration != null) Configuration.Serialize(userConfigPath, _configuration);
-        }
-
-        public void Reset()
-        {
-            for (int d = 0; d < districtThemeInfos.Length; d++)
-            {
-                districtThemeInfos[d] = null;
-            }
-
-            for (int i = 0; i < m_areaBuildings.Length; i++)
-            {
-                m_areaBuildings[i] = null;
-            }
-
-            _configuration = null;
-            m_areaBuildingsDirty = true;
-        }
-
-
-        private void ImportThemesFromThemeMods()
-        {
-            foreach (var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo().Where(pluginInfo => pluginInfo.isEnabled))
-            {
-                try
-                {
-                    var config = Configuration.Deserialize(Path.Combine(pluginInfo.modPath, ModConfigPath));
-                    if (config == null)
-                    {
-                        continue;
-                    }
-                    foreach (var theme in config.themes)
-                    {
-                        AddModTheme(theme, pluginInfo.name);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debugger.Log("Error while parsing BuildingThemes.xml of mod " + pluginInfo.name);
-                    Debugger.LogException(e);
-                }
             }
         }
 

@@ -198,7 +198,8 @@ namespace BuildingThemes
 
         private static void ApplyConfiguration(DistrictsConfiguration configuration) 
         {
-            var buildingThemesManager = Singleton<BuildingThemesManager>.instance;
+            var buildingThemesManager = BuildingThemesManager.instance;
+            buildingThemesManager.ImportThemes();
 
             foreach (var district in configuration.Districts)
             {
@@ -212,6 +213,7 @@ namespace BuildingThemes
                     var theme = buildingThemesManager.GetThemeByName(themeName);
                     if (theme == null)
                     {
+                        Debugger.LogFormat("Theme {0} that was enabled in district {1} could not be found!", themeName, district.id);
                         continue;
                     }
                     themes.Add(theme);

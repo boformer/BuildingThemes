@@ -96,6 +96,8 @@ namespace BuildingThemes
         {
             loaded = true;
 
+            Debugger.AppendModList();
+            Debugger.AppendThemeList();
             ShowExceptions();
         }
 
