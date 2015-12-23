@@ -60,6 +60,8 @@ namespace BuildingThemes.Detour
 
         public void SetParentButton(UIButton button)
         {
+            if (button == null) return;
+            
             // We have to remove the custom tab before the original SetParentButton method is called
             // SetParentButton() is searching for a TutorialUITag component which our tab does not have
             GUI.ThemePolicyTab.RemoveThemesTab();
