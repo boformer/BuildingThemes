@@ -41,7 +41,7 @@ namespace BuildingThemes.Detour
             }
         }
 
-        public void OnPoliciesClick()
+        public new void OnPoliciesClick()
         {
             if ((Object)ToolsModifierControl.GetTool<DistrictTool>() != (Object)ToolsModifierControl.GetCurrentTool<DistrictTool>())
                 ToolsModifierControl.keepThisWorldInfoPanel = true;
