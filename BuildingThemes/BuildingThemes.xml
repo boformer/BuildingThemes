@@ -290,14 +290,14 @@
         <Building name="Agricultural 4x4 Processing 01" />
         <Building name="Agricultural 4x4 Processing 02" />
         <Building name="H1 1x1 FarmingFacility03" />
-        <Building name="Farming 4x4 Farm" />
+        <Building name="Farming 4x4 Farm" environments="-Winter" />
         <Building name="Farming 4x4 Farm 2" />
         <Building name="Farming 4x4 Farm 3" />
         <Building name="Agricultural 3x3 Processing 03" />
         <Building name="Agricultural 3x3 Processing 04" />
         <Building name="agricultural_building_05" />
-        <Building name="Farming3x2" />
-        <Building name="Farming2x2" />
+        <Building name="Farming3x2" environments="-Winter" />
+        <Building name="Farming2x2" environments="-Winter" />
         <Building name="Agricultural 1x1 processing 1" />
         <Building name="Agricultural 2x2 processing 2" />
         <Building name="Farming4x4" />
@@ -357,11 +357,11 @@
         <Building name="2x2_Restaurant2" dlc="369150" />
         <Building name="2x2_Beauty Salon" dlc="369150" />
         <Building name="2x2_Karaoke Bar" dlc="369150" />
-        <Building name="2x2_PrivatePool" dlc="369150" />
+        <Building name="2x2_PrivatePool" dlc="369150" environments="-Winter" />
         <Building name="2x2_Beach Bar2" dlc="369150" />
         <Building name="2x2_Restaurant" dlc="369150" />
         <Building name="2x2_Souvenir Shop" dlc="369150" />
-        <Building name="4x3_Beach Hotel2" dlc="369150" />
+        <Building name="4x3_Beach Hotel2" dlc="369150" environments="-Winter" />
         <Building name="1x1_cafe" dlc="369150" />
         <Building name="2x2_Pub" dlc="369150" />
         <Building name="3x2_Bowling Alley" dlc="369150" />
@@ -372,28 +372,43 @@
         <Building name="2x3 Game Arcade" dlc="369150" />
         <Building name="3x4 Game Arcade" dlc="369150" />
         <Building name="3x2_Beach restaurant2" dlc="369150" />
-        <Building name="3x4_Nightclub a" dlc="369150" />
-        <Building name="3x4_Nightclub b" dlc="369150" />
+        <Building name="3x4_Nightclub a" dlc="369150" environments="-Winter" />
+        <Building name="3x4_Nightclub b" dlc="369150" environments="-Winter" />
         <Building name="4x3_Beach Hotel" dlc="369150" />
         <Building name="4x4_Tourist Hotel" dlc="369150" />
         <Building name="2x2_Comedy Club" dlc="369150" />
-        <Building name="2x2_Beach restaurant" dlc="369150" />
+        <Building name="2x2_Beach restaurant" dlc="369150" environments="-Winter" />
         <Building name="1x1_Restaurant01" dlc="369150" />
-        <Building name="1x1_beach_restaurant2" dlc="369150" />
+        <Building name="1x1_beach_restaurant2" dlc="369150" environments="-Winter" />
         <Building name="2x2_Hotel01" dlc="369150" />
         <Building name="3x2_Hotel01" dlc="369150" />
         <Building name="1x1_Hotel01" dlc="369150" />
-        <Building name="2x3_Night_club_a" dlc="369150" />
-        <Building name="2x3_Nightclub01" dlc="369150" />
+        <Building name="2x3_Night_club_a" dlc="369150" environments="-Winter" />
+        <Building name="2x3_Nightclub01" dlc="369150" environments="-Winter" />
         <Building name="2x2_Gym" dlc="369150" />
         <Building name="3x2_Cafe01" dlc="369150" />
-        <Building name="1x1_terrace01" dlc="369150" />
-        <Building name="2x2_terrace01" dlc="369150" />
-        <Building name="2x2_terrace02" dlc="369150" />
-        <Building name="1x1_terrace02" dlc="369150" />
+        <Building name="1x1_terrace01" dlc="369150" environments="-Winter" />
+        <Building name="2x2_terrace01" dlc="369150" environments="-Winter" />
+        <Building name="2x2_terrace02" dlc="369150" environments="-Winter" />
+        <Building name="1x1_terrace02" dlc="369150" environments="-Winter" />
         <Building name="1x1_Souvenir Shop" dlc="369150" />
         <Building name="1x1_Restaurant02" dlc="369150" />
         <Building name="3x2_Hotel02" dlc="369150" />
+        <Building name="2x2_Greenhouse" environments="+Winter" />
+        <Building name="3x2_Greenhouse" environments="+Winter" />
+        <Building name="4x4_Greenhouse" environments="+Winter" />
+        <Building name="3x4_winter_nightclub_02" dlc="369150" environments="+Winter" />
+        <Building name="1x1_terrace_winter01" dlc="369150" environments="+Winter" />
+        <Building name="1x1_terrace_winter02" dlc="369150" environments="+Winter" />
+        <Building name="1x1_Winter_Cafe" dlc="369150" environments="+Winter" />
+        <Building name="2x2_terrace_winter01" dlc="369150" environments="+Winter" />
+        <Building name="2x2_terrace_winter02" dlc="369150" environments="+Winter" />
+        <Building name="2x2_Winter_Cafe" dlc="369150" environments="+Winter" />
+        <Building name="2x2_Winter_PrivatePool" dlc="369150" environments="+Winter" />
+        <Building name="2x3_winter_nightclub_01" dlc="369150" environments="+Winter" />
+        <Building name="2x3_winter_nightclub_02" dlc="369150" environments="+Winter" />
+        <Building name="3x4_winter_nightclub_01" dlc="369150" environments="+Winter"/>
+        <Building name="4x3_winter_hotel_01" dlc="369150" environments="+Winter" />
       </Buildings>
     </Theme>
     <Theme name="International">
@@ -490,14 +505,15 @@
         <Building name="Forestry 4x4 Forest 1" />
         <Building name="Agricultural 4x4 Processing 01" />
         <Building name="Agricultural 4x4 Processing 02" />
-        <Building name="Farming 4x4 Farm" />
+        <Building name="H1 1x1 FarmingFacility03" />
+        <Building name="Farming 4x4 Farm" environments="-Winter" />
         <Building name="Farming 4x4 Farm 2" />
         <Building name="Farming 4x4 Farm 3" />
         <Building name="Agricultural 3x3 Processing 03" />
         <Building name="Agricultural 3x3 Processing 04" />
         <Building name="agricultural_building_05" />
-        <Building name="Farming3x2" />
-        <Building name="Farming2x2" />
+        <Building name="Farming3x2" environments="-Winter" />
+        <Building name="Farming2x2" environments="-Winter" />
         <Building name="Agricultural 1x1 processing 1" />
         <Building name="Agricultural 2x2 processing 2" />
         <Building name="Farming4x4" />
@@ -657,7 +673,6 @@
         <Building name="H3 2x3 Office10" />
         <Building name="H3 3x4 Office11a" />
         <Building name="H3 4x3 Office02a" />
-        <Building name="H3 4x4 Office09" />
         <Building name="H2 4x3 Sweatshop01" />
         <Building name="H1 4x4 Sweatshop02" />
         <Building name="H1 4x4 Mediumfactory02" />
@@ -845,11 +860,11 @@
         <Building name="2x2_Restaurant2" dlc="369150" />
         <Building name="2x2_Beauty Salon" dlc="369150" />
         <Building name="2x2_Karaoke Bar" dlc="369150" />
-        <Building name="2x2_PrivatePool" dlc="369150" />
+        <Building name="2x2_PrivatePool" dlc="369150" environments="-Winter" />
         <Building name="2x2_Beach Bar2" dlc="369150" />
         <Building name="2x2_Restaurant" dlc="369150" />
         <Building name="2x2_Souvenir Shop" dlc="369150" />
-        <Building name="4x3_Beach Hotel2" dlc="369150" />
+        <Building name="4x3_Beach Hotel2" dlc="369150" environments="-Winter" />
         <Building name="1x1_cafe" dlc="369150" />
         <Building name="2x2_Pub" dlc="369150" />
         <Building name="3x2_Bowling Alley" dlc="369150" />
@@ -860,28 +875,43 @@
         <Building name="2x3 Game Arcade" dlc="369150" />
         <Building name="3x4 Game Arcade" dlc="369150" />
         <Building name="3x2_Beach restaurant2" dlc="369150" />
-        <Building name="3x4_Nightclub a" dlc="369150" />
-        <Building name="3x4_Nightclub b" dlc="369150" />
+        <Building name="3x4_Nightclub a" dlc="369150" environments="-Winter" />
+        <Building name="3x4_Nightclub b" dlc="369150" environments="-Winter" />
         <Building name="4x3_Beach Hotel" dlc="369150" />
         <Building name="4x4_Tourist Hotel" dlc="369150" />
         <Building name="2x2_Comedy Club" dlc="369150" />
-        <Building name="2x2_Beach restaurant" dlc="369150" />
+        <Building name="2x2_Beach restaurant" dlc="369150" environments="-Winter" />
         <Building name="1x1_Restaurant01" dlc="369150" />
-        <Building name="1x1_beach_restaurant2" dlc="369150" />
+        <Building name="1x1_beach_restaurant2" dlc="369150" environments="-Winter" />
         <Building name="2x2_Hotel01" dlc="369150" />
         <Building name="3x2_Hotel01" dlc="369150" />
         <Building name="1x1_Hotel01" dlc="369150" />
-        <Building name="2x3_Night_club_a" dlc="369150" />
-        <Building name="2x3_Nightclub01" dlc="369150" />
+        <Building name="2x3_Night_club_a" dlc="369150" environments="-Winter" />
+        <Building name="2x3_Nightclub01" dlc="369150" environments="-Winter" />
         <Building name="2x2_Gym" dlc="369150" />
         <Building name="3x2_Cafe01" dlc="369150" />
-        <Building name="1x1_terrace01" dlc="369150" />
-        <Building name="2x2_terrace01" dlc="369150" />
-        <Building name="2x2_terrace02" dlc="369150" />
-        <Building name="1x1_terrace02" dlc="369150" />
+        <Building name="1x1_terrace01" dlc="369150" environments="-Winter" />
+        <Building name="2x2_terrace01" dlc="369150" environments="-Winter" />
+        <Building name="2x2_terrace02" dlc="369150" environments="-Winter" />
+        <Building name="1x1_terrace02" dlc="369150" environments="-Winter" />
         <Building name="1x1_Souvenir Shop" dlc="369150" />
         <Building name="1x1_Restaurant02" dlc="369150" />
         <Building name="3x2_Hotel02" dlc="369150" />
+        <Building name="2x2_Greenhouse" environments="+Winter" />
+        <Building name="3x2_Greenhouse" environments="+Winter" />
+        <Building name="4x4_Greenhouse" environments="+Winter" />
+        <Building name="3x4_winter_nightclub_02" dlc="369150" environments="+Winter" />
+        <Building name="1x1_terrace_winter01" dlc="369150" environments="+Winter" />
+        <Building name="1x1_terrace_winter02" dlc="369150" environments="+Winter" />
+        <Building name="1x1_Winter_Cafe" dlc="369150" environments="+Winter" />
+        <Building name="2x2_terrace_winter01" dlc="369150" environments="+Winter" />
+        <Building name="2x2_terrace_winter02" dlc="369150" environments="+Winter" />
+        <Building name="2x2_Winter_Cafe" dlc="369150" environments="+Winter" />
+        <Building name="2x2_Winter_PrivatePool" dlc="369150" environments="+Winter" />
+        <Building name="2x3_winter_nightclub_01" dlc="369150" environments="+Winter" />
+        <Building name="2x3_winter_nightclub_02" dlc="369150" environments="+Winter" />
+        <Building name="3x4_winter_nightclub_01" dlc="369150" environments="+Winter"/>
+        <Building name="4x3_winter_hotel_01" dlc="369150" environments="+Winter" />
       </Buildings>
     </Theme>
   </Themes>

@@ -41,6 +41,8 @@ namespace BuildingThemes.GUI
         {
             get
             {
+                if (Debugger.Enabled) return name; // display the real names in debug mode
+
                 if (m_displayName != null) return m_displayName;
 
                 m_displayName = Locale.GetUnchecked("BUILDING_TITLE", name);

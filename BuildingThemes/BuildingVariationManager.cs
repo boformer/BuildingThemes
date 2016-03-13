@@ -60,6 +60,8 @@ namespace BuildingThemes
 
             if (Enabled)
             {
+                BuildingThemesManager.instance.ImportThemesFromThemeMods(); // fix that theme mods do not support clones
+
                 foreach (var theme in BuildingThemesManager.instance.GetAllThemes())
                 {
                     foreach (var variation in theme.getVariations(prefab.name)) 

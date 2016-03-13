@@ -101,6 +101,9 @@ namespace BuildingThemes
             [XmlAttribute("dlc"), DefaultValue(null)]
             public string dlc = null;
 
+            [XmlAttribute("environments"), DefaultValue(null)]
+            public string environments = null;
+
             public bool Equals(Building other)
             {
                 if (other == null) { return false; }
@@ -129,6 +132,7 @@ namespace BuildingThemes
                 this.spawnRate = builtInBuilding.spawnRate;
                 this.include = builtInBuilding.include;
                 this.dlc = builtInBuilding.dlc;
+                this.environments = builtInBuilding.environments;
             }
 
             public Building()

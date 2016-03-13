@@ -286,8 +286,21 @@ namespace BuildingThemes.GUI
                 if (item.included)
                 {
                     includedCount++;
+                    if (item.prefab == null)
+                    {
+                        if (item.building != null)
+                        {
+                            if (item.building.dlc != null && !Steam.IsDlcInstalled(Convert.ToUInt32(item.building.dlc))) continue;
+                            if (item.building.environments != null
+                                && (item.building.environments.Contains("-" + SimulationManager.instance.m_metaData.m_environment)
+                                    || !item.building.environments.Contains("+" + SimulationManager.instance.m_metaData.m_environment)))
+                            {
+                                continue;
+                            }
+                        }
+                        validity |= ThemeValidity.BuildingNotLoaded;
+                    }
                     if (item.level == 1) l1Count++;
-                    if (item.prefab == null) validity |= ThemeValidity.BuildingNotLoaded;
                 }
             }
 
@@ -593,6 +606,12 @@ namespace BuildingThemes.GUI
                     // Prefab not found, adding building without prefab
 
                     if (buildings[i].dlc != null && !Steam.IsDlcInstalled(Convert.ToUInt32(buildings[i].dlc))) continue;
+                    if (buildings[i].environments != null
+                        && (buildings[i].environments.Contains("-" + SimulationManager.instance.m_metaData.m_environment)
+                        || !buildings[i].environments.Contains("+" + SimulationManager.instance.m_metaData.m_environment)))
+                    {
+                        continue;
+                    }
 
                     BuildingItem item = new BuildingItem();
                     item.building = buildings[i];

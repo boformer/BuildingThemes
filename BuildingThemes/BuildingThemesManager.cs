@@ -14,7 +14,8 @@ namespace BuildingThemes
         private readonly DistrictThemeInfo[] districtThemeInfos = new DistrictThemeInfo[128];
         private readonly FastList<ushort>[] m_areaBuildings = new FastList<ushort>[3040];
         private bool m_areaBuildingsDirty = true;
-        private bool imported = false;
+        private bool importedModThemes = false;
+        private bool importedStyles = false;
 
         private class DistrictThemeInfo
         {
@@ -81,22 +82,19 @@ namespace BuildingThemes
 
             _configuration = null;
             m_areaBuildingsDirty = true;
-            imported = false;
+            importedModThemes = false;
+            importedStyles = false;
 
         }
 
         public void ImportThemes() 
         {
-            if (!imported) 
-            { 
-                ImportThemesFromThemeMods();
-                ImportStylesAsThemes();
-                imported = true;
-            }
+            if (!importedModThemes) ImportThemesFromThemeMods();
+            if(!importedStyles) ImportStylesAsThemes();
         }
 
 
-        private void ImportThemesFromThemeMods()
+        public void ImportThemesFromThemeMods()
         {
             foreach (var pluginInfo in Singleton<PluginManager>.instance.GetPluginsInfo().Where(pluginInfo => pluginInfo.isEnabled))
             {
@@ -118,9 +116,11 @@ namespace BuildingThemes
                     Debugger.LogException(e);
                 }
             }
+
+            importedModThemes = true;
         }
 
-        private void ImportStylesAsThemes()
+        public void ImportStylesAsThemes()
         {
             var styles = DistrictManager.instance.m_Styles;
             if (styles == null)
@@ -155,6 +155,8 @@ namespace BuildingThemes
                 Debugger.LogFormat("Theme \"{0}\" was enabled for districtId={1} instead of style \"{2}\" (packageName={3})",
                     theme.name, districtId, style.Name, style.PackageName);
             }
+
+            importedStyles = true;
         }
 
         private void AddModTheme(Configuration.Theme modTheme, string modName)
