@@ -16,34 +16,102 @@ namespace BuildingThemes
             Debugger.Log("ON_CREATED");
             Debugger.Log("Building Themes: Initializing Mod...");
 
-            PolicyPanelEnabler.Register();
-            BuildingThemesManager.instance.Reset();
-            BuildingVariationManager.instance.Reset();
+            try
+            {
 
-            UpdateConfig();
+                PolicyPanelEnabler.Register();
+                BuildingThemesManager.instance.Reset();
+                BuildingVariationManager.instance.Reset();
 
-            try { Detour.BuildingManagerDetour.Deploy(); }
-            catch (Exception e) { Debugger.LogException(e); }
-            try { Detour.DistrictManagerDetour.Deploy(); }
-            catch (Exception e) { Debugger.LogException(e); }
-            try { Detour.ZoneBlockDetour.Deploy(); }
-            catch (Exception e) { Debugger.LogException(e); }
-            try { Detour.ImmaterialResourceManagerDetour.Deploy(); }
-            catch (Exception e) { Debugger.LogException(e); }
-            try { Detour.PrivateBuildingAIDetour<ResidentialBuildingAI>.Deploy(); }
-            catch (Exception e) { Debugger.LogException(e); }
-            try { Detour.PrivateBuildingAIDetour<CommercialBuildingAI>.Deploy(); }
-            catch (Exception e) { Debugger.LogException(e); }
-            try { Detour.PrivateBuildingAIDetour<IndustrialBuildingAI>.Deploy(); }
-            catch (Exception e) { Debugger.LogException(e); }
-            try { Detour.PrivateBuildingAIDetour<OfficeBuildingAI>.Deploy(); }
-            catch (Exception e) { Debugger.LogException(e); }
-            try { Detour.PoliciesPanelDetour.Deploy(); }
-            catch (Exception e) { Debugger.LogException(e); }
-            try { Detour.DistrictWorldInfoPanelDetour.Deploy(); }
-            catch (Exception e) { Debugger.LogException(e); }
+                UpdateConfig();
 
-            Debugger.Log("Building Themes: Mod successfully intialized.");
+                try
+                {
+                    Detour.BuildingManagerDetour.Deploy();
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+                try
+                {
+                    Detour.DistrictManagerDetour.Deploy();
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+                try
+                {
+                    Detour.ZoneBlockDetour.Deploy();
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+                try
+                {
+                    Detour.ImmaterialResourceManagerDetour.Deploy();
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+                try
+                {
+                    Detour.PrivateBuildingAIDetour<ResidentialBuildingAI>.Deploy();
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+                try
+                {
+                    Detour.PrivateBuildingAIDetour<CommercialBuildingAI>.Deploy();
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+                try
+                {
+                    Detour.PrivateBuildingAIDetour<IndustrialBuildingAI>.Deploy();
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+                try
+                {
+                    Detour.PrivateBuildingAIDetour<OfficeBuildingAI>.Deploy();
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+                try
+                {
+                    Detour.PoliciesPanelDetour.Deploy();
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+                try
+                {
+                    Detour.DistrictWorldInfoPanelDetour.Deploy();
+                }
+                catch (Exception e)
+                {
+                    Debugger.LogException(e);
+                }
+
+                Debugger.Log("Building Themes: Mod successfully intialized.");
+            }
+            catch (Exception e)
+            {
+                Debugger.LogException(e);
+            }
         }
 
         public override void OnLevelLoaded(LoadMode mode)
@@ -52,14 +120,22 @@ namespace BuildingThemes
             Debugger.Log("ON_LEVEL_LOADED");
             Debugger.OnLevelLoaded();
 
-            // Don't load if it's not a game
-            if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
+            try
+            {
 
-            BuildingThemesManager.instance.ImportThemes();
+                // Don't load if it's not a game
+                if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) return;
 
-            PolicyPanelEnabler.UnlockPolicyToolbarButton();
-            UIThemeManager.Initialize();
-            UIStyleButtonReplacer.ReplaceStyleButton();
+                BuildingThemesManager.instance.ImportThemes();
+
+                PolicyPanelEnabler.UnlockPolicyToolbarButton();
+                UIThemeManager.Initialize();
+                UIStyleButtonReplacer.ReplaceStyleButton();
+            }
+            catch (Exception e)
+            {
+                Debugger.LogException(e);
+            }
         }
 
         public override void OnLevelUnloading()

@@ -43,6 +43,12 @@ namespace BuildingThemes.GUI
             {
                 if (m_displayName != null) return m_displayName;
 
+                if (Debugger.Enabled)
+                {
+                    m_displayName = name;
+                    return m_displayName;
+                }
+
                 m_displayName = Locale.GetUnchecked("BUILDING_TITLE", name);
                 if (m_displayName.StartsWith("BUILDING_TITLE"))
                 {

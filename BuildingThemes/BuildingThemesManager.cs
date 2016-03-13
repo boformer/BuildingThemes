@@ -51,10 +51,12 @@ namespace BuildingThemes
                             _configuration = new Configuration();
                             SaveConfig();
                         }
+
+                        Debugger.xmlCorrupt = false;
                     }
-                    catch (Exception e) 
+                    catch (Exception e)
                     {
-                        Debugger.LogException(e);
+                        Debugger.xmlCorrupt = true;
                     }
                 }
 
@@ -175,6 +177,8 @@ namespace BuildingThemes
 
         private void AddStyleTheme(DistrictStyle style)
         {
+            if (style.Name == DistrictStyle.kEuropeanStyleName) return; //skip builtin style
+
             var buildingInfos = style.GetBuildingInfos();
             List<Configuration.Building> buildings = null;
             if (buildingInfos != null)
