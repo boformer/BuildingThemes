@@ -17,6 +17,8 @@ namespace BuildingThemes
 
         private static bool _enabled = false;
 
+        public static bool xmlCorrupt = false;
+
 
         private static bool loaded = false;
         private static string exceptions = "";
@@ -108,12 +110,25 @@ namespace BuildingThemes
 
         private static void ShowExceptions()
         {
-            if (exceptions != "")
+            string text = null;
+
+            if (xmlCorrupt)
             {
-                UIView.library.ShowModal<ExceptionPanel>("ExceptionPanel").SetMessage(
-                    "Building Themes Error",
-                    "Please report this error on the Building Themes workshop page:\n" + exceptions,
-                    true);
+                text = "BuildingThemes is unable to read the BuildingThemes.xml file " +
+                       "that stores your settings and themes!\n\n" +
+                       "To fix it, delete the corrupted file and restart the game:\n" +
+                       "{Steam folder}\\steamapps\\common\\\nCities_Skylines\\BuildingThemes.xml\n\n" +
+                       "(Your self-made themes and other settings will be lost. Thank your PC for that)";
+            }
+
+            else if (exceptions != "")
+            {
+                text = "Please report this error on the Building Themes workshop page:\n" + exceptions;
+            }
+
+            if (text != null)
+            {
+                UIView.library?.ShowModal<ExceptionPanel>("ExceptionPanel")?.SetMessage("Building Themes Error",text,true);
 
                 exceptions = "";
             }
@@ -138,14 +153,20 @@ namespace BuildingThemes
 
         public static void AppendThemeList()
         {
-            string message = "Loaded Themes:\n";
-
-            foreach (var theme in Singleton<BuildingThemesManager>.instance.GetAllThemes())
+            try
             {
-                message += String.Format("# {0}\n", theme.name);
-            }
+                string message = "Loaded Themes:\n";
 
-            Debug.Log(message);
+                foreach (var theme in Singleton<BuildingThemesManager>.instance.GetAllThemes())
+                {
+                    message += String.Format("# {0}\n", theme.name);
+                }
+
+                Debug.Log(message);
+            }
+            catch
+            {
+            }
         }
     }
 }

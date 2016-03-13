@@ -582,7 +582,7 @@ namespace BuildingThemes.GUI
                 {
                     BuildingItem item = new BuildingItem();
                     item.prefab = PrefabCollection<BuildingInfo>.GetPrefab(i);
-                    buildingDictionary.Add(item.name, item);
+                    if(!buildingDictionary.ContainsKey(item.name)) buildingDictionary.Add(item.name, item);
 
                     if (!BuildingVariationManager.instance.IsVariation(item.name))
                         list.Add(item);
