@@ -1,76 +1,54 @@
 ﻿using ColossalFramework;
 using ColossalFramework.Math;
 using System;
-using System.Reflection;
+using System.Runtime.CompilerServices;
+using BuildingThemes.Redirection;
 using UnityEngine;
 
 namespace BuildingThemes.Detour
 {
-    // This detour contains the modified plot calculation algorithm
+    [TargetType(typeof(ZoneBlock))]
     public struct ZoneBlockDetour
     {
-        private static bool deployed = false;
-
-        private static RedirectCallsState _ZoneBlock_SimulationStep_state;
-        private static MethodInfo _ZoneBlock_SimulationStep_original;
-        private static MethodInfo _ZoneBlock_SimulationStep_detour;
-
-        private static MethodInfo _CheckBlock;
-        private static MethodInfo _IsGoodPlace;
         private static int _zoneGridResolution = ZoneManager.ZONEGRID_RESOLUTION;
         private static int _zoneGridHalfResolution = ZoneManager.ZONEGRID_RESOLUTION / 2;
         private static readonly int EIGHTY_ONE_ZONEGRID_RESOLUTION = 270;
         private static readonly int EIGHTY_ONE_HALF_ZONEGRID_RESOLUTION = EIGHTY_ONE_ZONEGRID_RESOLUTION / 2;
 
-        public static void Deploy()
+        public static void SetUp()
         {
-            if (!deployed)
+            if (!Util.IsModActive(BuildingThemesMod.EIGHTY_ONE_MOD))
             {
-                _ZoneBlock_SimulationStep_original = typeof(ZoneBlock).GetMethod("SimulationStep", BindingFlags.Public | BindingFlags.Instance);
-                _ZoneBlock_SimulationStep_detour = typeof(ZoneBlockDetour).GetMethod("SimulationStep", BindingFlags.Static | BindingFlags.Public);
-                _ZoneBlock_SimulationStep_state = RedirectionHelper.RedirectCalls(_ZoneBlock_SimulationStep_original, _ZoneBlock_SimulationStep_detour);
-
-                _CheckBlock = typeof(ZoneBlock).GetMethod("CheckBlock", BindingFlags.NonPublic | BindingFlags.Instance);
-                _IsGoodPlace = typeof(ZoneBlock).GetMethod("IsGoodPlace", BindingFlags.NonPublic | BindingFlags.Instance);
-
-                if (Util.IsModActive(BuildingThemesMod.EIGHTY_ONE_MOD))
-                {
-                    _zoneGridResolution = EIGHTY_ONE_ZONEGRID_RESOLUTION;
-                    _zoneGridHalfResolution = EIGHTY_ONE_HALF_ZONEGRID_RESOLUTION;
-                }
-
-                deployed = true;
-
-                Debugger.Log("Building Themes: ZoneBlock Methods detoured!");
+                return;
             }
-        }
-
-        public static void Revert()
-        {
-            if (deployed)
-            {
-                RedirectionHelper.RevertRedirect(_ZoneBlock_SimulationStep_original, _ZoneBlock_SimulationStep_state);
-                _ZoneBlock_SimulationStep_original = null;
-                _ZoneBlock_SimulationStep_detour = null;
-
-                _CheckBlock = null;
-                _IsGoodPlace = null;
-
-                deployed = false;
-
-                Debugger.Log("Building Themes: ZoneBlock Methods restored!");
-            }
+            _zoneGridResolution = EIGHTY_ONE_ZONEGRID_RESOLUTION;
+            _zoneGridHalfResolution = EIGHTY_ONE_HALF_ZONEGRID_RESOLUTION;
         }
 
         private static int debugCount = 0;
 
-        // Detours
+        [RedirectReverse]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void CheckBlock(ref ZoneBlock zoneBlock, ref ZoneBlock other, int[] xBuffer, ItemClass.Zone zone, Vector2 startPos, Vector2 xDir,
+            Vector2 zDir, Quad2 quad)
+        {
+            UnityEngine.Debug.LogError($"CheckBlock(): this={zoneBlock}"); //this is just to give the method some body
+        }
 
+        [RedirectReverse]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static bool IsGoodPlace(ref ZoneBlock zoneBlock, Vector2 position)
+        {
+            UnityEngine.Debug.LogError($"IsGoodPlace(): this={zoneBlock}"); //this is just to give the method some body
+            return false;
+        }
+
+        // This method contains the modified plot calculation algorithm
+        // Segments which were changed are marked with "begin mod" and "end mod"
+
+        [RedirectMethod]
         public static void SimulationStep(ref ZoneBlock zoneBlock, ushort blockID)
         {
-            // This is the decompiled ZoneBlock.SimulationStep() method
-            // Segments which were changed are marked with "begin mod" and "end mod"
-
             if (Debugger.Enabled && debugCount < 10)
             {
                 debugCount++;
@@ -169,7 +147,7 @@ namespace BuildingThemes.Detour
 
                         if (num11 < 0f)
                         {
-                            _CheckBlock.Invoke(zoneBlock, new object[] { zoneManager.m_blocks.m_buffer[(int)num9], tmpXBuffer, zone, vector3, xDirection, zDirection, quad });
+                            CheckBlock(ref zoneBlock, ref zoneManager.m_blocks.m_buffer[(int)num9], tmpXBuffer, zone, vector3, xDirection, zDirection, quad);
                         }
                         num9 = zoneManager.m_blocks.m_buffer[(int)num9].m_nextGridBlock;
                         if (++num10 >= 49152)
@@ -222,7 +200,7 @@ namespace BuildingThemes.Detour
                 return;
             }
 
-            bool flag3 = (bool)_IsGoodPlace.Invoke(zoneBlock, new object[] { vector3 });
+            bool flag3 = IsGoodPlace(ref zoneBlock, vector3);
             if (Singleton<SimulationManager>.instance.m_randomizer.Int32(100u) >= num4)
             {
                 if (flag3)
@@ -764,7 +742,7 @@ namespace BuildingThemes.Detour
 
                 // Here we are calling a custom getRandomBuildingInfo method
 
-                buildingInfo = BuildingManagerDetour.GetRandomBuildingInfo_Spawn(vector6, ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3, style);
+                buildingInfo = RandomBuildings.GetRandomBuildingInfo_Spawn(vector6, ref Singleton<SimulationManager>.instance.m_randomizer, service, subService, level, width, length, zoningMode3, style);
 
                 // end mod
 
