@@ -60,8 +60,6 @@ namespace BuildingThemes
                     delegate (bool c) { BuildingVariationManager.Enabled = c; });
                 group.AddGroup("Warning: When you disable this option, spawned clones will disappear!");
 
-            group.AddCheckbox("Warning message when selecting an invalid theme", UIThemePolicyItem.showWarning, delegate(bool c) { UIThemePolicyItem.showWarning = c; });
-            group.AddCheckbox("Debug Mode", Debugger.Enabled, delegate(bool c) { Debugger.Enabled = c; });
                 group.AddCheckbox("Warning message when selecting an invalid theme", UIThemePolicyItem.showWarning,
                     delegate (bool c) { UIThemePolicyItem.showWarning = c; });
                 group.AddCheckbox("Generate Debug Output", Debugger.Enabled, delegate (bool c) { Debugger.Enabled = c; });
