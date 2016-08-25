@@ -620,7 +620,14 @@ namespace BuildingThemes.GUI
             }
 
             // Sorting
-            list.Sort(BuildingCompare);
+            try
+            {
+                list.Sort(BuildingCompare);
+            }
+            catch (Exception e)
+            {
+                Debugger.LogException(e);
+            }
             return list;
         }
 

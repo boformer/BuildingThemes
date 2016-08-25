@@ -25,6 +25,8 @@ namespace BuildingThemes.GUI
 
             UITabstrip tabstrip = ToolsModifierControl.policiesPanel.Find("Tabstrip") as UITabstrip;
 
+            if (tabstrip == null) return;
+
             // Add a custom tab
             tab = tabstrip.AddTab("Themes");
             tab.stringUserData = "Themes";
@@ -130,6 +132,8 @@ namespace BuildingThemes.GUI
         public static void RemoveThemesTab()
         {
             UITabstrip tabstrip = ToolsModifierControl.policiesPanel.Find("Tabstrip") as UITabstrip;
+
+            if (tabstrip == null) return;
 
             if (tab != null)
             {

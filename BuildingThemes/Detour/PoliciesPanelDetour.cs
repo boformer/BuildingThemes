@@ -3,6 +3,7 @@ using ColossalFramework;
 using ColossalFramework.UI;
 using UnityEngine;
 using BuildingThemes.GUI;
+using System;
 
 namespace BuildingThemes.Detour
 {
@@ -68,9 +69,17 @@ namespace BuildingThemes.Detour
 
             // Call the original method
             RedirectionHelper.RevertRedirect(_PoliciesPanel_SetParentButton_original, _PoliciesPanel_SetParentButton_state);
-            _PoliciesPanel_SetParentButton_original.Invoke(this, new object[] { button });
+            try
+            {
+                _PoliciesPanel_SetParentButton_original.Invoke(this, new object[] { button });
+            }
+            catch (Exception e)
+            {
+                Debugger.LogException(e);
+            }
             RedirectionHelper.RedirectCalls(_PoliciesPanel_SetParentButton_original, _PoliciesPanel_SetParentButton_detour);
 
+            
             // After the method call, add our custom tab again
             GUI.ThemePolicyTab.AddThemesTab();
         }
@@ -84,7 +93,14 @@ namespace BuildingThemes.Detour
 
             // Call the original method
             RedirectionHelper.RevertRedirect(_PoliciesPanel_RefreshPanel_original, _PoliciesPanel_RefreshPanel_state);
-            _PoliciesPanel_RefreshPanel_original.Invoke(this, new object[] { });
+            try
+            {
+                _PoliciesPanel_RefreshPanel_original.Invoke(this, new object[] { });
+            }
+            catch(Exception e)
+            {
+                Debugger.LogException(e);
+            }
             RedirectionHelper.RedirectCalls(_PoliciesPanel_RefreshPanel_original, _PoliciesPanel_RefreshPanel_detour);
 
             // After the method call, add our custom tab again

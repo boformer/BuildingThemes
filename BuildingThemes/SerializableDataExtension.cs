@@ -159,28 +159,25 @@ namespace BuildingThemes
                     }
                 }
 
-                if (configuration.Districts.Count > 0)
+                byte[] configurationData;
+
+                var xmlSerializer = new XmlSerializer(typeof(DistrictsConfiguration));
+                XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
+                ns.Add("", "");
+                using (var memoryStream = new MemoryStream())
                 {
-                    byte[] configurationData;
-
-                    var xmlSerializer = new XmlSerializer(typeof(DistrictsConfiguration));
-                    XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
-                    ns.Add("", "");
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        xmlSerializer.Serialize(memoryStream, configuration, ns);
-                        configurationData = memoryStream.ToArray();
-                    }
-                    SerializableData.SaveData(XMLSaveDataId, configurationData);
-
-                    // output for debugging
-                    /*
-                    using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter("BuildingThemesData.xml"))
-                    {
-                        xmlSerializer.Serialize(streamWriter, configuration, ns);
-                    }
-                    */
+                    xmlSerializer.Serialize(memoryStream, configuration, ns);
+                    configurationData = memoryStream.ToArray();
                 }
+                SerializableData.SaveData(XMLSaveDataId, configurationData);
+
+                // output for debugging
+                /*
+                using (System.IO.StreamWriter streamWriter = new System.IO.StreamWriter("BuildingThemesData.xml"))
+                {
+                    xmlSerializer.Serialize(streamWriter, configuration, ns);
+                }
+                */
 
                 if (Debugger.Enabled)
                 {
