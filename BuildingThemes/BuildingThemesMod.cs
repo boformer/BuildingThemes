@@ -15,39 +15,9 @@ namespace BuildingThemes
         public static Vector3 position;
         public static readonly string EIGHTY_ONE_MOD = "81 Tiles (Fixed for C:S 1.2+)";
 
-        public string Name { get { return "Building Themes"; } }
+        public string Name => "Building Themes";
 
-        public string Description
-        {
-            get
-            {
-                var adPanel = GameObject.Find("WorkshopAdPanel");
-                var chirper = GameObject.Find("Chirper");
-                var moo = GameObject.Find("MooMemorial");
-                if (moo == null && chirper != null && adPanel != null)
-                {
-                    var chirperSprite = chirper.GetComponent<UISprite>();
-                    if (chirperSprite != null)
-                    {
-                        chirperSprite.isVisible = false;
-                        var label = chirperSprite.parent.AddUIComponent<UILabel>();
-                        label.name = "MooMemorial";
-                        label.textColor = new Color32(128, 128, 128, 255);
-                        label.bottomColor = new Color32(52, 112, 140, 255); //new Color32(163, 226, 254, 255);
-                        label.useGradient = true;
-                        label.dropShadowColor = new Color32(0, 0, 0, 255);
-                        label.dropShadowOffset = new Vector2(0f, -1.33f);
-                        label.useDropShadow = true;
-                        label.text = "Dedicated to TotalyMoo";
-                        label.tooltip = "The greatest community manager of all times!";
-                        label.isTooltipLocalized = false;
-                        label.CenterToParent();
-                        label.position = new Vector2(label.position.x, chirperSprite.position.y);
-                    }
-                }
-                return "Create building themes and apply them to cities and districts.";
-            }
-        }
+        public string Description => "Create building themes and apply them to cities and districts.";
 
         public void OnSettingsUI(UIHelperBase helper)
         {

@@ -66,7 +66,7 @@ namespace BuildingThemes.GUI
         {
             get
             {
-                if (prefab == null) return Category.None;
+                if (prefab == null || prefab.m_class == null) return Category.None;
 
                 ItemClass itemClass = prefab.m_class;
                 if (itemClass.m_subService == ItemClass.SubService.ResidentialLow) return Category.ResidentialLow;
@@ -93,7 +93,7 @@ namespace BuildingThemes.GUI
                 if(m_level == -1)
                 {
                     m_level = 0;
-                    if (prefab != null)
+                    if (prefab != null && prefab.m_class != null)
                     {
                         m_level = (int)prefab.m_class.m_level + 1;
                     }

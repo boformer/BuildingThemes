@@ -626,7 +626,8 @@ namespace BuildingThemes.GUI
             }
             catch (Exception e)
             {
-                Debugger.LogException(e);
+                Debug.LogException(e);
+                // ignore this error. seems harmless
             }
             return list;
         }

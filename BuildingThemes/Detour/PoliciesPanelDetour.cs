@@ -75,7 +75,8 @@ namespace BuildingThemes.Detour
             }
             catch (Exception e)
             {
-                Debugger.LogException(e);
+                Debug.LogException(e);
+                // ignore this error, seems harmless
             }
             RedirectionHelper.RedirectCalls(_PoliciesPanel_SetParentButton_original, _PoliciesPanel_SetParentButton_detour);
 
