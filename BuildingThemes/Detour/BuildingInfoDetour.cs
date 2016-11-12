@@ -33,12 +33,12 @@ namespace BuildingThemes.Detour
                         type.GetMethod("RegisterPreInitializationHook", BindingFlags.Public | BindingFlags.Static)
                             .Invoke(null, new object[]
                             {
-                                            new Action<BuildingInfo>(PreInitializeHook),
+                                new Action<BuildingInfo>(PreInitializeHook),
                             });
                         type.GetMethod("RegisterPostInitializationHook", BindingFlags.Public | BindingFlags.Static)
                             .Invoke(null, new object[]
                             {
-                            new Action<BuildingInfo>(PostInitializeHook),
+                                new Action<BuildingInfo>(PostInitializeHook),
                             });
                         type.GetMethod("Deploy", BindingFlags.Public | BindingFlags.Static)
                             .Invoke(null, new object[]
