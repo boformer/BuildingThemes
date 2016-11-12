@@ -24,20 +24,28 @@ namespace BuildingThemes.Detour
                 if (Util.IsModActive("Prefab Hook"))
                 {
                     var type = Util.FindType("BuildingInfoHookReflective");
-                    type.GetMethod("RegisterPreInitializationHook", BindingFlags.Public | BindingFlags.Static)
-                        .Invoke(null, new object[]
-                        {
-                            new Action<BuildingInfo>(PreInitializeHook), 
-                        });
-                    type.GetMethod("RegisterPostInitializationHook", BindingFlags.Public | BindingFlags.Static)
-                        .Invoke(null, new object[]
-                        {
+                    if (type == null)
+                    {
+                        UnityEngine.Debug.LogError("Building Themes - type 'BuildingInfoHookReflective' not found. Update Prefab Hook!");
+                    }
+                    else
+                    {
+                        type.GetMethod("RegisterPreInitializationHook", BindingFlags.Public | BindingFlags.Static)
+                            .Invoke(null, new object[]
+                            {
+                                            new Action<BuildingInfo>(PreInitializeHook),
+                            });
+                        type.GetMethod("RegisterPostInitializationHook", BindingFlags.Public | BindingFlags.Static)
+                            .Invoke(null, new object[]
+                            {
                             new Action<BuildingInfo>(PostInitializeHook),
-                        });
-                    type.GetMethod("Deploy", BindingFlags.Public | BindingFlags.Static)
-                        .Invoke(null, new object[]
-                        {
-                        });
+                            });
+                        type.GetMethod("Deploy", BindingFlags.Public | BindingFlags.Static)
+                            .Invoke(null, new object[]
+                            {
+                            });
+                    }
+
                 }
                 else
                 {
@@ -58,10 +66,18 @@ namespace BuildingThemes.Detour
                 if (Util.IsModActive("Prefab Hook"))
                 {
                     var type = Util.FindType("BuildingInfoHookReflective");
-                    type.GetMethod("Revert", BindingFlags.Public | BindingFlags.Static)
-                        .Invoke(null, new object[]
-                        {
-                        });
+                    if (type == null)
+                    {
+                        UnityEngine.Debug.LogError(
+                            "Building Themes - type 'BuildingInfoHookReflective' not found. Update Prefab Hook!");
+                    }
+                    else
+                    {
+                        type.GetMethod("Revert", BindingFlags.Public | BindingFlags.Static)
+                            .Invoke(null, new object[]
+                            {
+                            });
+                    }
                 }
                 else
                 {
@@ -99,7 +115,7 @@ namespace BuildingThemes.Detour
             {
                 PostInitializeHook(this);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 UnityEngine.Debug.LogException(e);
             }
