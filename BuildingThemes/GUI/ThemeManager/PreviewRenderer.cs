@@ -23,6 +23,7 @@ namespace BuildingThemes.GUI
             m_camera.enabled = false;
             m_camera.targetTexture = new RenderTexture(512, 512, 24, RenderTextureFormat.ARGB32);
             m_camera.pixelRect = new Rect(0f, 0f, 512, 512);
+            m_camera.clearFlags = CameraClearFlags.Color;
         }
 
         public Vector2 size
@@ -87,30 +88,61 @@ namespace BuildingThemes.GUI
         public void Render()
         {
             if (m_mesh == null) return;
-            
-            float magnitude = m_bounds.extents.magnitude;
-            float num = magnitude + 16f;
-            float num2 = magnitude * m_zoom;
-
-            m_camera.transform.position = -Vector3.forward * num2;
-            m_camera.transform.rotation = Quaternion.identity;
-            m_camera.nearClipPlane = Mathf.Max(num2 - num * 1.5f, 0.01f);
-            m_camera.farClipPlane = num2 + num * 1.5f;
-
-            Quaternion quaternion = Quaternion.Euler(-20f, 0f, 0f) * Quaternion.Euler(0f, m_rotation, 0f);
-            Vector3 pos = quaternion * -m_bounds.center;
-            Matrix4x4 matrix = Matrix4x4.TRS(pos, quaternion, Vector3.one);
 
             InfoManager infoManager = Singleton<InfoManager>.instance;
             InfoManager.InfoMode currentMod = infoManager.CurrentMode;
             InfoManager.SubInfoMode currentSubMod = infoManager.CurrentSubMode; ;
             infoManager.SetCurrentMode(InfoManager.InfoMode.None, InfoManager.SubInfoMode.Default);
+            infoManager.UpdateInfoMode();
+
+            Light sunLight = DayNightProperties.instance.sunLightSource;
+            float lightIntensity = sunLight.intensity;
+            Color lightColor = sunLight.color;
+            Vector3 lightAngles = sunLight.transform.eulerAngles;
+
+            sunLight.intensity = 2f;
+            sunLight.color = Color.white;
+            sunLight.transform.eulerAngles = new Vector3(50, 180, 70);
+
+            Light mainLight = RenderManager.instance.MainLight;
+            RenderManager.instance.MainLight = sunLight;
+
+            if (mainLight == DayNightProperties.instance.moonLightSource)
+            {
+                DayNightProperties.instance.sunLightSource.enabled = true;
+                DayNightProperties.instance.moonLightSource.enabled = false;
+            }
+
+            float magnitude = m_bounds.extents.magnitude;
+            float num = magnitude + 16f;
+            float num2 = magnitude * m_zoom;
+
+            m_camera.transform.position = Vector3.forward * num2;
+            m_camera.transform.rotation = Quaternion.AngleAxis(180, Vector3.up);
+            m_camera.nearClipPlane = Mathf.Max(num2 - num * 1.5f, 0.01f);
+            m_camera.farClipPlane = num2 + num * 1.5f;
+
+            Quaternion rotation = Quaternion.Euler(-20f, 180f, 0f) * Quaternion.Euler(0f, m_rotation, 0f);
+            Vector3 position = rotation * -m_bounds.center;
+            Matrix4x4 matrix = Matrix4x4.TRS(position, rotation, Vector3.one);
 
             Graphics.DrawMesh(m_mesh, matrix, material, 0, m_camera, 0, null, true, true);
             m_camera.RenderWithShader(material.shader, "");
 
-            infoManager.SetCurrentMode(currentMod, currentSubMod);
+            sunLight.intensity = lightIntensity;
+            sunLight.color = lightColor;
+            sunLight.transform.eulerAngles = lightAngles;
 
+            RenderManager.instance.MainLight = mainLight;
+
+            if (mainLight == DayNightProperties.instance.moonLightSource)
+            {
+                DayNightProperties.instance.sunLightSource.enabled = false;
+                DayNightProperties.instance.moonLightSource.enabled = true;
+            }
+
+            infoManager.SetCurrentMode(currentMod, currentSubMod);
+            infoManager.UpdateInfoMode();
         }
     }
 }
