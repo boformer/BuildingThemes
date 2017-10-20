@@ -169,13 +169,12 @@ namespace BuildingThemes
             {
                 return;
             }
-            Configuration.Theme theme;
-            AddImportedTheme(modTheme.buildings, modTheme.name, null, out theme);
+            var theme = AddImportedTheme(modTheme.buildings, modTheme.name, null);
+
             Debugger.LogFormat(
                 "Imported theme from mod \"{0}\" as theme \"{1}\". Buildings in mod: {2}. Buildings in theme: {3} ",
                 modTheme.buildings.Count,
-                modName, theme.name, theme.buildings.Count
-                );
+                modName, theme.name, theme.buildings.Count);
         }
 
 
@@ -192,19 +191,29 @@ namespace BuildingThemes
                     name = buildingInfo.name, fromStyle = true
                 }).ToList();
             }
-            Configuration.Theme theme;
-            AddImportedTheme(buildings,
-                (style.BuiltIn && style.Name == DistrictStyle.kEuropeanStyleName) ? "European" : style.Name,
-                style.PackageName, out theme);
+            var theme = AddImportedTheme(buildings, FormatStyleName(style), style.PackageName);
+
+
             Debugger.LogFormat(
                 "Imported style \"{0}\" as theme \"{1}\". Buildings in style: {2}. Buildings in theme: {3} ",
-                style.FullName, theme.name, buildingInfos != null ? buildingInfos.Length : 0,
+                style.FullName, theme.name, buildingInfos?.Length ?? 0,
                 theme.buildings.Count);
         }
 
-        private void AddImportedTheme(List<Configuration.Building> builtInBuildings, string themeName, string stylePackage, out Configuration.Theme theme)
+        private static string FormatStyleName(DistrictStyle style)
         {
-            theme = Configuration.getTheme(themeName);
+            if (style.BuiltIn)
+            {
+                if (style.Name == DistrictStyle.kEuropeanStyleName) return "European";
+                if (style.Name == DistrictStyle.kEuropeanSuburbiaStyleName) return "European Suburbia";
+            }
+
+            return style.Name;
+        }
+
+        private Configuration.Theme AddImportedTheme(List<Configuration.Building> builtInBuildings, string themeName, string stylePackage)
+        {
+            var theme = Configuration.getTheme(themeName);
             if (theme == null)
             {
                 theme = new Configuration.Theme
@@ -215,24 +224,25 @@ namespace BuildingThemes
                 Configuration.themes.Add(theme);
             }
             theme.isBuiltIn = true;
-            if (builtInBuildings == null)
+            if (builtInBuildings != null)
             {
-                return;
-            }
-            foreach (var builtInBuilding in builtInBuildings)
-            {
-                var building = theme.getBuilding(builtInBuilding.name);
-                if (building == null)
+                foreach (var builtInBuilding in builtInBuildings)
                 {
-                    building= new Configuration.Building(builtInBuilding);
-                    theme.buildings.Add(building);
+                    var building = theme.getBuilding(builtInBuilding.name);
+                    if (building == null)
+                    {
+                        building = new Configuration.Building(builtInBuilding);
+                        theme.buildings.Add(building);
+                    }
+                    else if (building.builtInBuilding == null)
+                    {
+                        building.builtInBuilding = builtInBuilding;
+                    }
+                    building.fromStyle = builtInBuilding.fromStyle;
                 }
-                else if (building.builtInBuilding == null)
-                {
-                    building.builtInBuilding = builtInBuilding;
-                }
-                building.fromStyle = builtInBuilding.fromStyle;
             }
+
+            return theme;
         }
 
         public void EnableTheme(byte districtId, Configuration.Theme theme)
