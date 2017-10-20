@@ -1,11 +1,13 @@
-﻿using UnityEngine;
+﻿using System;
+using ColossalFramework.PlatformServices;
+using UnityEngine;
 using ColossalFramework.UI;
 
 namespace BuildingThemes.GUI
 {
     public class UIBuildingFilter : UIPanel
     {
-        private const int NumOfCategories = 12;
+        private const int NumOfCategories = 15;
         public UICheckBox[] zoningToggles;
         public UIButton allZones;
         public UIButton noZones;
@@ -25,16 +27,19 @@ namespace BuildingThemes.GUI
         {
             return zoningToggles[(int)Category.ResidentialLow].isChecked &&
                 zoningToggles[(int)Category.ResidentialHigh].isChecked &&
+                zoningToggles[(int)Category.ResidentialEco].isChecked &&
                 zoningToggles[(int)Category.CommercialLow].isChecked &&
                 zoningToggles[(int)Category.CommercialHigh].isChecked &&
                 zoningToggles[(int)Category.CommercialLeisure].isChecked &&
                 zoningToggles[(int)Category.CommercialTourism].isChecked &&
+                zoningToggles[(int)Category.CommercialEco].isChecked &&
                 zoningToggles[(int)Category.Industrial].isChecked &&
                 zoningToggles[(int)Category.Farming].isChecked &&
                 zoningToggles[(int)Category.Forestry].isChecked &&
                 zoningToggles[(int)Category.Oil].isChecked &&
                 zoningToggles[(int)Category.Ore].isChecked &&
-                zoningToggles[(int)Category.Office].isChecked;
+                zoningToggles[(int)Category.Office].isChecked &&
+                zoningToggles[(int)Category.OfficeHightech].isChecked;
         }
 
         public ItemClass.Level buildingLevel
@@ -99,10 +104,23 @@ namespace BuildingThemes.GUI
                 };
             }
 
+            if (!PlatformService.IsDlcInstalled(SteamHelper.kAfterDLCAppID))
+            {
+                zoningToggles[(int) Category.CommercialLeisure].isVisible = false;
+                zoningToggles[(int) Category.CommercialTourism].isVisible = false;
+            }
+
+            if (!PlatformService.IsDlcInstalled(SteamHelper.kGreenDLCAppID))
+            {
+                zoningToggles[(int)Category.ResidentialEco].isVisible = false;
+                zoningToggles[(int)Category.CommercialEco].isVisible = false;
+                zoningToggles[(int)Category.OfficeHightech].isVisible = false;
+            }
+
             allZones = UIUtils.CreateButton(this);
-            allZones.width = 55;
+            allZones.width = 40;
             allZones.text = "All";
-            allZones.relativePosition = new Vector3(480, 5);
+            allZones.relativePosition = new Vector3(600, 5);
 
             allZones.eventClick += (c, p) =>
             {
@@ -116,7 +134,7 @@ namespace BuildingThemes.GUI
             noZones = UIUtils.CreateButton(this);
             noZones.width = 55;
             noZones.text = "None";
-            noZones.relativePosition = new Vector3(540, 5);
+            noZones.relativePosition = new Vector3(645, 5);
 
             noZones.eventClick += (c, p) =>
             {

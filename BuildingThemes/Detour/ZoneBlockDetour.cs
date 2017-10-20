@@ -744,9 +744,21 @@ namespace BuildingThemes.Detour
                 {
                     ZoneBlock.GetCommercialType(vector6, zone, width, length, out subService, out level);
                 }
+                else if (zone == ItemClass.Zone.ResidentialLow || zone == ItemClass.Zone.ResidentialHigh)
+                {
+                    ZoneBlock.GetResidentialType(vector6, zone, width, length, out subService, out level);
+                }
+                else if (zone == ItemClass.Zone.Office)
+                {
+                    ZoneBlock.GetOfficeType(vector6, zone, width, length, out subService, out level);
+                }
 
                 byte district2 = instance2.GetDistrict(vector6);
                 ushort style = instance2.m_districts.m_buffer[(int)district2].m_Style;
+                if (Singleton<BuildingManager>.instance.m_BuildingWrapper != null)
+                {
+                    Singleton<BuildingManager>.instance.m_BuildingWrapper.OnCalculateSpawn(vector6, ref service, ref subService, ref level, ref style);
+                }
 
                 // begin mod
 

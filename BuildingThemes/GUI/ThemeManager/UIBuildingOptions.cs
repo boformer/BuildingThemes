@@ -8,6 +8,8 @@ namespace BuildingThemes.GUI
     {
         private UILabel m_noOption;
 
+        public UIButton m_plop;
+
         private UICheckBox m_include;
         private UITextField m_spawnRate;
 
@@ -141,6 +143,16 @@ namespace BuildingThemes.GUI
                 Show(m_item);
             };
 
+            m_plop = UIUtils.CreateButton(this);
+            m_plop.width = 60;
+            m_plop.text = "Plop";
+            m_plop.relativePosition = new Vector3(width - 70, 0); ;
+
+            m_plop.eventClick += (c, p) =>
+            {
+                UIThemeManager.instance.Plop(m_item);
+            };
+
             // Base Name
             UIPanel baseNamePanel = AddUIComponent<UIPanel>();
             baseNamePanel.height = 50;
@@ -214,6 +226,7 @@ namespace BuildingThemes.GUI
             m_spawnRate.parent.isVisible = false;
             m_upgradeName.parent.isVisible = false;
             m_baseName.parent.isVisible = false;
+            m_plop.isVisible = false;
 
             if (m_item == null)
             {
@@ -235,7 +248,6 @@ namespace BuildingThemes.GUI
             {
                 m_spawnRate.text = m_item.building.spawnRate.ToString();
 
-
                 if (m_item.building.upgradeName != null && m_item.level < m_item.maxLevel)
                 {
                     m_upgradeBuilding = UIThemeManager.instance.GetBuildingItem(m_item.building.upgradeName);
@@ -248,6 +260,11 @@ namespace BuildingThemes.GUI
                     if (m_baseBuilding != null) m_baseName.text = m_baseBuilding.displayName;
                     m_baseName.parent.isVisible = true;
                 }
+            }
+
+            if (m_item.prefab != null)
+            {
+                m_plop.isVisible = true;
             }
         }
 

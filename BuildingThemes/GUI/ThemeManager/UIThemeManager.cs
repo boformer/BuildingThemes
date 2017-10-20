@@ -723,6 +723,15 @@ namespace BuildingThemes.GUI
             return compare;
         }
         #endregion
+
+        public void Plop(BuildingItem mItem)
+        {
+            var buildingTool = ToolsModifierControl.SetTool<BuildingTool>();
+            {
+                buildingTool.m_prefab = mItem.prefab;
+                buildingTool.m_relocate = 0;
+            }
+        }
     }
 }
 

@@ -71,16 +71,20 @@ namespace BuildingThemes.GUI
                 ItemClass itemClass = prefab.m_class;
                 if (itemClass.m_subService == ItemClass.SubService.ResidentialLow) return Category.ResidentialLow;
                 if (itemClass.m_subService == ItemClass.SubService.ResidentialHigh) return Category.ResidentialHigh;
+                if (itemClass.m_subService == ItemClass.SubService.ResidentialLowEco) return Category.ResidentialEco;
+                if (itemClass.m_subService == ItemClass.SubService.ResidentialHighEco) return Category.ResidentialEco;
                 if (itemClass.m_subService == ItemClass.SubService.CommercialLow) return Category.CommercialLow;
                 if (itemClass.m_subService == ItemClass.SubService.CommercialHigh) return Category.CommercialHigh;
                 if (itemClass.m_subService == ItemClass.SubService.CommercialLeisure) return Category.CommercialLeisure;
                 if (itemClass.m_subService == ItemClass.SubService.CommercialTourist) return Category.CommercialTourism;
+                if (itemClass.m_subService == ItemClass.SubService.CommercialEco) return Category.CommercialEco;
                 if (itemClass.m_subService == ItemClass.SubService.IndustrialGeneric) return Category.Industrial;
                 if (itemClass.m_subService == ItemClass.SubService.IndustrialFarming) return Category.Farming;
                 if (itemClass.m_subService == ItemClass.SubService.IndustrialForestry) return Category.Forestry;
                 if (itemClass.m_subService == ItemClass.SubService.IndustrialOil) return Category.Oil;
                 if (itemClass.m_subService == ItemClass.SubService.IndustrialOre) return Category.Ore;
-                if (itemClass.m_service == ItemClass.Service.Office) return Category.Office;
+                if (itemClass.m_subService == ItemClass.SubService.OfficeGeneric) return Category.Office;
+                if (itemClass.m_subService == ItemClass.SubService.OfficeHightech) return Category.OfficeHightech;
 
                 return Category.None;
             }
@@ -116,6 +120,7 @@ namespace BuildingThemes.GUI
                     case Category.None:
                     case Category.ResidentialHigh:
                     case Category.ResidentialLow:
+                    case Category.ResidentialEco:
                         return 5;
                     case Category.Farming:
                     case Category.Forestry:
@@ -123,6 +128,8 @@ namespace BuildingThemes.GUI
                     case Category.Ore:
                     case Category.CommercialLeisure:
                     case Category.CommercialTourism:
+                    case Category.OfficeHightech:
+                    case Category.CommercialEco:
                         return 1;
                 }
 

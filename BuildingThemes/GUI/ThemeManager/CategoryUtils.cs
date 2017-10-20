@@ -25,41 +25,76 @@ namespace BuildingThemes.GUI
         None = -1,
         ResidentialLow = 0,
         ResidentialHigh,
+        ResidentialEco, // gc
         CommercialLow,
         CommercialHigh,
         CommercialLeisure,
         CommercialTourism,
+        CommercialEco, // gc
         Industrial,
         Farming,
         Forestry,
         Oil,
         Ore,
-        Office
+        Office,
+        OfficeHightech // gc
     }
 
     public class CategoryIcons
     {
 
-        public static readonly string[] atlases = { "Thumbnails", "Thumbnails", "Thumbnails", "Thumbnails", "Ingame", "Ingame", "Thumbnails",
-                                                       "Ingame", "Ingame", "Ingame", "Ingame", "Thumbnails" };
+        public static readonly string[] atlases = {
+            "Thumbnails",
+            "Thumbnails",
+            "Thumbnails", // gc
+            "Thumbnails",
+            "Thumbnails",
+            "Thumbnails",
+            "Thumbnails",
+            "Thumbnails", // gc
+            "Thumbnails",
+            "Ingame",
+            "Ingame",
+            "Ingame",
+            "Ingame",
+            "Thumbnails",
+            "Thumbnails" //gc
+        };
 
-        public static readonly string[] spriteNames = { "ZoningResidentialLow", "ZoningResidentialHigh", "ZoningCommercialLow", "ZoningCommercialHigh",
-                                                        "IconPolicyLeisure", "IconPolicyTourist",
-                                                        "ZoningIndustrial", "IconPolicyFarming", "IconPolicyForest", "IconPolicyOil", "IconPolicyOre",
-                                                        "ZoningOffice" };
+        public static readonly string[] spriteNames = {
+            "ZoningResidentialLow",
+            "ZoningResidentialHigh",
+            "DistrictSpecializationSelfsufficient",
+            "ZoningCommercialLow",
+            "ZoningCommercialHigh",
+            "DistrictSpecializationLeisure",
+            "DistrictSpecializationTourist",
+            "DistrictSpecializationOrganic",
+            "ZoningIndustrial",
+            "IconPolicyFarming",
+            "IconPolicyForest",
+            "IconPolicyOil",
+            "IconPolicyOre",
+            "ZoningOffice",
+            "DistrictSpecializationHightech"
+        };
 
         public static readonly string[] tooltips = {
             "Low density residential",
             "High density residential",
+            "Eco residential",
             "Low density commercial",
             "High density commercial",
             "Leisure commercial",
             "Tourism commercial",
+            "Eco commercial",
             "Generic Industry",
             "Farming Industry",
             "Forest Industry",
             "Oil Industry",
             "Ore Industry",
-            "Office" };
+            "Office",
+            "Hightech office"
+        };
     }
 }
