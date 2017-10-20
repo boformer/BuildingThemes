@@ -10,9 +10,11 @@ namespace BuildingThemes
 {
     public class BuildingThemesManager : Singleton<BuildingThemesManager>
     {
+        private const int AreaBuildingsLength = 3840;
+
         private const string ModConfigPath = "BuildingThemes.xml";
         private readonly DistrictThemeInfo[] districtThemeInfos = new DistrictThemeInfo[128];
-        private readonly FastList<ushort>[] m_areaBuildings = new FastList<ushort>[3040];
+        private readonly FastList<ushort>[] m_areaBuildings = new FastList<ushort>[AreaBuildingsLength];
         private bool m_areaBuildingsDirty = true;
         private bool importedModThemes = false;
         private bool importedStyles = false;
@@ -24,7 +26,7 @@ namespace BuildingThemes
             public readonly HashSet<Configuration.Theme> themes = new HashSet<Configuration.Theme>();
 
             // similar to BuildingManager.m_areaBuildings, but separate for every district
-            public readonly FastList<ushort>[] areaBuildings = new FastList<ushort>[3040];
+            public readonly FastList<ushort>[] areaBuildings = new FastList<ushort>[AreaBuildingsLength];
 
             // building upgrade mapping (prefabLevel1 --> prefabLevel2) for realistic building upgrades
             public readonly Dictionary<ushort, ushort> upgradeBuildings = new Dictionary<ushort, ushort>();
