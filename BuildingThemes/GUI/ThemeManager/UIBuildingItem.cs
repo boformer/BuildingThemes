@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using ColossalFramework.UI;
-using ColossalFramework.Steamworks;
+using ColossalFramework.PlatformServices;
 
 namespace BuildingThemes.GUI
 {
@@ -87,12 +87,12 @@ namespace BuildingThemes.GUI
 
             UIUtils.ResizeIcon(m_steamIcon, new Vector2(25, 25));
 
-            if (Steam.IsOverlayEnabled())
+            if (PlatformService.IsOverlayEnabled())
             {
                 m_steamIcon.eventClick += (c, p) =>
                 {
                     p.Use();
-                    Steam.ActivateGameOverlayToWorkshopItem(new PublishedFileId(ulong.Parse(m_building.steamID)));
+                    PlatformService.ActivateGameOverlayToWorkshopItem(new PublishedFileId(ulong.Parse(m_building.steamID)));
                 };
             }
 

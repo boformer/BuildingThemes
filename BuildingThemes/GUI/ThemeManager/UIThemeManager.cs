@@ -1,5 +1,5 @@
 ﻿using ColossalFramework;
-using ColossalFramework.Steamworks;
+using ColossalFramework.PlatformServices;
 using ColossalFramework.UI;
 using System;
 using System.Collections.Generic;
@@ -290,7 +290,7 @@ namespace BuildingThemes.GUI
                     {
                         if (item.building != null)
                         {
-                            if (item.building.dlc != null && !Steam.IsDlcInstalled(Convert.ToUInt32(item.building.dlc))) continue;
+                            if (item.building.dlc != null && !PlatformService.IsDlcInstalled(Convert.ToUInt32(item.building.dlc))) continue;
                             if (item.building.environments != null
                                 && (item.building.environments.Contains("-" + SimulationManager.instance.m_metaData.m_environment)
                                     || !item.building.environments.Contains("+" + SimulationManager.instance.m_metaData.m_environment)))
@@ -605,7 +605,7 @@ namespace BuildingThemes.GUI
                 {
                     // Prefab not found, adding building without prefab
 
-                    if (buildings[i].dlc != null && !Steam.IsDlcInstalled(Convert.ToUInt32(buildings[i].dlc))) continue;
+                    if (buildings[i].dlc != null && !PlatformService.IsDlcInstalled(Convert.ToUInt32(buildings[i].dlc))) continue;
                     if (buildings[i].environments != null
                         && (buildings[i].environments.Contains("-" + SimulationManager.instance.m_metaData.m_environment)
                         || !buildings[i].environments.Contains("+" + SimulationManager.instance.m_metaData.m_environment)))
