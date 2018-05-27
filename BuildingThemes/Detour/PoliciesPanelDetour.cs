@@ -1,9 +1,10 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using ColossalFramework;
 using ColossalFramework.UI;
 using UnityEngine;
 using BuildingThemes.GUI;
-using System;
+using BuildingThemes.Redirection;
 
 namespace BuildingThemes.Detour
 {
@@ -80,7 +81,6 @@ namespace BuildingThemes.Detour
             }
             RedirectionHelper.RedirectCalls(_PoliciesPanel_SetParentButton_original, _PoliciesPanel_SetParentButton_detour);
 
-            
             // After the method call, add our custom tab again
             GUI.ThemePolicyTab.AddThemesTab();
         }

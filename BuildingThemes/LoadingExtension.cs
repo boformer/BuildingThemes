@@ -1,5 +1,7 @@
 ﻿using System;
+using BuildingThemes.Detour;
 using BuildingThemes.GUI;
+using BuildingThemes.Redirection;
 using ColossalFramework;
 using ICities;
 
@@ -27,7 +29,8 @@ namespace BuildingThemes
 
                 try
                 {
-                    Detour.BuildingManagerDetour.Deploy();
+                    Redirector<BuildingManagerDetour>.Deploy();
+                    Debugger.Log("Building Themes: BuildingManager Methods detoured!");
                 }
                 catch (Exception e)
                 {
@@ -35,7 +38,8 @@ namespace BuildingThemes
                 }
                 try
                 {
-                    Detour.DistrictManagerDetour.Deploy();
+                    Redirector<DistrictManagerDetour>.Deploy();
+                    Debugger.Log("Building Themes: DistrictManager Methods detoured!");
                 }
                 catch (Exception e)
                 {
@@ -43,7 +47,9 @@ namespace BuildingThemes
                 }
                 try
                 {
-                    Detour.ZoneBlockDetour.Deploy();
+                    Redirector<ZoneBlockDetour>.Deploy();
+                    Debugger.Log("Building Themes: ZoneBlock Methods detoured!");
+                    ZoneBlockDetour.SetUp();
                 }
                 catch (Exception e)
                 {
@@ -99,7 +105,8 @@ namespace BuildingThemes
                 }
                 try
                 {
-                    Detour.DistrictWorldInfoPanelDetour.Deploy();
+                    Redirector<DistrictWorldInfoPanelDetour>.Deploy();
+                    Debugger.Log("Building Themes: DistrictWorldInfoPanel Methods detoured!");
                 }
                 catch (Exception e)
                 {
@@ -161,16 +168,20 @@ namespace BuildingThemes
             try
             {
                 Detour.BuildingInfoDetour.Revert();
-                Detour.BuildingManagerDetour.Revert();
-                Detour.DistrictManagerDetour.Revert();
-                Detour.ZoneBlockDetour.Revert();
+                Redirector<BuildingManagerDetour>.Revert();
+                Debugger.Log("Building Themes: BuildingManager Methods restored!");
+                Redirector<DistrictManagerDetour>.Revert();
+                Debugger.Log("Building Themes: DistrictManager Methods restored!");
+                Redirector<ZoneBlockDetour>.Revert();
+                Debugger.Log("Building Themes: ZoneBlock Methods restored!");
                 Detour.ImmaterialResourceManagerDetour.Revert();
                 Detour.PrivateBuildingAIDetour<ResidentialBuildingAI>.Revert();
                 Detour.PrivateBuildingAIDetour<CommercialBuildingAI>.Revert();
                 Detour.PrivateBuildingAIDetour<IndustrialBuildingAI>.Revert();
                 Detour.PrivateBuildingAIDetour<OfficeBuildingAI>.Revert();
                 Detour.PoliciesPanelDetour.Revert();
-                Detour.DistrictWorldInfoPanelDetour.Revert();
+                Redirector<DistrictWorldInfoPanelDetour>.Revert();
+                Debugger.Log("Building Themes: DistrictWorldInfoPanel Methods restored!");
             }
             catch (Exception e)
             {
