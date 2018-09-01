@@ -9,6 +9,7 @@ namespace BuildingThemes.GUI
         private UILabel m_noOption;
 
         public UIButton m_plop;
+        public UIButton m_destroy;
 
         private UICheckBox m_include;
         private UITextField m_spawnRate;
@@ -151,6 +152,15 @@ namespace BuildingThemes.GUI
             m_plop.eventClick += (c, p) =>
             {
                 UIThemeManager.instance.Plop(m_item);
+            };
+
+            m_destroy = UIUtils.CreateButton(this);
+            m_destroy.width = 120;
+            m_destroy.text = "Destroy";
+            m_destroy.relativePosition = new Vector3(m_plop.relativePosition.x + m_plop.width + 10f, m_plop.relativePosition.y);
+            m_destroy.eventClick += (c, p) =>
+            {
+                UIThemeManager.instance.DestroyAll(m_item);
             };
 
             // Base Name

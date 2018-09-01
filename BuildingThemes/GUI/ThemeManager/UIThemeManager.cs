@@ -1,5 +1,6 @@
 ﻿using ColossalFramework;
 using ColossalFramework.PlatformServices;
+using ColossalFramework.Threading;
 using ColossalFramework.UI;
 using System;
 using System.Collections.Generic;
@@ -731,6 +732,48 @@ namespace BuildingThemes.GUI
                 buildingTool.m_prefab = mItem.prefab;
                 buildingTool.m_relocate = 0;
             }
+        }
+
+        public void DestroyAll(BuildingItem m_item)
+        {
+            var simulationManager = SimulationManager.instance.AddAction(() =>
+            {
+                var buildings = BuildingManager.instance.m_buildings.m_buffer;
+                for (ushort buildingId = 0; buildingId < buildings.Length; buildingId++)
+                {
+                    var building = buildings[buildingId];
+                    if (building.Info == null)
+                    {
+                        continue;
+                    }
+
+                    if (building.Info.name != m_item.name)
+                    {
+                        continue;
+                    }
+
+                    Destroy(buildingId, building);
+                }
+            });
+        }
+
+        //similar to BulldozeTool.DeleteBuildingImpl
+        public void Destroy(ushort buildingId, Building building)
+        {
+            BuildingManager instance = Singleton<BuildingManager>.instance;
+            BuildingInfo info = building.Info;
+            Vector3 position = building.m_position;
+            float angle = building.m_angle;
+            int width = building.Width;
+            int length = building.Length;
+            bool collapsed = (building.m_flags & Building.Flags.Collapsed) != Building.Flags.None;
+            instance.ReleaseBuilding(buildingId);
+            int publicServiceIndex = ItemClass.GetPublicServiceIndex(info.m_class.m_service);
+            if (publicServiceIndex != -1)
+            {
+                Singleton<CoverageManager>.instance.CoverageUpdated(info.m_class.m_service, info.m_class.m_subService, info.m_class.m_level);
+            }
+            BuildingTool.DispatchPlacementEffect(info, buildingId, position, angle, width, length, true, collapsed);
         }
     }
 }
