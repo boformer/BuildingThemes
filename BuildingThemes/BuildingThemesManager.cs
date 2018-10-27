@@ -57,7 +57,7 @@ namespace BuildingThemes
 
                         Debugger.xmlCorrupt = false;
                     }
-                    catch (Exception e)
+                    catch
                     {
                         Debugger.xmlCorrupt = true;
                     }
