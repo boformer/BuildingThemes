@@ -1,6 +1,7 @@
 ﻿using System;
 using BuildingThemes.Detour;
 using BuildingThemes.GUI;
+using BuildingThemes.HarmonyPatches.BuildingInfoPatch;
 using BuildingThemes.Redirection;
 using ColossalFramework;
 using ICities;
@@ -167,7 +168,7 @@ namespace BuildingThemes
             Debugger.Log("Building Themes: Reverting detoured methods...");
             try
             {
-                Detour.BuildingInfoDetour.Revert();
+                InitializePrefabPatch.Revert();
                 Redirector<BuildingManagerDetour>.Revert();
                 Debugger.Log("Building Themes: BuildingManager Methods restored!");
                 Redirector<DistrictManagerDetour>.Revert();
@@ -220,7 +221,7 @@ namespace BuildingThemes
 
                 if (cloneFeatureUsed)
                 {
-                    try { Detour.BuildingInfoDetour.Deploy(); }
+                    try { InitializePrefabPatch.Deploy(); }
                     catch (Exception e) { Debugger.LogException(e); }
                 }
                 else
