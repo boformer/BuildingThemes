@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using ColossalFramework;
 
 namespace BuildingThemes.HarmonyPatches.BuildingInfoPatch
@@ -69,18 +70,27 @@ namespace BuildingThemes.HarmonyPatches.BuildingInfoPatch
 
         public static void PostInitializeHook(BuildingInfo __instance, State __state)
         {
-
-            if (!__state.isGrowable || !__state.prefixSuccess)
+            try
             {
-                return;
-            }
-            var prefabVariations = Singleton<BuildingVariationManager>.instance.CreateVariations(__instance).Values.ToArray<BuildingInfo>();
+                if (!__state.isGrowable || !__state.prefixSuccess)
+                {
+                    return;
+                }
 
-            if (prefabVariations.Length > 0)
-            {
-                PrefabCollection<BuildingInfo>.InitializePrefabs("BetterUpgrade", prefabVariations, null);
+                var prefabVariations = Singleton<BuildingVariationManager>.instance.CreateVariations(__instance).Values
+                    .ToArray<BuildingInfo>();
+
+                if (prefabVariations.Length > 0)
+                {
+                    PrefabCollection<BuildingInfo>.InitializePrefabs("BetterUpgrade", prefabVariations, null);
+                }
+                //Debugger.Log("InitializePrefab done:   " + this.name);
+
             }
-            //Debugger.Log("InitializePrefab done:   " + this.name);
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogException(e);
+            }
         }
     }
 }
