@@ -161,7 +161,7 @@ namespace BuildingThemes.GUI
 
             m_destroy = UIUtils.CreateButton(constructionPanel);
             m_destroy.width = 120;
-            m_destroy.text = "Bulldoze ll";
+            m_destroy.text = "Bulldoze All";
             m_destroy.relativePosition = new Vector3(m_plop.width + 10f, 0);
             m_destroy.eventClick += (c, p) =>
             {
