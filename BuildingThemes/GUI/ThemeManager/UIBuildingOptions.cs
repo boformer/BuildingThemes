@@ -144,20 +144,25 @@ namespace BuildingThemes.GUI
                 Show(m_item);
             };
 
-            m_plop = UIUtils.CreateButton(this);
+            var constructionPanel = AddUIComponent<UIPanel>();
+            constructionPanel.height = 30;
+            constructionPanel.isVisible = true;
+
+            
+            m_plop = UIUtils.CreateButton(constructionPanel);
             m_plop.width = 60;
             m_plop.text = "Plop";
-            m_plop.relativePosition = new Vector3(width - 70, 0); ;
+            m_plop.relativePosition = new Vector3(0, 0); ;
 
             m_plop.eventClick += (c, p) =>
             {
                 UIThemeManager.instance.Plop(m_item);
             };
 
-            m_destroy = UIUtils.CreateButton(this);
+            m_destroy = UIUtils.CreateButton(constructionPanel);
             m_destroy.width = 120;
-            m_destroy.text = "Destroy";
-            m_destroy.relativePosition = new Vector3(m_plop.relativePosition.x + m_plop.width + 10f, m_plop.relativePosition.y);
+            m_destroy.text = "Bulldoze ll";
+            m_destroy.relativePosition = new Vector3(m_plop.width + 10f, 0);
             m_destroy.eventClick += (c, p) =>
             {
                 UIThemeManager.instance.DestroyAll(m_item);
@@ -237,6 +242,7 @@ namespace BuildingThemes.GUI
             m_upgradeName.parent.isVisible = false;
             m_baseName.parent.isVisible = false;
             m_plop.isVisible = false;
+            m_destroy.isVisible = false;
 
             if (m_item == null)
             {
@@ -275,6 +281,7 @@ namespace BuildingThemes.GUI
             if (m_item.prefab != null)
             {
                 m_plop.isVisible = true;
+                m_destroy.isVisible = true;
             }
         }
 
