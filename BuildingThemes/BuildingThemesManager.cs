@@ -538,7 +538,7 @@ namespace BuildingThemes
                     }
                 }
             }
-            int num3 = 19;
+            int num3 = 24;
             for (int k = 0; k < num3; k++)
             {
                 for (int l = 0; l < 5; l++)
