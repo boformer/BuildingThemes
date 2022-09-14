@@ -17,7 +17,7 @@ namespace BuildingThemes.Detour
 
         public static void SetUp()
         {
-            if (!Util.IsModActive(BuildingThemesMod.EIGHTY_ONE_MOD))
+            if (!Util.IsModActive(BuildingThemesMod.EIGHTY_ONE_MOD) && !Util.IsEightyOne2Active())
             {
                 return;
             }
@@ -29,7 +29,7 @@ namespace BuildingThemes.Detour
 
         [RedirectReverse]
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void CheckBlock(ref ZoneBlock zoneBlock, ref ZoneBlock other, int[] xBuffer, ItemClass.Zone zone, Vector2 startPos, Vector2 xDir,
+        private static void CheckBlock(ref ZoneBlock zoneBlock, ushort blockID, ushort otherID, ref ZoneBlock other, int[] xBuffer, ItemClass.Zone zone, Vector2 startPos, Vector2 xDir,
             Vector2 zDir, Quad2 quad)
         {
             UnityEngine.Debug.LogError($"CheckBlock(): this={zoneBlock}"); //this is just to give the method some body
@@ -58,21 +58,22 @@ namespace BuildingThemes.Detour
             ZoneManager zoneManager = Singleton<ZoneManager>.instance;
             int rowCount = zoneBlock.RowCount;
             float m_angle = zoneBlock.m_angle;
-
             Vector2 xDirection = new Vector2(Mathf.Cos(m_angle), Mathf.Sin(m_angle)) * 8f;
             Vector2 zDirection = new Vector2(xDirection.y, -xDirection.x);
             ulong num = zoneBlock.m_valid & ~(zoneBlock.m_occupied1 | zoneBlock.m_occupied2);
             int spawnpointRow = 0;
             ItemClass.Zone zone = ItemClass.Zone.Unzoned;
-            int num3 = 0;
-            while (num3 < 4 && zone == ItemClass.Zone.Unzoned)
+            for (int i = 0; i < 4; i++)
             {
+                if (zone != 0)
+                {
+                    break;
+                }
                 spawnpointRow = Singleton<SimulationManager>.instance.m_randomizer.Int32((uint)rowCount);
-                if ((num & 1uL << (spawnpointRow << 3)) != 0uL)
+                if ((num & (ulong)(1L << (spawnpointRow << 3))) != 0)
                 {
                     zone = zoneBlock.GetZone(0, spawnpointRow);
                 }
-                num3++;
             }
             DistrictManager instance2 = Singleton<DistrictManager>.instance;
 
@@ -106,8 +107,11 @@ namespace BuildingThemes.Detour
                     num4 = zoneManager.m_actualWorkplaceDemand;
                     num4 += instance2.m_districts.m_buffer[(int)district].CalculateOfficeDemandOffset();
                     break;
+
+                //begin mod
                 default:
                     return;
+                    // end mod
             }
             Vector2 a = VectorUtils.XZ(m_position);
             Vector2 vector3 = a - 3.5f * xDirection + ((float)spawnpointRow - 3.5f) * zDirection;
@@ -116,7 +120,6 @@ namespace BuildingThemes.Detour
             {
                 tmpXBuffer[i] = 0;
             }
-
             Quad2 quad = default(Quad2);
             quad.a = a - 4f * xDirection + ((float)spawnpointRow - 10f) * zDirection;
             quad.b = a + 3f * xDirection + ((float)spawnpointRow - 10f) * zDirection;
@@ -147,7 +150,7 @@ namespace BuildingThemes.Detour
 
                         if (num11 < 0f)
                         {
-                            CheckBlock(ref zoneBlock, ref zoneManager.m_blocks.m_buffer[(int)num9], tmpXBuffer, zone, vector3, xDirection, zDirection, quad);
+                            CheckBlock(ref zoneBlock, blockID, num9, ref zoneManager.m_blocks.m_buffer[num9], tmpXBuffer, zone, vector3, xDirection, zDirection, quad);
                         }
                         num9 = zoneManager.m_blocks.m_buffer[(int)num9].m_nextGridBlock;
                         if (++num10 >= 49152)
@@ -163,7 +166,8 @@ namespace BuildingThemes.Detour
             {
                 uint num12 = (uint)tmpXBuffer[l];
                 int num13 = 0;
-                bool flag = (num12 & 196608u) == 196608u;
+                bool newFlag = (num12 & 0x10000) == 65536;
+                bool flag = (num12 & 0x20000) == 131072;
                 bool flag2 = false;
                 while ((num12 & 1u) != 0u)
                 {
@@ -171,26 +175,28 @@ namespace BuildingThemes.Detour
                     flag2 = ((num12 & 65536u) != 0u);
                     num12 >>= 1;
                 }
-                if (num13 == 5 || num13 == 6)
+                switch (num13)
                 {
-                    if (flag2)
-                    {
-                        num13 -= Singleton<SimulationManager>.instance.m_randomizer.Int32(2u) + 2;
-                    }
-                    else
-                    {
+                    case 5:
+                    case 6:
+                        num13 = ((!flag2) ? 4 : (num13 - (Singleton<SimulationManager>.instance.m_randomizer.Int32(2u) + 2)));
+                        num13 |= 0x40000;
+                        break;
+                    case 7:
                         num13 = 4;
+                        num13 |= 0x40000;
+                        break;
+                }
+                if (num13 != 0)
+                {
+                    if (newFlag)
+                    {
+                        num13 |= 0x10000;
                     }
-                    num13 |= 131072;
-                }
-                else if (num13 == 7)
-                {
-                    num13 = 4;
-                    num13 |= 131072;
-                }
-                if (flag)
-                {
-                    num13 |= 65536;
+                    if (flag)
+                    {
+                        num13 |= 0x20000;
+                    }
                 }
                 tmpXBuffer[l] = num13;
             }
@@ -284,13 +290,15 @@ namespace BuildingThemes.Detour
                 {
                     if (num16 - num15 > 2)
                     {
+                        num15++;
+                        num16--;
                         break;
                     }
                     if (num14 <= 2)
                     {
                         if (!flag4)
                         {
-                            goto Block_34;
+                            break;
                         }
                     }
                     else
@@ -302,13 +310,14 @@ namespace BuildingThemes.Detour
                 {
                     if (num16 - num15 > 1)
                     {
-                        goto Block_36;
+                        num15++;
+                        break;
                     }
                     if (num14 <= 2)
                     {
                         if (!flag4)
                         {
-                            goto Block_38;
+                            break;
                         }
                     }
                     else
@@ -320,13 +329,14 @@ namespace BuildingThemes.Detour
                 {
                     if (num16 - num15 > 1)
                     {
-                        goto Block_40;
+                        num16--;
+                        break;
                     }
                     if (num14 <= 2)
                     {
                         if (!flag4)
                         {
-                            goto Block_42;
+                            break;
                         }
                     }
                     else
@@ -338,13 +348,13 @@ namespace BuildingThemes.Detour
                 {
                     if (num15 != num16)
                     {
-                        goto IL_884;
+                        break;
                     }
                     if (num14 <= 2)
                     {
                         if (!flag4)
                         {
-                            goto Block_45;
+                            break;
                         }
                     }
                     else
@@ -354,20 +364,6 @@ namespace BuildingThemes.Detour
                 }
                 flag4 = false;
             }
-            num15++;
-            num16--;
-            Block_34:
-            goto IL_891;
-            Block_36:
-            num15++;
-            Block_38:
-            goto IL_891;
-            Block_40:
-            num16--;
-            Block_42:
-            Block_45:
-            IL_884:
-            IL_891:
             int num19;
             int num20;
             if (num14 == 1 && num16 - num15 >= 1)
@@ -467,12 +463,12 @@ namespace BuildingThemes.Detour
             for (int m = num15; m <= num16; m++)
             {
                 depth_A = Mathf.Min(depth_A, tmpXBuffer[m] & 65535);
-                if ((tmpXBuffer[m] & 131072) == 0)
+                if ((tmpXBuffer[m] & 0x40000) == 0)
                 {
                     flag7 = false;
                 }
             }
-            if (num16 > num15)
+            if (num16 >= num15)
             {
                 if ((tmpXBuffer[num15] & 65536) != 0)
                 {
@@ -480,7 +476,7 @@ namespace BuildingThemes.Detour
                     num20 = num15 + num20 - num19;
                     num19 = num15;
                 }
-                if ((tmpXBuffer[num16] & 65536) != 0 && (zoningMode != BuildingInfo.ZoningMode.CornerLeft || Singleton<SimulationManager>.instance.m_randomizer.Int32(2u) == 0))
+                else if (((uint)tmpXBuffer[num16] & 0x20000u) != 0)
                 {
                     zoningMode = BuildingInfo.ZoningMode.CornerRight;
                     num19 = num16 + num19 - num20;
@@ -494,25 +490,25 @@ namespace BuildingThemes.Detour
             for (int n = num19; n <= num20; n++)
             {
                 depth_B = Mathf.Min(depth_B, tmpXBuffer[n] & 65535);
-                if ((tmpXBuffer[n] & 131072) == 0)
+                if ((tmpXBuffer[n] & 0x40000) == 0)
                 {
                     flag8 = false;
                 }
             }
-            if (num20 > num19)
+            if (num20 >= num19)
             {
-                if ((tmpXBuffer[num19] & 65536) != 0)
+                if (((uint)tmpXBuffer[num19] & 0x10000u) != 0)
                 {
                     zoningMode2 = BuildingInfo.ZoningMode.CornerLeft;
                 }
-                if ((tmpXBuffer[num20] & 65536) != 0 && (zoningMode2 != BuildingInfo.ZoningMode.CornerLeft || Singleton<SimulationManager>.instance.m_randomizer.Int32(2u) == 0))
+                if (((uint)tmpXBuffer[num20] & 0x20000u) != 0)
                 {
                     zoningMode2 = BuildingInfo.ZoningMode.CornerRight;
                 }
             }
+            ItemClass.Service service = ItemClass.Service.None;
             ItemClass.SubService subService = ItemClass.SubService.None;
             ItemClass.Level level = ItemClass.Level.Level1;
-            ItemClass.Service service;
             switch (zone)
             {
                 case ItemClass.Zone.ResidentialLow:
@@ -536,7 +532,6 @@ namespace BuildingThemes.Detour
                     break;
                 case ItemClass.Zone.Office:
                     service = ItemClass.Service.Office;
-                    subService = ItemClass.SubService.None;
                     break;
                 default:
                     return;
@@ -709,10 +704,10 @@ namespace BuildingThemes.Detour
                     default:
                         goto IL_D6A;
                 }
-                IL_DF0:
+            IL_DF0:
                 num28++;
                 continue;
-                IL_D6A:
+            IL_D6A:
                 vector6 = m_position + VectorUtils.X_Y(((float)length * 0.5f - 4f) * xDirection + ((float)num25_row * 0.5f + (float)spawnpointRow - 10f) * zDirection);
                 if (zone == ItemClass.Zone.Industrial)
                 {
@@ -819,25 +814,24 @@ namespace BuildingThemes.Detour
                 return;
             }
             float num29 = Singleton<TerrainManager>.instance.WaterLevel(VectorUtils.XZ(vector6));
-            if (num29 > vector6.y)
+            if (num29 > vector6.y || Singleton<DisasterManager>.instance.IsEvacuating(vector6))
             {
                 return;
             }
-            float num30 = m_angle + 1.57079637f;
+            float num30 = m_angle + (float)Math.PI / 2f;
             if (zoningMode3 == BuildingInfo.ZoningMode.CornerLeft && buildingInfo.m_zoningMode == BuildingInfo.ZoningMode.CornerRight)
             {
-                num30 -= 1.57079637f;
+                num30 -= (float)Math.PI / 2f;
                 length = width;
             }
             else if (zoningMode3 == BuildingInfo.ZoningMode.CornerRight && buildingInfo.m_zoningMode == BuildingInfo.ZoningMode.CornerLeft)
             {
-                num30 += 1.57079637f;
+                num30 += (float)Math.PI / 2f;
                 length = width;
             }
-            ushort num31;
-            if (Singleton<BuildingManager>.instance.CreateBuilding(out num31, ref Singleton<SimulationManager>.instance.m_randomizer, buildingInfo, vector6, num30, length, Singleton<SimulationManager>.instance.m_currentBuildIndex))
+            if (Singleton<BuildingManager>.instance.CreateBuilding(out var building, ref Singleton<SimulationManager>.instance.m_randomizer, buildingInfo, vector6, num30, length, Singleton<SimulationManager>.instance.m_currentBuildIndex))
             {
-                Singleton<SimulationManager>.instance.m_currentBuildIndex += 1u;
+                Singleton<SimulationManager>.instance.m_currentBuildIndex++;
                 switch (service)
                 {
                     case ItemClass.Service.Residential:
@@ -853,17 +847,9 @@ namespace BuildingThemes.Detour
                         zoneManager.m_actualWorkplaceDemand = Mathf.Max(0, zoneManager.m_actualWorkplaceDemand - 5);
                         break;
                 }
-
-                switch (zone)
+                if (zone == ItemClass.Zone.ResidentialHigh || zone == ItemClass.Zone.CommercialHigh)
                 {
-                    case ItemClass.Zone.ResidentialHigh:
-                    case ItemClass.Zone.CommercialHigh:
-                        {
-                            Building[] expr_FD7_cp_0 = Singleton<BuildingManager>.instance.m_buildings.m_buffer;
-                            ushort expr_FD7_cp_1 = num31;
-                            expr_FD7_cp_0[(int)expr_FD7_cp_1].m_flags = (expr_FD7_cp_0[(int)expr_FD7_cp_1].m_flags | Building.Flags.HighDensity);
-                            break;
-                        }
+                    Singleton<BuildingManager>.instance.m_buildings.m_buffer[building].m_flags |= Building.Flags.HighDensity;
                 }
             }
             zoneManager.m_goodAreaFound[(int)zone] = 1024;
