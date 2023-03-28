@@ -74,6 +74,9 @@
     <Compile Include="Detour\BuildingManagerDetour.cs" />
     <Compile Include="Detour\ZoneBlockDetour.cs" />
     <Compile Include="Detour\PoliciesPanelDetour.cs" />
+    <Compile Include="DistrictStylesPlusImport\DSPTransientStyleManager.cs" />
+    <Compile Include="DistrictStylesPlusImport\Serializer.cs" />
+    <Compile Include="DistrictStylesPlusImport\TransientDistrictStyleContainer.cs" />
     <Compile Include="GUI\ThemeManager\BuildingItem.cs" />
     <Compile Include="GUI\ThemeManager\CategoryUtils.cs" />
     <Compile Include="GUI\ThemeManager\UIBuildingPreview.cs" />
