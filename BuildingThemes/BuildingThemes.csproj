@@ -66,11 +66,15 @@
     <Compile Include="BuildingThemesMod.cs" />
     <Compile Include="BuildingVariationManager.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="Data\ConfigurationHelper.cs" />
+    <Compile Include="Data\DistrictsConfiguration.cs" />
     <Compile Include="Data\DistrictStylesPlusImport\DSPDistrictStyleManager.cs" />
     <Compile Include="Data\DistrictStylesPlusImport\DSPDistrictStylePackageManager.cs" />
     <Compile Include="Data\DistrictStylesPlusImport\DSPTransientStyleManager.cs" />
     <Compile Include="Data\DistrictStylesPlusImport\DSPSerializer.cs" />
     <Compile Include="Data\DistrictStylesPlusImport\TransientDistrictStyleContainer.cs" />
+    <Compile Include="Data\DSPDataLoader.cs" />
+    <Compile Include="Data\LegacyDataLoader.cs" />
     <Compile Include="Data\SerializableDataExtension.cs" />
     <Compile Include="Debugger.cs" />
     <Compile Include="Detour\DistrictManagerDetour.cs" />

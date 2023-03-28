@@ -1,28 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using BuildingThemes.Data.DistrictStylesPlusImport;
 using ColossalFramework;
 using ICities;
-using UnityEngine;
 
 namespace BuildingThemes.Data
 {
     // This extension handles the loading and saving of district theme data (which themes are assigned to a district).
     public class SerializableDataExtension : SerializableDataExtensionBase
     {
-        public static string XMLSaveDataId = "BuildingThemes-SaveData";
+        private const string XMLSaveDataId = "BuildingThemes-SaveData";
 
         // support for legacy data
-        public static string LegacyDataId = "BuildingThemes";
 
         public override void OnLoadData()
         {
             base.OnLoadData();
             try 
             {
-                byte[] saveData = serializableDataManager.LoadData(XMLSaveDataId);
+                DistrictsConfiguration configuration;
+                var saveData = serializableDataManager.LoadData(XMLSaveDataId);
 
                 if (saveData != null)
                 {
@@ -31,66 +29,22 @@ namespace BuildingThemes.Data
                         Debugger.Log("Building Themes: Loading Save Data...");
                     }
                     
-                    DistrictsConfiguration configuration = null;
+
                     
                     var xmlSerializer = new XmlSerializer(typeof(DistrictsConfiguration));
                     using (var memoryStream = new MemoryStream(saveData))
                     {
-                        configuration = xmlSerializer.Deserialize(new MemoryStream(saveData)) as DistrictsConfiguration;
+                        configuration = xmlSerializer.Deserialize(memoryStream) as DistrictsConfiguration;
                     }
 
-                    ApplyConfiguration(configuration);
+                    ConfigurationHelper.ApplyConfiguration(configuration);
                 }
                 else
                 {
                     // search for legacy save data
-                    byte[] legacyData = serializableDataManager.LoadData(LegacyDataId);
-
-                    if (legacyData != null)
+                    if ((configuration = LegacyDataLoader.TryImportLegacyConfiguration(serializableDataManager)) != null)
                     {
-                        if (Debugger.Enabled)
-                        {
-                            Debugger.Log("Building Themes: Loading Legacy Save Data...");
-                        }
-
-                        var UniqueId = 0u;
-
-                        for (var i = 0; i < legacyData.Length - 3; i++)
-                        {
-                            UniqueId = BitConverter.ToUInt32(legacyData, i);
-                        }
-
-                        Debug.Log(UniqueId);
-
-                        var filepath = Path.Combine(Application.dataPath, String.Format("buildingThemesSave_{0}.xml", UniqueId));
-
-                        Debug.Log(filepath);
-
-                        if (!File.Exists(filepath))
-                        {
-                            if (Debugger.Enabled)
-                            {
-                                Debugger.Log(filepath + " not found!");
-                            }
-                            return;
-                        }
-
-                        DistrictsConfiguration configuration;
-
-                        var serializer = new XmlSerializer(typeof(DistrictsConfiguration));
-                        try
-                        {
-                            using (var reader = new StreamReader(filepath))
-                            {
-                                configuration = (DistrictsConfiguration)serializer.Deserialize(reader);
-                            }
-                        }
-                        catch
-                        {
-                            configuration = null;
-                        }
-
-                        ApplyConfiguration(configuration);
+                        ConfigurationHelper.ApplyConfiguration(configuration);
                     }
                     else
                     { 
@@ -99,7 +53,18 @@ namespace BuildingThemes.Data
                             Debugger.Log("No legacy save data found!");
                         }
 
-                        TryLoadingDSPData();
+                        //search for District Styles Plus save data
+                        if ((configuration = DSPDataLoader.TryImportDSPConfiguration(serializableDataManager)) != null)
+                        {
+                            ConfigurationHelper.ApplyConfiguration(configuration);
+                        }
+                        else
+                        {
+                            if (Debugger.Enabled)
+                            {
+                                Debugger.Log("No DSP save data found!");
+                            }
+                        }
                     }
                 }
             }
@@ -108,14 +73,6 @@ namespace BuildingThemes.Data
                 Debugger.LogError("Building Themes: Error loading theme data");
                 Debugger.LogException(ex);
             }
-        }
-
-        private void TryLoadingDSPData()
-        {
-            Debugger.Log("Attempting to load DSP data...");
-            DSPSerializer.LoadData(serializableDataManager);
-            DSPTransientStyleManager.LoadDataFromSave();
-            
         }
 
         public override void OnSaveData()
@@ -162,11 +119,11 @@ namespace BuildingThemes.Data
                 byte[] configurationData;
 
                 var xmlSerializer = new XmlSerializer(typeof(DistrictsConfiguration));
-                XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
-                ns.Add("", "");
+                var namespaces = new XmlSerializerNamespaces();
+                namespaces.Add("", "");
                 using (var memoryStream = new MemoryStream())
                 {
-                    xmlSerializer.Serialize(memoryStream, configuration, ns);
+                    xmlSerializer.Serialize(memoryStream, configuration, namespaces);
                     configurationData = memoryStream.ToArray();
                 }
                 serializableDataManager.SaveData(XMLSaveDataId, configurationData);
@@ -179,11 +136,12 @@ namespace BuildingThemes.Data
                 }
                 */
 
-                if (Debugger.Enabled)
+                if (!Debugger.Enabled)
                 {
-                    Debugger.LogFormat("Building Themes: Serialization done.");
-                    Debugger.AppendThemeList();
+                    return;
                 }
+                Debugger.LogFormat("Building Themes: Serialization done.");
+                Debugger.AppendThemeList();
             }
 
             catch (Exception ex)
@@ -192,50 +150,5 @@ namespace BuildingThemes.Data
                 Debugger.LogException(ex);
             }
         }
-
-        private static void ApplyConfiguration(DistrictsConfiguration configuration) 
-        {
-            var buildingThemesManager = BuildingThemesManager.instance;
-            buildingThemesManager.ImportThemes();
-
-            foreach (var district in configuration.Districts)
-            {
-                //skip districts which do not exist
-                if (DistrictManager.instance.m_districts.m_buffer[district.id].m_flags == District.Flags.None) continue;
-
-                var themes = new HashSet<Configuration.Theme>();
-
-                foreach (var themeName in district.themes)
-                {
-                    var theme = buildingThemesManager.GetThemeByName(themeName);
-                    if (theme == null)
-                    {
-                        Debugger.LogFormat("Theme {0} that was enabled in district {1} could not be found!", themeName, district.id);
-                        continue;
-                    }
-                    themes.Add(theme);
-                }
-
-                if (Debugger.Enabled)
-                {
-                    Debugger.LogFormat("Building Themes: Loading: {0} themes enabled for district {1}", themes.Count, district.id);
-                }
-
-                buildingThemesManager.setThemeInfo(district.id, themes, district.blacklistMode);
-            }
-        }
-    }
-
-    public class DistrictsConfiguration
-    {
-
-        public class District
-        {
-            public byte id;
-            public bool blacklistMode = false;
-            public string[] themes;
-        }
-
-        public List<District> Districts = new List<District>();
     }
 }
