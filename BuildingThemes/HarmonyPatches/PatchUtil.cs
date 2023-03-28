@@ -1,6 +1,6 @@
 using System;
 using System.Reflection;
-using Harmony;
+using HarmonyLib;
 using UnityEngine;
 
 namespace BuildingThemes.HarmonyPatches
@@ -8,10 +8,10 @@ namespace BuildingThemes.HarmonyPatches
     public static class PatchUtil
     {
         private const string HarmonyId = "github.com/boformer/BuildingThemes";
-        private static HarmonyInstance _harmonyInstance = null;
+        private static Harmony _harmonyInstance = null;
 
-        private static HarmonyInstance HarmonyInstance =>
-            _harmonyInstance ?? (_harmonyInstance = HarmonyInstance.Create(HarmonyId));
+        private static Harmony HarmonyInstance =>
+            _harmonyInstance ?? (_harmonyInstance = new Harmony(HarmonyId));
 
         public static void Patch(
             MethodDefinition original,
@@ -22,7 +22,7 @@ namespace BuildingThemes.HarmonyPatches
             if (prefix == null && postfix == null && transpiler == null)
             {
                 throw new Exception(
-                    $"Building Themess: prefix, postfix and transpiler are null for method {original.Type.FullName}.{original.MethodName}");
+                    $"Building Themes: prefix, postfix and transpiler are null for method {original.Type.FullName}.{original.MethodName}");
             }
 
             try

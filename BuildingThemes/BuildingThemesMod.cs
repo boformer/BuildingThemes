@@ -1,7 +1,9 @@
 ﻿using System;
 using ICities;
 using BuildingThemes.GUI;
+using CitiesHarmony.API;
 using ColossalFramework.UI;
+using Epic.OnlineServices.Platform;
 using UnityEngine;
 
 namespace BuildingThemes
@@ -42,6 +44,10 @@ namespace BuildingThemes
                                "{Steam folder}\\steamapps\\common\\Cities_Skylines\\BuildingThemes.xml");
             }
 
+        }
+
+        public void OnEnabled() {
+            HarmonyHelper.EnsureHarmonyInstalled();
         }
     }
 }

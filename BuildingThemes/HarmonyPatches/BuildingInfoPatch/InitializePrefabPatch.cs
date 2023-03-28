@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using CitiesHarmony.API;
 using ColossalFramework;
 
 namespace BuildingThemes.HarmonyPatches.BuildingInfoPatch
@@ -10,6 +11,10 @@ namespace BuildingThemes.HarmonyPatches.BuildingInfoPatch
 
         public static void Deploy()
         {
+            if (!HarmonyHelper.IsHarmonyInstalled)
+            {
+                return;
+            }
             if (deployed)
             {
                 return;
@@ -26,6 +31,10 @@ namespace BuildingThemes.HarmonyPatches.BuildingInfoPatch
 
         public static void Revert()
         {
+            if (!HarmonyHelper.IsHarmonyInstalled)
+            {
+                return;
+            }
             if (!deployed)
             {
                 return;
