@@ -85,7 +85,10 @@ namespace BuildingThemes.GUI
                 if (itemClass.m_subService == ItemClass.SubService.IndustrialOre) return Category.Ore;
                 if (itemClass.m_subService == ItemClass.SubService.OfficeGeneric) return Category.Office;
                 if (itemClass.m_subService == ItemClass.SubService.OfficeHightech) return Category.OfficeHightech;
-
+                if (itemClass.m_subService == ItemClass.SubService.ResidentialWallToWall) return Category.ResidentialWallToWall;
+                if (itemClass.m_subService == ItemClass.SubService.CommercialWallToWall) return Category.CommercialWallToWall;
+                if (itemClass.m_subService == ItemClass.SubService.OfficeWallToWall) return Category.OfficeWallToWall;
+                if (itemClass.m_subService == ItemClass.SubService.OfficeFinancial) return Category.OfficeFinancial;
                 return Category.None;
             }
         }
@@ -121,6 +124,7 @@ namespace BuildingThemes.GUI
                     case Category.ResidentialHigh:
                     case Category.ResidentialLow:
                     case Category.ResidentialEco:
+                    case Category.ResidentialWallToWall:
                         return 5;
                     case Category.Farming:
                     case Category.Forestry:
@@ -130,10 +134,11 @@ namespace BuildingThemes.GUI
                     case Category.CommercialTourism:
                     case Category.OfficeHightech:
                     case Category.CommercialEco:
+                    case Category.OfficeFinancial:
                         return 1;
                 }
 
-                return 3;
+                return 3; //TODO: double check for new stuff
             }
         }
 

@@ -37,7 +37,11 @@ namespace BuildingThemes.GUI
         Oil,
         Ore,
         Office,
-        OfficeHightech // gc
+        OfficeHightech, // gc
+        ResidentialWallToWall, //pp
+        CommercialWallToWall, //pp
+        OfficeWallToWall, //pp
+        OfficeFinancial //fd
     }
 
     public class CategoryIcons
@@ -58,7 +62,11 @@ namespace BuildingThemes.GUI
             "Ingame",
             "Ingame",
             "Thumbnails",
-            "Thumbnails" //gc
+            "Thumbnails", //gc
+            "Thumbnails",
+            "Thumbnails",
+            "Thumbnails",
+            "Thumbnails" //(TODO): fix for new subclasses
         };
 
         public static readonly string[] spriteNames = {
@@ -76,7 +84,11 @@ namespace BuildingThemes.GUI
             "IconPolicyOil",
             "IconPolicyOre",
             "ZoningOffice",
-            "DistrictSpecializationHightech"
+            "DistrictSpecializationHightech",
+            "ZoningResidentialLow",
+            "ZoningResidentialLow",
+            "ZoningResidentialLow",
+            "ZoningResidentialLow" //(TODO): fix for new subclasses
         };
 
         public static readonly string[] tooltips = {
@@ -94,7 +106,11 @@ namespace BuildingThemes.GUI
             "Oil Industry",
             "Ore Industry",
             "Office",
-            "Hightech office"
+            "Hightech office",
+            "Low density residential",
+            "Low density residential",
+            "Low density residential",
+            "Low density residential" //(TODO): fix for new subclasses
         };
     }
 }

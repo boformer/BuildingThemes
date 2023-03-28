@@ -26,20 +26,24 @@ namespace BuildingThemes.GUI
         public bool IsAllZoneSelected()
         {
             return zoningToggles[(int)Category.ResidentialLow].isChecked &&
-                zoningToggles[(int)Category.ResidentialHigh].isChecked &&
-                zoningToggles[(int)Category.ResidentialEco].isChecked &&
-                zoningToggles[(int)Category.CommercialLow].isChecked &&
-                zoningToggles[(int)Category.CommercialHigh].isChecked &&
-                zoningToggles[(int)Category.CommercialLeisure].isChecked &&
-                zoningToggles[(int)Category.CommercialTourism].isChecked &&
-                zoningToggles[(int)Category.CommercialEco].isChecked &&
-                zoningToggles[(int)Category.Industrial].isChecked &&
-                zoningToggles[(int)Category.Farming].isChecked &&
-                zoningToggles[(int)Category.Forestry].isChecked &&
-                zoningToggles[(int)Category.Oil].isChecked &&
-                zoningToggles[(int)Category.Ore].isChecked &&
-                zoningToggles[(int)Category.Office].isChecked &&
-                zoningToggles[(int)Category.OfficeHightech].isChecked;
+                   zoningToggles[(int)Category.ResidentialHigh].isChecked &&
+                   zoningToggles[(int)Category.ResidentialEco].isChecked &&
+                   zoningToggles[(int)Category.CommercialLow].isChecked &&
+                   zoningToggles[(int)Category.CommercialHigh].isChecked &&
+                   zoningToggles[(int)Category.CommercialLeisure].isChecked &&
+                   zoningToggles[(int)Category.CommercialTourism].isChecked &&
+                   zoningToggles[(int)Category.CommercialEco].isChecked &&
+                   zoningToggles[(int)Category.Industrial].isChecked &&
+                   zoningToggles[(int)Category.Farming].isChecked &&
+                   zoningToggles[(int)Category.Forestry].isChecked &&
+                   zoningToggles[(int)Category.Oil].isChecked &&
+                   zoningToggles[(int)Category.Ore].isChecked &&
+                   zoningToggles[(int)Category.Office].isChecked &&
+                   zoningToggles[(int)Category.OfficeHightech].isChecked &&
+                   zoningToggles[(int)Category.ResidentialWallToWall].isChecked &&
+                   zoningToggles[(int)Category.CommercialWallToWall].isChecked &&
+                   zoningToggles[(int)Category.OfficeWallToWall].isChecked &&
+                   zoningToggles[(int)Category.OfficeFinancial].isChecked;
         }
 
         public ItemClass.Level buildingLevel
@@ -115,6 +119,18 @@ namespace BuildingThemes.GUI
                 zoningToggles[(int)Category.ResidentialEco].isVisible = false;
                 zoningToggles[(int)Category.CommercialEco].isVisible = false;
                 zoningToggles[(int)Category.OfficeHightech].isVisible = false;
+            }
+            
+            if (!PlatformService.IsDlcInstalled(SteamHelper.kPlazasAndPromenadesDLCAppID))
+            {
+                zoningToggles[(int)Category.ResidentialWallToWall].isVisible = false;
+                zoningToggles[(int)Category.CommercialWallToWall].isVisible = false;
+                zoningToggles[(int)Category.OfficeWallToWall].isVisible = false;
+            }
+            
+            if (!PlatformService.IsDlcInstalled(SteamHelper.kFinancialDistrictsDLCAppID))
+            {
+                zoningToggles[(int)Category.OfficeFinancial].isVisible = false;
             }
 
             allZones = UIUtils.CreateButton(this);
