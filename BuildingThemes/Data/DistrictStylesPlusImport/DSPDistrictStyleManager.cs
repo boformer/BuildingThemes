@@ -6,7 +6,7 @@ using ColossalFramework;
 using HarmonyLib;
 using JetBrains.Annotations;
 
-namespace BuildingThemes.DistrictStylesPlusImport
+namespace BuildingThemes.Data.DistrictStylesPlusImport
 {
     
     /// <summary>

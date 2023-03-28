@@ -6,7 +6,7 @@ using ColossalFramework;
 using ColossalFramework.Packaging;
 using HarmonyLib;
 
-namespace BuildingThemes.DistrictStylesPlusImport
+namespace BuildingThemes.Data.DistrictStylesPlusImport
 {
     public static class DSPDistrictStylePackageManager
     {

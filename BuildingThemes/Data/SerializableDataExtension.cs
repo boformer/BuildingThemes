@@ -1,39 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Timers;
 using System.Xml.Serialization;
+using BuildingThemes.Data.DistrictStylesPlusImport;
 using ColossalFramework;
 using ICities;
 using UnityEngine;
 
-namespace BuildingThemes
+namespace BuildingThemes.Data
 {
     // This extension handles the loading and saving of district theme data (which themes are assigned to a district).
-    public class SerializableDataExtension : ISerializableDataExtension
+    public class SerializableDataExtension : SerializableDataExtensionBase
     {
-        public static ISerializableData SerializableData;
-        
         public static string XMLSaveDataId = "BuildingThemes-SaveData";
 
         // support for legacy data
         public static string LegacyDataId = "BuildingThemes";
 
-        public void OnCreated(ISerializableData serializableData)
+        public override void OnLoadData()
         {
-            SerializableData = serializableData;
-        }
-
-        public void OnReleased()
-        {
-        }
-
-        public void OnLoadData()
-        {
+            base.OnLoadData();
             try 
             {
-                byte[] saveData = SerializableData.LoadData(XMLSaveDataId);
+                byte[] saveData = serializableDataManager.LoadData(XMLSaveDataId);
 
                 if (saveData != null)
                 {
@@ -55,7 +44,7 @@ namespace BuildingThemes
                 else
                 {
                     // search for legacy save data
-                    byte[] legacyData = SerializableData.LoadData(LegacyDataId);
+                    byte[] legacyData = serializableDataManager.LoadData(LegacyDataId);
 
                     if (legacyData != null)
                     {
@@ -109,6 +98,8 @@ namespace BuildingThemes
                         {
                             Debugger.Log("No legacy save data found!");
                         }
+
+                        TryLoadingDSPData();
                     }
                 }
             }
@@ -119,8 +110,17 @@ namespace BuildingThemes
             }
         }
 
-        public void OnSaveData()
+        private void TryLoadingDSPData()
         {
+            Debugger.Log("Attempting to load DSP data...");
+            DSPSerializer.LoadData(serializableDataManager);
+            DSPTransientStyleManager.LoadDataFromSave();
+            
+        }
+
+        public override void OnSaveData()
+        {
+            base.OnSaveData();
             if (Debugger.Enabled)
             {
                 Debugger.Log("Building Themes: Saving Data...");
@@ -169,7 +169,7 @@ namespace BuildingThemes
                     xmlSerializer.Serialize(memoryStream, configuration, ns);
                     configurationData = memoryStream.ToArray();
                 }
-                SerializableData.SaveData(XMLSaveDataId, configurationData);
+                serializableDataManager.SaveData(XMLSaveDataId, configurationData);
 
                 // output for debugging
                 /*

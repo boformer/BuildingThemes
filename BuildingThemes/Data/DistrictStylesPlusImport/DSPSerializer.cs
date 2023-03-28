@@ -3,9 +3,9 @@ using System.IO;
 using ColossalFramework.IO;
 using ICities;
 
-namespace BuildingThemes.DistrictStylesPlusImport
+namespace BuildingThemes.Data.DistrictStylesPlusImport
 {
-    public class Serializer 
+    public static class DSPSerializer 
     {
         
         // Current data version
@@ -17,7 +17,7 @@ namespace BuildingThemes.DistrictStylesPlusImport
         // flattened data to save
         private static TransientDistrictStyleContainer[] _transientDistrictStyles;
 
-        public void LoadData(ISerializableData serializableDataManager)
+        public static void LoadData(ISerializableData serializableDataManager)
         {
             try
             {

@@ -66,6 +66,12 @@
     <Compile Include="BuildingThemesMod.cs" />
     <Compile Include="BuildingVariationManager.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="Data\DistrictStylesPlusImport\DSPDistrictStyleManager.cs" />
+    <Compile Include="Data\DistrictStylesPlusImport\DSPDistrictStylePackageManager.cs" />
+    <Compile Include="Data\DistrictStylesPlusImport\DSPTransientStyleManager.cs" />
+    <Compile Include="Data\DistrictStylesPlusImport\DSPSerializer.cs" />
+    <Compile Include="Data\DistrictStylesPlusImport\TransientDistrictStyleContainer.cs" />
+    <Compile Include="Data\SerializableDataExtension.cs" />
     <Compile Include="Debugger.cs" />
     <Compile Include="Detour\DistrictManagerDetour.cs" />
     <Compile Include="Detour\DistrictWorldInfoPanelDetour.cs" />
@@ -74,11 +80,6 @@
     <Compile Include="Detour\BuildingManagerDetour.cs" />
     <Compile Include="Detour\ZoneBlockDetour.cs" />
     <Compile Include="Detour\PoliciesPanelDetour.cs" />
-    <Compile Include="DistrictStylesPlusImport\DSPDistrictStyleManager.cs" />
-    <Compile Include="DistrictStylesPlusImport\DSPDistrictStylePackageManager.cs" />
-    <Compile Include="DistrictStylesPlusImport\DSPTransientStyleManager.cs" />
-    <Compile Include="DistrictStylesPlusImport\Serializer.cs" />
-    <Compile Include="DistrictStylesPlusImport\TransientDistrictStyleContainer.cs" />
     <Compile Include="GUI\ThemeManager\BuildingItem.cs" />
     <Compile Include="GUI\ThemeManager\CategoryUtils.cs" />
     <Compile Include="GUI\ThemeManager\UIBuildingPreview.cs" />
@@ -112,7 +113,6 @@
     <Compile Include="Redirection\RedirectReverseAttribute.cs" />
     <Compile Include="Redirection\TargetTypeAttribute.cs" />
     <Compile Include="Redirection\Tuple.cs" />
-    <Compile Include="SerializableDataExtension.cs" />
     <Compile Include="GUI\ThemePolicies\ThemePolicyContainer.cs" />
     <Compile Include="Util.cs" />
   </ItemGroup>

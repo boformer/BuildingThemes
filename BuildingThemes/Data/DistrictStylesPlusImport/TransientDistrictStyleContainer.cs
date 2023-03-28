@@ -3,7 +3,7 @@ using System.Linq;
 using ColossalFramework;
 using ColossalFramework.IO;
 
-namespace BuildingThemes.DistrictStylesPlusImport
+namespace BuildingThemes.Data.DistrictStylesPlusImport
 {
     /// <summary>
     /// Serialisation / DeSerialisation of district styles selections to save game file.

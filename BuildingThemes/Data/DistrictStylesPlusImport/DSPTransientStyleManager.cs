@@ -4,7 +4,7 @@ using System.Linq;
 using ColossalFramework;
 using HarmonyLib;
 
-namespace BuildingThemes.DistrictStylesPlusImport
+namespace BuildingThemes.Data.DistrictStylesPlusImport
 {
     /// <summary>
     /// Manager of transient styles. Transient style is style which is created only in-game which means that it does not
@@ -300,7 +300,7 @@ namespace BuildingThemes.DistrictStylesPlusImport
         /// </summary>
         internal static void LoadDataFromSave()
         {
-            var data = Serializer.GetSavedData();
+            var data = DSPSerializer.GetSavedData();
             
             UnityEngine.Debug.Log("Apply saved DSP data.");
             
