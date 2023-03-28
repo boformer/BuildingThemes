@@ -10,7 +10,8 @@ namespace BuildingThemes
 {
     public class BuildingThemesManager : Singleton<BuildingThemesManager>
     {
-        private const int AreaBuildingsLength = 3840;
+        // From BuildingManager.
+        private const int AreaBuildingsLength = 4320;
 
         private const string ModConfigPath = "BuildingThemes.xml";
         private readonly DistrictThemeInfo[] districtThemeInfos = new DistrictThemeInfo[128];

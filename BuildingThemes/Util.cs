@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using ColossalFramework.Plugins;
 using ICities;
 
@@ -16,6 +17,21 @@ namespace BuildingThemes
                     select instances[0].Name into name
                     where name == modName
                     select name).Any();
+        }
+
+        public static bool IsEightyOne2Active()
+        {
+            foreach (PluginManager.PluginInfo plugin in PluginManager.instance.GetPluginsInfo())
+            {
+                foreach (Assembly assembly in plugin.GetAssemblies())
+                {
+                    if (assembly.GetName().Name.Equals("EightyOne2") && plugin.isEnabled)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         public static Type FindType(string className)
