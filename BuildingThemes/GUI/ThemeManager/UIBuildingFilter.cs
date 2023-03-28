@@ -267,14 +267,14 @@ namespace BuildingThemes.GUI
             UILabel nameLabel = AddUIComponent<UILabel>();
             nameLabel.textScale = 0.8f;
             nameLabel.padding = new RectOffset(0, 0, 8, 0);
-            nameLabel.relativePosition = new Vector3(width - 250, 0);
+            nameLabel.relativePosition = new Vector3(width - 250, 40);
             nameLabel.text = "Name: ";
 
             nameFilter = UIUtils.CreateTextField(this);
             nameFilter.width = 200;
             nameFilter.height = 30;
             nameFilter.padding = new RectOffset(6, 6, 6, 6);
-            nameFilter.relativePosition = new Vector3(width - nameFilter.width, 0);
+            nameFilter.relativePosition = new Vector3(width - nameFilter.width, 40);
 
             nameFilter.eventTextChanged += (c, s) => eventFilteringChanged(this, 5);
             nameFilter.eventTextSubmitted += (c, s) => eventFilteringChanged(this, 5);

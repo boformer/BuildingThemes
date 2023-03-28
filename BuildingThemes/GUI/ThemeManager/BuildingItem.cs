@@ -134,11 +134,10 @@ namespace BuildingThemes.GUI
                     case Category.CommercialTourism:
                     case Category.OfficeHightech:
                     case Category.CommercialEco:
-                    case Category.OfficeFinancial:
                         return 1;
                 }
 
-                return 3; //TODO: double check for new stuff
+                return 3;
             }
         }
 

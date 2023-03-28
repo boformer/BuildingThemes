@@ -66,7 +66,7 @@ namespace BuildingThemes.GUI
             "Thumbnails",
             "Thumbnails",
             "Thumbnails",
-            "Thumbnails" //(TODO): fix for new subclasses
+            "Thumbnails"
         };
 
         public static readonly string[] spriteNames = {
@@ -85,32 +85,32 @@ namespace BuildingThemes.GUI
             "IconPolicyOre",
             "ZoningOffice",
             "DistrictSpecializationHightech",
-            "ZoningResidentialLow",
-            "ZoningResidentialLow",
-            "ZoningResidentialLow",
-            "ZoningResidentialLow" //(TODO): fix for new subclasses
+            "DistrictSpecializationResidentialWallToWall",
+            "DistrictSpecializationCommercialWallToWall",
+            "DistrictSpecializationOfficeWallToWall",
+            "DistrictSpecializationFinancial"
         };
 
         public static readonly string[] tooltips = {
             "Low density residential",
             "High density residential",
-            "Eco residential",
+            "Self-sufficient residential",
             "Low density commercial",
             "High density commercial",
             "Leisure commercial",
             "Tourism commercial",
-            "Eco commercial",
+            "Organic & local produce commercial",
             "Generic Industry",
             "Farming Industry",
             "Forest Industry",
             "Oil Industry",
             "Ore Industry",
             "Office",
-            "Hightech office",
-            "Low density residential",
-            "Low density residential",
-            "Low density residential",
-            "Low density residential" //(TODO): fix for new subclasses
+            "IT office",
+            "Wall-to-Wall residential",
+            "Wall-to-Wall commercial",
+            "Wall-to-Wall office",
+            "Financial Office"
         };
     }
 }
