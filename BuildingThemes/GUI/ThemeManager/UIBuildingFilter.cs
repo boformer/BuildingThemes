@@ -7,7 +7,7 @@ namespace BuildingThemes.GUI
 {
     public class UIBuildingFilter : UIPanel
     {
-        private const int NumOfCategories = 15;
+        private const int NumOfCategories = 19;
         public UICheckBox[] zoningToggles;
         public UIButton allZones;
         public UIButton noZones;
