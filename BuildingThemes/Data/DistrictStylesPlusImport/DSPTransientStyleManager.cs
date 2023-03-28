@@ -294,32 +294,6 @@ namespace BuildingThemes.Data.DistrictStylesPlusImport
             return !TransientDistrictStyleConfigs.ContainsKey(districtId) ? 
                 null : new HashSet<string>(TransientDistrictStyleConfigs.GetValueSafe(districtId));
         }
-
-        /// <summary>
-        /// Apply data from save game to create transient styles
-        /// </summary>
-        internal static void LoadDataFromSave()
-        {
-            var data = DSPSerializer.GetSavedData();
-            
-            UnityEngine.Debug.Log("Apply saved DSP data.");
-            
-            for (var i = 0; i < data.Length; i++)
-            {
-                var districtId = (byte) i;
-
-                if (DistrictManager.instance.m_districts.m_buffer[i].m_flags == District.Flags.None) continue;
-
-                var transientDistrictStyle = data[i];
-                if (transientDistrictStyle != null && transientDistrictStyle.StyleFullNames.Count > 0) {
-                    SetSelectedStylesForDistrict(districtId, transientDistrictStyle.StyleFullNames);
-                }
-            }
-            
-            UnityEngine.Debug.Log("DSP data loaded!");
-            
-        }
-
     }
 
     //just a stub

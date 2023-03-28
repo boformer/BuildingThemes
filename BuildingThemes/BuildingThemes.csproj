@@ -71,7 +71,6 @@
     <Compile Include="Data\DistrictStylesPlusImport\DSPDistrictStyleManager.cs" />
     <Compile Include="Data\DistrictStylesPlusImport\DSPDistrictStylePackageManager.cs" />
     <Compile Include="Data\DistrictStylesPlusImport\DSPTransientStyleManager.cs" />
-    <Compile Include="Data\DistrictStylesPlusImport\DSPSerializer.cs" />
     <Compile Include="Data\DistrictStylesPlusImport\TransientDistrictStyleContainer.cs" />
     <Compile Include="Data\DSPDataLoader.cs" />
     <Compile Include="Data\LegacyDataLoader.cs" />
