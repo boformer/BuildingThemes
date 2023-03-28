@@ -17,7 +17,7 @@ namespace BuildingThemes.Detour
 
         public static void SetUp()
         {
-            if (!Util.IsModActive(BuildingThemesMod.EIGHTY_ONE_MOD) && !Util.IsEightyOne2Active())
+            if (!Util.IsModActive(BuildingThemesMod.EIGHTY_ONE_MOD) && !Util.IsModAssemblyActive(BuildingThemesMod.EIGHTY_ONE_2_ASSEMBLY))
             {
                 return;
             }

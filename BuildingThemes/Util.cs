@@ -8,6 +8,9 @@ namespace BuildingThemes
 {
     public static class Util
     {
+        
+        
+        
         public static bool IsModActive(string modName)
         {
             var plugins = PluginManager.instance.GetPluginsInfo();
@@ -19,13 +22,13 @@ namespace BuildingThemes
                     select name).Any();
         }
 
-        public static bool IsEightyOne2Active()
+        public static bool IsModAssemblyActive(string assemblyName)
         {
             foreach (PluginManager.PluginInfo plugin in PluginManager.instance.GetPluginsInfo())
             {
                 foreach (Assembly assembly in plugin.GetAssemblies())
                 {
-                    if (assembly.GetName().Name.Equals("EightyOne2") && plugin.isEnabled)
+                    if (assembly.GetName().Name.Equals(assemblyName) && plugin.isEnabled)
                     {
                         return true;
                     }
