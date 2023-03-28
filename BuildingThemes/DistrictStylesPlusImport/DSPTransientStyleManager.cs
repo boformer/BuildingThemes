@@ -70,15 +70,15 @@ namespace BuildingThemes.DistrictStylesPlusImport
         /// <param name="dsStyleFullNames">list of chosen styles fullNames</param>
         internal static void SetSelectedStylesForDistrict(byte districtId, HashSet<string> dsStyleFullNames)
         {
-            Logging.DebugLog($"Selected styles {string.Join(", ", dsStyleFullNames.ToArray())} " +
+            UnityEngine.Debug.Log($"Selected styles {string.Join(", ", dsStyleFullNames.ToArray())} " +
                              $"for district {districtId}");
 
             var currentDistrictStyleSelection = GetSelectedStylesForDistrict(districtId);
             
-            Logging.DebugLog($"Already in transient " +
+            UnityEngine.Debug.Log($"Already in transient " +
                              $"{string.Join(",", currentDistrictStyleSelection.ToArray())}");
             
-            Logging.DebugLog($"Compared result: {currentDistrictStyleSelection.SetEquals(dsStyleFullNames)}");
+            UnityEngine.Debug.Log($"Compared result: {currentDistrictStyleSelection.SetEquals(dsStyleFullNames)}");
             
             if (currentDistrictStyleSelection.SetEquals(dsStyleFullNames)) 
                 return; // do nothing if selection is same
@@ -92,13 +92,13 @@ namespace BuildingThemes.DistrictStylesPlusImport
             // no style selected
             if (dsStyleFullNames.Count == 0)
             {
-                Logging.DebugLog($"No style selected for district {districtId}");
+                UnityEngine.Debug.Log($"No style selected for district {districtId}");
                 
                 // assign default style to district
                 DistrictManager.instance.m_districts.m_buffer[districtId].m_Style = 0;
                 
                 
-                Logging.DebugLog($"Try to delete transient DS if exists {transientStyleFullName}");
+                UnityEngine.Debug.Log($"Try to delete transient DS if exists {transientStyleFullName}");
                 // transient style can be removed
                 if (transientStyle != null)
                     DSPDistrictStyleManager.DeleteDistrictStyle(transientStyle, true);
@@ -107,13 +107,13 @@ namespace BuildingThemes.DistrictStylesPlusImport
             
             // some DS has been selected so add new configuration of transient style
             TransientDistrictStyleConfigs.Add(districtId, dsStyleFullNames);
-            Logging.DebugLog($"New configuration added for district {districtId}");
+            UnityEngine.Debug.Log($"New configuration added for district {districtId}");
 
             // if transient style does not exist, create new one
             if (transientStyle == null)
             {
                 transientStyle = CreateTransientStyle(transientStyleName);
-                Logging.DebugLog($"New transient style created {transientStyleName}");
+                UnityEngine.Debug.Log($"New transient style created {transientStyleName}");
             }
             
             // merge selected district styles to transient style
@@ -128,7 +128,7 @@ namespace BuildingThemes.DistrictStylesPlusImport
             }
             else
             {
-                Logging.ErrorLog($"Transient style for district {districtId} does not exist!");
+                UnityEngine.Debug.LogError($"Transient style for district {districtId} does not exist!");
                 DistrictManager.instance.m_districts.m_buffer[districtId].m_Style = 0;
             }
         }
@@ -139,7 +139,7 @@ namespace BuildingThemes.DistrictStylesPlusImport
         /// <param name="dsFullName"></param>
         internal static void RemoveDeletedDistrictStyleFromTransients(string dsFullName)
         {
-            Logging.DebugLog($"Remove {dsFullName} from transient styles");
+            UnityEngine.Debug.Log($"Remove {dsFullName} from transient styles");
 
             var districtIds = GetDistrictIdsByDSFullName(dsFullName);
             
@@ -169,12 +169,12 @@ namespace BuildingThemes.DistrictStylesPlusImport
         private static void MergeDistrictStylesToTransientStyle
             (HashSet<string> dsStyleFullNames, DistrictStyle transientStyle)
         {
-            Logging.DebugLog($"Merge styles {string.Join(", ", dsStyleFullNames.ToArray())} " +
+            UnityEngine.Debug.Log($"Merge styles {string.Join(", ", dsStyleFullNames.ToArray())} " +
                              $"for transient style {transientStyle.Name}");
             
             // buildingInfos for transient style
             var buildingInfos = new HashSet<BuildingInfo>();
-            Logging.DebugLog($"Building Hash set up. Size {buildingInfos.Count}");
+            UnityEngine.Debug.Log($"Building Hash set up. Size {buildingInfos.Count}");
 
             if (dsStyleFullNames != null && dsStyleFullNames.Count > 0)
             {
@@ -186,7 +186,7 @@ namespace BuildingThemes.DistrictStylesPlusImport
                         || districtStyle.GetBuildingInfos().Length == 0) continue;
                     
                     buildingInfos.UnionWith(districtStyle.GetBuildingInfos()); 
-                    Logging.DebugLog($"Building Hash modified by {districtStyle.Name}. " +
+                    UnityEngine.Debug.Log($"Building Hash modified by {districtStyle.Name}. " +
                                      $"Size {buildingInfos.Count}");
                 }
             }
@@ -211,14 +211,14 @@ namespace BuildingThemes.DistrictStylesPlusImport
         private static void UpdateBuildingInfosInTransientStyle(
             HashSet<BuildingInfo> buildingInfos, DistrictStyle transientStyle, bool refreshStylesInBuildingManager)
         {
-            Logging.DebugLog($"Update buildings transient style {transientStyle.Name}");
+            UnityEngine.Debug.Log($"Update buildings transient style {transientStyle.Name}");
             
             // get buildingInfo field from transient district style
             var buildingInfosFieldInfo = 
                 DSPDistrictStyleManager.GetDistrictStyleClassField("m_Infos", transientStyle);
             if (buildingInfosFieldInfo == null)
             {
-                Logging.ErrorLog("District style does not have field m_Infos!");
+                UnityEngine.Debug.LogError("District style does not have field m_Infos!");
                 return;
             }
             
@@ -242,7 +242,7 @@ namespace BuildingThemes.DistrictStylesPlusImport
         internal static void ModifyTransientStylesByDSBuildingInfos(
             List<BuildingInfo> buildingInfos, string styleFullName, bool adding)
         {
-            Logging.DebugLog($"Modify transient styles by {styleFullName} action add {adding}");
+            UnityEngine.Debug.Log($"Modify transient styles by {styleFullName} action add {adding}");
             
             // get district ids of ones which use provided district style in transient style
             var districtIds = GetDistrictIdsByDSFullName(styleFullName);
@@ -259,12 +259,12 @@ namespace BuildingThemes.DistrictStylesPlusImport
                     newBuildingInfos.UnionWith(transientStyle.GetBuildingInfos());
                 if (adding)
                 {
-                    Logging.DebugLog($"Add new buildings to transient style {transientStyleName}");
+                    UnityEngine.Debug.Log($"Add new buildings to transient style {transientStyleName}");
                     newBuildingInfos.UnionWith(buildingInfos);
                 }
                 else
                 {
-                    Logging.DebugLog($"Remove buildings from transient style {transientStyleName}");
+                    UnityEngine.Debug.Log($"Remove buildings from transient style {transientStyleName}");
                     newBuildingInfos.ExceptWith(buildingInfos);
                 }
                 UpdateBuildingInfosInTransientStyle(newBuildingInfos, transientStyle, false);
@@ -302,7 +302,7 @@ namespace BuildingThemes.DistrictStylesPlusImport
         {
             var data = Serializer.GetSavedData();
             
-            Logging.DebugLog("Apply saved DSP data.");
+            UnityEngine.Debug.Log("Apply saved DSP data.");
             
             for (var i = 0; i < data.Length; i++)
             {
@@ -316,9 +316,18 @@ namespace BuildingThemes.DistrictStylesPlusImport
                 }
             }
             
-            Logging.DebugLog("DSP data loaded!");
+            UnityEngine.Debug.Log("DSP data loaded!");
             
         }
 
+    }
+
+    //just a stub
+    internal class DSPBuildingManager : Singleton<DSPBuildingManager>
+    {
+        public void RefreshStylesInBuildingManager()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

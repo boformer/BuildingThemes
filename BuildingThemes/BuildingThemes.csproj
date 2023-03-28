@@ -74,6 +74,8 @@
     <Compile Include="Detour\BuildingManagerDetour.cs" />
     <Compile Include="Detour\ZoneBlockDetour.cs" />
     <Compile Include="Detour\PoliciesPanelDetour.cs" />
+    <Compile Include="DistrictStylesPlusImport\DSPDistrictStyleManager.cs" />
+    <Compile Include="DistrictStylesPlusImport\DSPDistrictStylePackageManager.cs" />
     <Compile Include="DistrictStylesPlusImport\DSPTransientStyleManager.cs" />
     <Compile Include="DistrictStylesPlusImport\Serializer.cs" />
     <Compile Include="DistrictStylesPlusImport\TransientDistrictStyleContainer.cs" />

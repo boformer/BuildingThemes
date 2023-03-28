@@ -5,7 +5,7 @@ using ICities;
 
 namespace BuildingThemes.DistrictStylesPlusImport
 {
-    public class Serializer : SerializableDataExtensionBase
+    public class Serializer 
     {
         
         // Current data version
@@ -17,44 +17,8 @@ namespace BuildingThemes.DistrictStylesPlusImport
         // flattened data to save
         private static TransientDistrictStyleContainer[] _transientDistrictStyles;
 
-        public override void OnCreated(ISerializableData serializableData)
+        public void LoadData(ISerializableData serializableDataManager)
         {
-            base.OnCreated(serializableData);
-
-            _transientDistrictStyles = new TransientDistrictStyleContainer[DSPTransientStyleManager.MaxDistrictCount];
-        }
-
-        public override void OnSaveData()
-        {
-            base.OnSaveData();
-            
-           UnityEngine.Debug.Log("Saving DSP data...");
-
-            for (var i = 0; i < _transientDistrictStyles.Length; i++)
-            {
-                var data = DSPTransientStyleManager.GetStylesToSave((byte) i);
-                
-                if (data == null) continue; // no data for given district
-                
-                var transientDistrictStyle = new TransientDistrictStyleContainer();
-                transientDistrictStyle.StyleFullNames = data;
-                _transientDistrictStyles[i] = transientDistrictStyle;
-            }
-
-            using (MemoryStream stream = new MemoryStream())
-            {
-                DataSerializer.SerializeArray(stream, DataSerializer.Mode.Memory, DataVersion, _transientDistrictStyles);
-                serializableDataManager.SaveData(DataId, stream.ToArray());
-                
-                UnityEngine.Debug.Log("saved " + stream.Length + " B.");
-            }
-            
-        }
-
-        public override void OnLoadData()
-        {
-            base.OnLoadData();
-
             try
             {
                 // read byte data from save game

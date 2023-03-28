@@ -149,7 +149,7 @@ namespace BuildingThemes
                 var district = DistrictManager.instance.m_districts.m_buffer[districtId];
                 if (district.m_flags == District.Flags.None || district.m_Style <= 0)
                 {
-                    continue;
+                    continue; // 0 is the default style
                 }
                 var style = DistrictManager.instance.m_Styles[district.m_Style - 1];
                 var stylePackage = style.PackageName;
