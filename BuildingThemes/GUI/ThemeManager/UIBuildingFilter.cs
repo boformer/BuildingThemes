@@ -136,7 +136,7 @@ namespace BuildingThemes.GUI
             allZones = UIUtils.CreateButton(this);
             allZones.width = 40;
             allZones.text = "All";
-            allZones.relativePosition = new Vector3(600, 5);
+            allZones.relativePosition = new Vector3(760, 5);
 
             allZones.eventClick += (c, p) =>
             {
@@ -150,7 +150,7 @@ namespace BuildingThemes.GUI
             noZones = UIUtils.CreateButton(this);
             noZones.width = 55;
             noZones.text = "None";
-            noZones.relativePosition = new Vector3(645, 5);
+            noZones.relativePosition = new Vector3(800, 5);
 
             noZones.eventClick += (c, p) =>
             {
